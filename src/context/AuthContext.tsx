@@ -1,0 +1,289 @@
+'use client'
+
+import React, { createContext, useContext, useState, useEffect, useRef } from 'react'
+import { useRouter } from 'next/navigation'
+import { usePathname } from "next/navigation";
+import { publicRoutes } from "@/lib/auth-routes";
+
+
+interface User {
+  id: string
+  name: string
+  email: string
+  phone_no: string
+  address?: string
+  created_at: string
+  avatar?: string
+}
+
+interface Credentials {
+  [key: string]: string;
+}
+
+interface AuthContextType {
+  user: User | null
+  isAuthenticated: boolean
+  isLoading: boolean
+  login: (credentials: Credentials) => Promise<{ success: boolean; error?: string }>
+  logout: () => Promise<void>
+  updateUser: (updatedData: Partial<User>) => Promise<void>
+  fetchProfile: (forceRefresh?: boolean) => Promise<void>
+  updateAccountDetails: (updatedData: Partial<User>) => Promise<{ success: boolean; error?: string }>
+}
+
+export const AuthContext = createContext<AuthContextType | undefined>(undefined)
+
+// Cache key for localStorage
+const USER_CACHE_KEY = 'user_cache'
+const CACHE_MAX_AGE = 5 * 60 * 1000 // 5 minutes
+
+export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
+  const [user, setUser] = useState<User | null>(null)
+  const [isLoading, setIsLoading] = useState(true)
+  const router = useRouter()
+  const pathname = usePathname();
+  const fetchInProgress = useRef(false) // To prevent concurrent fetches
+
+  // Helper functions for cache management
+  const getCachedUser = (): { user: User, timestamp: number } | null => {
+    if (typeof window === 'undefined') return null
+    const cached = localStorage.getItem(USER_CACHE_KEY)
+    if (!cached) return null
+    
+    try {
+      return JSON.parse(cached)
+    } catch {
+      return null
+    }
+  }
+
+  const setCachedUser = (user: User) => {
+    if (typeof window === 'undefined') return
+    localStorage.setItem(USER_CACHE_KEY, JSON.stringify({
+      user,
+      timestamp: Date.now()
+    }))
+  }
+
+  const clearCachedUser = () => {
+    if (typeof window === 'undefined') return
+    localStorage.removeItem(USER_CACHE_KEY)
+  }
+
+  const fetchProfile = async (forceRefresh = false) => {
+    // Prevent multiple simultaneous fetches
+    if (fetchInProgress.current) return
+    if (publicRoutes.includes(pathname)) {
+        setUser(null);
+        setIsLoading(false);
+        return;
+      }
+    fetchInProgress.current = true
+    
+    try {
+      // Check cache first if not forcing refresh
+      if (!forceRefresh) {
+        const cached = getCachedUser()
+        if (cached && Date.now() - cached.timestamp < CACHE_MAX_AGE) {
+          setUser(cached.user)
+          setIsLoading(false)
+          fetchInProgress.current = false
+          return
+        }
+      }
+
+      const res = await fetch('/api/auth/me', {
+        credentials: 'include',
+        cache: forceRefresh ? 'no-cache' : 'default'
+      })
+      
+      // Don't redirect if we're on register page with token
+      const isRegisterWithToken = typeof window !== 'undefined' && 
+        window.location.pathname === '/register' && 
+        new URLSearchParams(window.location.search).has('token')
+
+      const isResetPasswordWithToken = typeof window !== 'undefined' && 
+        window.location.pathname === '/reset-password' && 
+        new URLSearchParams(window.location.search).has('token')
+      
+      
+      if (res.status === 401 && !isRegisterWithToken && !isResetPasswordWithToken) {
+        await logout()
+        router.push('/login')
+        return
+      }
+
+      if (!res.ok) throw new Error('Failed to fetch profile')
+
+      const userData = await res.json()
+      setUser(userData)
+      setCachedUser(userData) // Update cache
+    } catch (error) {
+      console.error('Failed to fetch profile:', error)
+      // Don't throw error for register page with token
+      const isRegisterWithToken = typeof window !== 'undefined' && 
+        window.location.pathname === '/register' && 
+        new URLSearchParams(window.location.search).has('token')
+
+      const isResetPasswordWithToken = typeof window !== 'undefined' && 
+        window.location.pathname === '/reset-password' && 
+        new URLSearchParams(window.location.search).has('token')
+
+      if (!isRegisterWithToken && !isResetPasswordWithToken) {
+        throw error
+      }
+    } finally {
+      setIsLoading(false)
+      fetchInProgress.current = false
+    }
+  }
+
+  useEffect(() => {
+    // Initial load - check if user is logged in
+    fetchProfile().catch(() => {/* Error handled in fetchProfile */})
+  }, [pathname])
+
+  const login = async (credentials: Credentials) => {
+    setIsLoading(true)
+    try {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL
+      if (!apiUrl) {
+        throw new Error("API URL is not configured")
+      }
+
+      // 1. Authenticate with backend
+      const backendRes = await fetch(`${apiUrl}/Customer/signin`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(credentials),
+      })
+
+      if (!backendRes.ok) {
+        const errorData = await backendRes.json()
+        return { success: false, error: errorData.message || 'Authentication failed' }
+      }
+
+      const { token } = await backendRes.json()
+
+      // 2. Create session with Next.js API
+      const sessionRes = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ token }),
+      })
+
+      if (!sessionRes.ok) {
+        return { success: false, error: 'Failed to create session' }
+      }
+
+      // 3. Redirect immediately without waiting for profile
+      router.push('/dashboard')
+
+      // 4. Kick off profile fetch in background
+      fetchProfile(true).catch(error => {
+        console.error('Background profile fetch failed:', error)
+      })
+
+      return { success: true }
+    } catch (error) {
+      console.error('Login error:', error)
+      return { 
+        success: false, 
+        error: error instanceof Error ? error.message : 'Login failed' 
+      }
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+ 
+const logout = async () => {
+  try {
+    // clearing  frontend state first
+    setUser(null)
+    clearCachedUser()
+    
+    // Then attempt to call the logout API
+    await fetch('/api/auth/logout', { 
+      method: 'POST',
+      credentials: 'include' // Ensure cookies are sent
+    })
+    
+    // Redirect regardless of API call success
+    router.push('/login')
+    router.refresh() // Force a refresh to clear any cached data
+  } catch (error) {
+    console.error('Logout error:', error)
+    // Even if API call fails, ensure we redirect
+    router.push('/login')
+  }
+}
+
+  const updateUser = async (updatedData: Partial<User>) => {
+    setUser(prev => {
+      if (!prev) return null
+      const newUser = {
+        ...prev,
+        ...updatedData,
+        name: updatedData.name || prev.name,
+        email: prev.email // Always keep original email
+      }
+      setCachedUser(newUser) // Update cache
+      return newUser
+    })
+  }
+
+  const updateAccountDetails = async (updatedData: Partial<User>) => {
+  try {
+    setIsLoading(true)
+    
+    // Remove email if present (shouldn't be editable)
+    const { email, ...updatePayload } = updatedData
+    
+    const response = await fetch('/api/auth/update', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(updatePayload)
+    })
+
+    if (!response.ok) {
+      const errorData = await response.json()
+      throw new Error(errorData.error || 'Failed to update account')
+    }
+
+    const responseData = await response.json()
+    
+    // Handle both response formats (direct user object or wrapped response)
+    const updatedUser = responseData.data || responseData
+    
+    // Update both state and cache
+    setUser(updatedUser)
+    setCachedUser(updatedUser)
+    
+    return { success: true }
+  } catch (error) {
+    console.error('Update account error:', error)
+    return { 
+      success: false, 
+      error: error instanceof Error ? error.message : 'Update failed' 
+    }
+  } finally {
+    setIsLoading(false)
+  }
+}
+
+  const value = {
+    user,
+    isAuthenticated: !!user,
+    isLoading,
+    login,
+    logout,
+    updateUser,
+    updateAccountDetails,
+    fetchProfile,
+  }
+
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
+}

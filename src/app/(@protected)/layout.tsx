@@ -1,0 +1,62 @@
+import { getSession } from '@/lib/session';
+import "../globals.css";
+import '@fortawesome/fontawesome-free/css/all.min.css';
+import { AuthProvider } from '@/context/AuthContext';
+import Header from '@/components/layout/Header';
+import Footer from '@/components/layout/Footer';
+import { redirect } from 'next/navigation';
+import { Geist, Geist_Mono } from 'next/font/google';
+import { Metadata } from 'next';
+import ToastProvider from '@/components/ToastProvider'
+import AuthHandler from '@/components/auth/AuthHandler'
+
+interface LayoutProps {
+  children: React.ReactNode;
+}
+const geistSans = Geist({
+  variable: "--font-geist-sans",
+  subsets: ["latin"],
+});
+
+const geistMono = Geist_Mono({
+  variable: "--font-geist-mono",
+  subsets: ["latin"],
+});
+
+export const metadata: Metadata = {
+  title: 'ShaadiSharthi',
+  description: 'Your one-stop platform for crafting unforgettable weddings with ease.',
+}
+
+
+export default async function ProtectedLayout({ children }: LayoutProps) {
+  const session = await getSession();
+
+  if (!session) {
+    // This should theoretically not be hit if middleware is correct,
+    // but it's a good failsafe.
+    redirect('/login');
+  }
+
+//  const account = await getAccountDetails(session.customerId);
+
+  return (
+    <>
+      <AuthProvider>
+        <AuthHandler />
+        <div className="flex flex-col min-h-screen">
+          <Header />
+          <main className="flex-grow">
+            <div className="container mx-auto px-4 py-8">
+              <>
+                <ToastProvider />
+              </>
+              {children}
+            </div>
+          </main>
+          <Footer />
+        </div>
+      </AuthProvider>
+    </>
+  );
+}

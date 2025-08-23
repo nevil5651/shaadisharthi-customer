@@ -1,0 +1,143 @@
+'use client';
+
+import { useState, useEffect } from 'react';
+import { RatingStars } from '@/app/(@protected)/services/components/RatingStars';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
+import { useForm } from 'react-hook-form';
+import { submitReview, Review } from '@/lib/service';
+import { toast } from 'react-toastify';
+import api from '@/lib/axios';
+
+const reviewSchema = z.object({
+    rating: z.number().min(1, "Please select a rating").max(5, "Rating cannot exceed 5"),
+    reviewText: z.string().min(10, "Review must be at least 10 characters").max(500, "Review cannot exceed 500 characters"),
+});
+
+type ReviewFormData = z.infer<typeof reviewSchema>;
+
+interface ReviewFormProps {
+    serviceId: number;
+    onSubmitSuccess?: (newReview: Review | null) => void; 
+    onServerUpdate?: (serverReviews: Review[]) => void;   
+}
+
+
+export function ReviewForm({ serviceId, onSubmitSuccess, onServerUpdate }: ReviewFormProps) {
+   const {
+        register,
+        handleSubmit,
+        setValue,
+        watch,
+        reset,
+        formState: { errors, isSubmitting },
+    } = useForm<ReviewFormData>({
+        resolver: zodResolver(reviewSchema),
+        defaultValues: { rating: 0, reviewText: '' },
+    });
+
+    const [isFormDisabled, setIsFormDisabled] = useState(!serviceId);
+
+    useEffect(() => {
+        if (!serviceId) {
+            toast.error('Invalid service ID. Cannot submit review.');
+            setIsFormDisabled(true);
+        } else {
+            setIsFormDisabled(false);
+        }
+    }, [serviceId]);
+
+    const reviewText = watch('reviewText');
+    const currentRating = watch('rating');
+    const maxCharacters = 500;
+    const remainingCharacters = maxCharacters - (reviewText?.length || 0);
+
+    const onSubmit = async (data: ReviewFormData) => {
+        const optimisticReview: Review = {
+            reviewId: `temp-${Date.now()}`,
+            customerName: 'You', // Replace with actual user name from auth context
+            rating: data.rating,
+            text: data.reviewText,
+            createdAt: new Date().toISOString(),
+        };
+
+        // optimistic UI (optional)
+        onSubmitSuccess?.(optimisticReview);
+
+        try {
+            const res = await api.post(`/Customer/reviews/${serviceId}`, {
+                reviewText: data.reviewText,
+                rating: data.rating
+            });
+
+            // Server returns updated page-1 array
+            const serverData: any[] = res.data;
+            const serverReviews: Review[] = serverData.map((r) => ({
+                reviewId: String(r.reviewId),
+                customerName: r.customerName,
+                rating: r.rating,
+                text: r.reviewText,
+                createdAt: new Date(r.createdAt).toISOString(),
+            }));
+
+            // notify parent with server authoritative list
+            onServerUpdate?.(serverReviews);
+
+            toast.success('Review submitted successfully!');
+            reset();
+        } catch (error: any) {
+            const errorMessage = error?.response?.data?.error || error?.message || 'Failed to submit review. Please try again.';
+            toast.error(errorMessage);
+            console.error('Error submitting review:', error);
+            // remove optimistic item
+            onSubmitSuccess?.(null);
+        }
+    };
+
+    return (
+        <div className="bg-white rounded-xl shadow-md p-6">
+            <h3 className="text-xl font-heading font-bold text-gray-900 mb-4">Write a Review</h3>
+            <form onSubmit={handleSubmit(onSubmit)}>
+                <input type="hidden" {...register('rating')} />
+                <div className="mb-4">
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Your Rating</label>
+                    <RatingStars 
+                        rating={currentRating} 
+                        interactive 
+                        setRating={(rating) => setValue('rating', rating, { shouldValidate: true })} 
+                    />
+                    {errors.rating && (
+                        <p className="mt-1 text-sm text-red-600">{errors.rating.message}</p>
+                    )}
+                </div>
+                <div className="mb-4">
+                    <label htmlFor="reviewText" className="block text-sm font-medium text-gray-700 mb-2">
+                        Your Review
+                    </label>
+                    <textarea
+                        id="reviewText"
+                        {...register('reviewText')}
+                        rows={4}
+                        maxLength={maxCharacters}
+                        className="w-full px-3 text-black py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-all"
+                        placeholder="Share your experience..."
+                        disabled={isFormDisabled}
+                    />
+                    <p className="mt-1 text-sm text-gray-500">
+                        {remainingCharacters} characters remaining
+                    </p>
+                    {errors.reviewText && (
+                        <p className="mt-1 text-sm text-red-600">{errors.reviewText.message}</p>
+                    )}
+                </div>
+                <button
+                    type="submit"
+                    disabled={isSubmitting || isFormDisabled}
+                    className={`gradient-btn ${isFormDisabled ? 'opacity-50 cursor-not-allowed' : ''}`}
+                >
+                    {isSubmitting ? 'Submitting...' : 'Submit Review'}
+                </button>
+            </form>
+        </div>
+    );
+}
