@@ -34,10 +34,6 @@ export default function Login() {
     setApiError(null);
     setIsLoading(true);
 
-    // The login function from AuthContext now handles the entire flow:
-    // 1. Calls your Java backend.
-    // 2. On success, calls the Next.js API to set the secure cookie.
-    // 3. On success, redirects to the dashboard.
     const result = await login({ email: data.email, password: data.password });
 
     if (!result.success) {

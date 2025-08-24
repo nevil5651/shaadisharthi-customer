@@ -180,7 +180,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       }
 
       // 3. Redirect immediately without waiting for profile
-      router.push('/dashboard')
+       router.push('/dashboard')
       toast.success('Logged in successfully')
 
       // 4. Kick off profile fetch in background
