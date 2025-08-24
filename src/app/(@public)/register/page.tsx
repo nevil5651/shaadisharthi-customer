@@ -6,6 +6,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import axios from 'axios';
+import { toast } from 'react-toastify';
 import AuthCard from '@/components/cards/AuthCard';
 import { FaUser, FaEnvelope, FaPhone, FaPhoneAlt, FaLock, FaEye, FaEyeSlash } from 'react-icons/fa';
 import SocialLogin from '@/components/ui/SocialLogin';
@@ -74,29 +75,42 @@ export default function Register() {
   const onSubmit = async (data: RegisterFormInputs) => {
     setIsLoading(true);
     setApiError(null);
+    const toastId = toast.loading("Creating your account...");
+
     try {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL;
       if (!apiUrl) {
         throw new Error("API URL is not configured.");
       }
 
-      // Include token in payload
       const { confirmPassword, termsAccepted, ...payload } = data;
 
-      const response = await axios.post(`${apiUrl}/Customer/cstmr-rgt`, payload);
-      console.log('Registration successful:', response.data);
+      await axios.post(`${apiUrl}/Customer/cstmr-rgt`, payload);
 
-      router.push('/login');
+      toast.update(toastId, {
+        render: 'Registration successful! Redirecting to login...',
+        type: 'success',
+        isLoading: false,
+        autoClose: 2000,
+      });
+
+      // Redirect after a short delay to allow the user to see the toast.
+      // The form remains disabled via the `isLoading` state.
+      setTimeout(() => {
+        router.push('/login');
+      }, 2000);
+
     } catch (err) {
       console.error('Registration failed:', err);
+      let errorMessage = 'An unexpected error occurred.';
       if (axios.isAxiosError(err) && err.response) {
-        setApiError(err.response.data.error || 'Registration failed. Please try again.');
+        errorMessage = err.response.data.error || 'Registration failed. Please try again.';
       } else if (err instanceof Error) {
-        setApiError(err.message);
-      } else {
-        setApiError('An unexpected error occurred.');
+        errorMessage = err.message;
       }
-    } finally {
+      setApiError(errorMessage);
+      toast.update(toastId, { render: errorMessage, type: 'error', isLoading: false, autoClose: 5000 });
+      // Only re-enable the form on failure
       setIsLoading(false);
     }
   };
