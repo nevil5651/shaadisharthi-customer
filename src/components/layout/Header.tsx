@@ -11,7 +11,7 @@ import {
 export default function Header() {
   const [notifOpen, setNotifOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
-  const { logout } = useAuth()
+  const { logout,isLoggingOut } = useAuth()
 
   return (
     <header className="dashboard-header sticky top-0 z-50 bg-white shadow-sm">
@@ -88,8 +88,9 @@ export default function Header() {
                   <div className="border-t border-gray-200 my-1"></div>
                   <button
                   onClick={logout}
+                  disabled={isLoggingOut}
                   className="block w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100">
-                    Logout
+                    {isLoggingOut ? 'Logging out...' : 'Logout'}
                   </button>
                 </div>
               )}

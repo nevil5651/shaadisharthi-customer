@@ -1,6 +1,7 @@
 'use client'
 
 import React, { createContext, useContext, useState, useEffect, useRef } from 'react'
+import { toast } from 'react-toastify'
 import { useRouter } from 'next/navigation'
 import { usePathname } from "next/navigation";
 import { publicRoutes } from "@/lib/auth-routes";
@@ -24,6 +25,7 @@ interface AuthContextType {
   user: User | null
   isAuthenticated: boolean
   isLoading: boolean
+  isLoggingOut: boolean
   login: (credentials: Credentials) => Promise<{ success: boolean; error?: string }>
   logout: () => Promise<void>
   updateUser: (updatedData: Partial<User>) => Promise<void>
@@ -40,6 +42,7 @@ const CACHE_MAX_AGE = 5 * 60 * 1000 // 5 minutes
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<User | null>(null)
   const [isLoading, setIsLoading] = useState(true)
+  const [isLoggingOut, setIsLoggingOut] = useState(false)
   const router = useRouter()
   const pathname = usePathname();
   const fetchInProgress = useRef(false) // To prevent concurrent fetches
@@ -198,24 +201,33 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
  
 const logout = async () => {
+  if (isLoggingOut) return // Prevent multiple clicks
+
+  setIsLoggingOut(true)
+  const toastId = toast.loading('Logging out...')
+
   try {
-    // clearing  frontend state first
-    setUser(null)
-    clearCachedUser()
-    
     // Then attempt to call the logout API
-    await fetch('/api/auth/logout', { 
+    await fetch('/api/auth/logout', {
       method: 'POST',
       credentials: 'include' // Ensure cookies are sent
     })
     
-    // Redirect regardless of API call success
-    router.push('/login')
-    router.refresh() // Force a refresh to clear any cached data
+    // On success, set a flag for the login page to show the success toast
+    // and redirect immediately. The loading toast will disappear with the page.
+    if (typeof window !== 'undefined') {
+      sessionStorage.setItem('logout_status', 'success')
+    }
+    toast.update(toastId, { render: 'Logged out successfully', type: 'success', isLoading: false, autoClose: 3000 })
+    setUser(null)
+    clearCachedUser()
+    window.location.assign('/login')
+    
   } catch (error) {
     console.error('Logout error:', error)
-    // Even if API call fails, ensure we redirect
-    router.push('/login')
+    // On failure, just show an error and allow the user to retry.
+    toast.update(toastId, { render: 'Logout failed. Please try again.', type: 'error', isLoading: false, autoClose: 3000 })
+    setIsLoggingOut(false) // Re-enable the button
   }
 }
 
@@ -278,6 +290,7 @@ const logout = async () => {
     user,
     isAuthenticated: !!user,
     isLoading,
+    isLoggingOut,
     login,
     logout,
     updateUser,

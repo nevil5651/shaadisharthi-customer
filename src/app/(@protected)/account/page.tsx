@@ -5,7 +5,7 @@ import { useAuth } from '@/context/useAuth'
 import Head from 'next/head'
 
 const AccountPage = () => {
-  const { user, updateAccountDetails, logout } = useAuth()
+  const { user, updateAccountDetails, logout,isLoggingOut } = useAuth()
   const [isEditing, setIsEditing] = useState(false)
   const [formData, setFormData] = useState({
   name: user?.name || '',
@@ -294,9 +294,11 @@ if (!user) {
                 <div className="space-y-3">
                   <button 
                     onClick={logout}
+                    disabled={isLoggingOut}
                     className="w-full bg-red-500 text-white py-3 px-4 rounded-lg hover:bg-red-600 transition-all"
                   >
-                    <i className="fas fa-sign-out-alt mr-2"></i> Logout
+                    <i className="fas fa-sign-out-alt mr-2"></i> 
+                    {isLoggingOut ? 'Logging out...' : 'Logout'}
                   </button>
                   <button className="w-full bg-gray-500 text-white py-3 px-4 rounded-lg hover:bg-gray-600 transition-all">
                     <i className="fas fa-trash-alt mr-2"></i> Delete Account
