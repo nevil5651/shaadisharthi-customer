@@ -147,6 +147,16 @@ function BookingsContent() {
         }
     };
 
+    const handlePayNow = (bookingId: string) => {
+  toast.info(
+    "We apologize, but online payment is not yet available. Please arrange payment directly with the service provider.",
+    {
+      autoClose: 8000, // Keep message on screen longer for readability
+      position: "top-center",
+    }
+  );
+};
+
     useEffect(() => {
         if (searchParams.get('fromBooking')) {
             refetch();
@@ -167,6 +177,7 @@ function BookingsContent() {
                 error={error?.message || null}
                 onCancel={onCancel}
                 currentPage={currentPage}
+                onPay={handlePayNow}
                 totalPages={data?.totalPages || 1}
                 onPageChange={handlePageChange}
             />

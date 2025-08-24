@@ -9,6 +9,7 @@ type BookingsListProps = {
   loading: boolean;
   error: string | null;
   onCancel: (id: string) => void;
+  onPay: (id: string) => void;
   currentPage: number;
   totalPages: number;
   onPageChange: (page: number) => void;
@@ -19,6 +20,7 @@ export const BookingsList = ({
   loading,
   error,
   onCancel,
+  onPay,
   currentPage,
   totalPages,
   onPageChange,
@@ -70,7 +72,8 @@ export const BookingsList = ({
             <BookingCard 
               key={booking.id}
               booking={booking} 
-              onCancel={onCancel} 
+              onCancel={onCancel}
+              onPay={onPay} 
             />
         ))}
       </div>
