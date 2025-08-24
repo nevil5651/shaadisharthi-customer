@@ -3,8 +3,6 @@ import { FaSearch } from 'react-icons/fa';
 import { FiChevronLeft, FiChevronRight } from 'react-icons/fi';
 import { BookingCard } from './BookingCard';
 import { Booking } from '@/lib/bookings';
-import { useState } from 'react';
-import { normalizeBookingStatus } from '../bookingUtils';
 
 type BookingsListProps = {
   bookings: Booking[];
@@ -53,7 +51,7 @@ export const BookingsList = ({
     );
   }
 
-  if (!loading && !error && normalizeBookingStatus.length === 0) {
+  if (!loading && !error && bookings.length === 0) {
     return (
       <div className="text-center py-12">
         <FaSearch className="mx-auto text-gray-400 text-4xl mb-4" />
@@ -83,7 +81,7 @@ export const BookingsList = ({
           <div className="flex items-center gap-2">
             <button 
               onClick={() => onPageChange(currentPage - 1)}
-              disabled={currentPage === 1}
+              disabled={currentPage === 1 || loading}
               className="p-2 rounded-lg border border-gray-200 disabled:opacity-50 hover:bg-pink-50 transition"
             >
               <FiChevronLeft />

@@ -1,11 +1,12 @@
 'use client'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { toast } from 'react-toastify';
 import { BookingProvider, useBookingContext } from './BookingContext';
 import { BookingFilters } from './components/BookingFilters';
 import { BookingsList } from './components/BookingsList';
 import { useQuery } from '@tanstack/react-query';
 import api from '@/lib/axios';
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, ComponentProps } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { debounce } from 'lodash';
 import { normalizeBookingStatus, formatDateForAPI } from './bookingUtils';
@@ -112,18 +113,38 @@ function BookingsContent() {
         setCurrentPage(page);
     };
 
-    const onCancel = (id: string) => {
-        const reason = prompt('Reason for cancellation?');
-        if (reason === null) return;
-        
-        api.post(`/Customer/cstmr-action/${id}`, { 
-            action: 'cancel', 
-            reason 
-        }).then(() => {
-            refetch();
-        }).catch(err => {
-            alert('Cancel failed: ' + err.message);
-        });
+    const onCancel: ComponentProps<typeof BookingsList>['onCancel'] = async (id) => {
+        const reason = window.prompt('Please provide a reason for cancellation:');
+        if (reason === null) { // User clicked "Cancel" on the prompt
+            return;
+        }
+
+        const toastId = toast.loading('Submitting cancellation...');
+
+        try {
+            await api.post(`/Customer/cstmr-action/${id}`, {
+                action: 'cancel',
+                reason,
+            });
+
+            toast.update(toastId, {
+                render: 'Booking cancelled successfully!',
+                type: 'success',
+                isLoading: false,
+                autoClose: 3000,
+            });
+
+            refetch(); // Refresh the bookings list
+        } catch (err: any) {
+            console.error('Cancellation failed:', err);
+            const errorMessage = err.response?.data?.message || err.message || 'An unknown error occurred';
+            toast.update(toastId, {
+                render: `Cancellation failed: ${errorMessage}`,
+                type: 'error',
+                isLoading: false,
+                autoClose: 5000,
+            });
+        }
     };
 
     useEffect(() => {
