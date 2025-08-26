@@ -1,4 +1,4 @@
-// components/Hero.tsx (CLIENT COMPONENT)
+
 'use client';
 
 import { useRouter } from 'next/navigation';
@@ -26,7 +26,7 @@ const Hero: React.FC = () => {
               href="http://localhost:4200/login" // External URL for service provider
               className="bg-transparent hover:bg-white text-white hover:text-black py-3 px-8 border-2 border-white rounded-full text-lg transition duration-300"
             >
-              Become a Vendor <FontAwesomeIcon icon={faUserTie} className="ml-2" />
+              Become a Vendor <FontAwesomeIcon icon={faUserTie} className="ml-2 hover:text-black" />
             </Link>
           </div>
         </div>

@@ -14,10 +14,17 @@ interface InputFieldProps {
 export default function InputField({ icon, type = 'text', placeholder, name, required = false, label, value, onChange }: InputFieldProps) {
   return (
     <div className="mb-5">
+      {label && (
+        <label htmlFor={name} className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+          {label}
+        </label>
+      )}
       <div className="relative">
-        <div className="input-icon">
-          {icon}
-        </div>
+        {icon && (
+          <div className="input-icon">
+            {icon}
+          </div>
+        )}
         <input
           type={type}
           name={name}
@@ -25,7 +32,7 @@ export default function InputField({ icon, type = 'text', placeholder, name, req
           required={required}
           value={value}
           onChange={onChange}
-          className="form-input"
+          className="form-input w-full pl-10 pr-3 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:placeholder-gray-400"
         />
       </div>
     </div>

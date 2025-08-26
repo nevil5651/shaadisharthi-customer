@@ -1,4 +1,3 @@
-// CategoryCard.tsx (updated)
 import React, { memo } from 'react';
 import * as Icons from './Icons';
 
@@ -38,22 +37,23 @@ const CategoryCard: React.FC<CategoryCardProps> = ({
   onClick,
 }) => {
   const IconComponent = iconComponentMap[icon] || Icons.StarIcon;
-  const bgClass = isSelected
-    ? 'bg-white text-primary shadow-md'
-    : `${colorClass.bg} ${colorClass.text}`;
-
+  
   return (
     <button
       onClick={() => onClick(category)}
-      className={`flex items-center p-3 bg-white rounded-lg hover:shadow-md transition-all ${
-        isSelected ? 'shadow-md' : ''
+      className={`flex items-center p-3 rounded-lg hover:shadow-md transition-all w-full ${
+        isSelected 
+          ? 'bg-primary text-white shadow-md' 
+          : `bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 ${colorClass.text}`
       }`}
       aria-pressed={isSelected}
     >
-      <div className={`category-icon w-10 h-10 rounded-full flex items-center justify-center mr-3 ${bgClass}`}>
-        <IconComponent />
+      <div className={`w-10 h-10 rounded-full flex items-center justify-center mr-3 ${
+        isSelected ? 'bg-white/20' : colorClass.bg
+      }`}>
+        <IconComponent className={isSelected ? 'text-white' : ''} />
       </div>
-      <span className="font-medium">{category}</span>
+      <span className="font-medium text-sm truncate">{category}</span>
     </button>
   );
 };

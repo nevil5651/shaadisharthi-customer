@@ -15,15 +15,15 @@ export function MediaGallery({ media }: MediaGalleryProps) {
   };
 
   return (
-    <section className="bg-white rounded-xl shadow-md p-6 mb-8">
-      <h2 className="text-2xl font-heading font-bold text-gray-900 mb-4">Media Gallery</h2>
+    <section className="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6 mb-8">
+      <h2 className="text-2xl font-heading font-bold text-gray-900 dark:text-white mb-4">Media Gallery</h2>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {media.map((item, index) => (
-          <div key={`${item.url}-${index}`} className="relative aspect-video rounded-lg overflow-hidden bg-gray-200">
+          <div key={`${item.url}-${index}`} className="relative aspect-video rounded-lg overflow-hidden bg-gray-200 dark:bg-gray-700">
             {item.type === 'Image' ? (
               <>
                 {!loadedIndexes.has(index) && (
-                  <div className="absolute inset-0 bg-gray-300 animate-pulse"></div>
+                  <div className="absolute inset-0 bg-gray-300 dark:bg-gray-600 animate-pulse"></div>
                 )}
                 <Image
                   src={item.url}

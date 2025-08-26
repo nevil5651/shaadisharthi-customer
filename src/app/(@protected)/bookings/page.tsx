@@ -31,8 +31,6 @@ export default function BookingsPage() {
     );
 }
 
-
-
 function BookingsContent() {
     const searchParams = useSearchParams();
     const { filters, updateFilters, resetFilters } = useBookingContext();
@@ -107,8 +105,6 @@ function BookingsContent() {
     debouncedUpdateFilters(newFilters);
 };
 
-
-
     const handlePageChange = (page: number) => {
         setCurrentPage(page);
     };
@@ -164,7 +160,7 @@ function BookingsContent() {
     }, [searchParams, refetch]);
 
     return (
-        <div className="container mx-auto px-4 py-8">
+        <div className="container mx-auto px-4 py-8 bg-gray-50 dark:bg-gray-900 min-h-screen">
             <BookingFilters 
                 filters={filters}
                 onFilterChange={handleFilterChange} 

@@ -37,95 +37,95 @@ const Contact = () => {
   };
 
   return (
-    <section id="contact" className="py-16 bg-gray-50">
+    <section id="contact" className="py-16 bg-gray-50 dark:bg-gray-900">
       <Toaster position="top-right" />
       <div className="container mx-auto px-4">
         <SectionHeader subtitle="GET IN TOUCH" title="We'd Love to Hear From You" />
         <div className="flex flex-col md:flex-row gap-8">
-          <div className="md:w-1/2 bg-white p-8 rounded-xl shadow-md">
-            <h3 className="text-2xl font-bold mb-6 font-playfair-display">Send us a Message</h3>
+          <div className="md:w-1/2 bg-white dark:bg-gray-800 p-8 rounded-xl shadow-md">
+            <h3 className="text-2xl font-bold mb-6 font-playfair-display text-gray-800 dark:text-white">Send us a Message</h3>
             <form onSubmit={handleSubmit(onSubmit)}>
               <div className="mb-4">
-                <label htmlFor="name" className="block text-gray-700 mb-2 font-medium">Full Name</label>
-                <input id="name" {...register('name')} className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent" />
-                {errors.name && <p className="text-red-500 text-sm mt-1">{errors.name.message}</p>}
+                <label htmlFor="name" className="block text-gray-700 dark:text-gray-300 mb-2 font-medium">Full Name</label>
+                <input id="name" {...register('name')} className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary dark:focus:ring-pink-400 focus:border-transparent bg-white dark:bg-gray-700 text-gray-800 dark:text-white" />
+                {errors.name && <p className="text-red-500 dark:text-red-400 text-sm mt-1">{errors.name.message}</p>}
               </div>
               <div className="mb-4">
-                <label htmlFor="email" className="block text-gray-700 mb-2 font-medium">Email Address</label>
-                <input id="email" type="email" {...register('email')} className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent" />
-                {errors.email && <p className="text-red-500 text-sm mt-1">{errors.email.message}</p>}
+                <label htmlFor="email" className="block text-gray-700 dark:text-gray-300 mb-2 font-medium">Email Address</label>
+                <input id="email" type="email" {...register('email')} className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary dark:focus:ring-pink-400 focus:border-transparent bg-white dark:bg-gray-700 text-gray-800 dark:text-white" />
+                {errors.email && <p className="text-red-500 dark:text-red-400 text-sm mt-1">{errors.email.message}</p>}
               </div>
               <div className="mb-4">
-                <label htmlFor="subject" className="block text-gray-700 mb-2 font-medium">Subject</label>
-                <input id="subject" {...register('subject')} className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent" />
-                {errors.subject && <p className="text-red-500 text-sm mt-1">{errors.subject.message}</p>}
+                <label htmlFor="subject" className="block text-gray-700 dark:text-gray-300 mb-2 font-medium">Subject</label>
+                <input id="subject" {...register('subject')} className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary dark:focus:ring-pink-400 focus:border-transparent bg-white dark:bg-gray-700 text-gray-800 dark:text-white" />
+                {errors.subject && <p className="text-red-500 dark:text-red-400 text-sm mt-1">{errors.subject.message}</p>}
               </div>
               <div className="mb-4">
-                <label htmlFor="message" className="block text-gray-700 mb-2 font-medium">Message</label>
-                <textarea id="message" rows={5} {...register('message')} className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent" />
-                {errors.message && <p className="text-red-500 text-sm mt-1">{errors.message.message}</p>}
+                <label htmlFor="message" className="block text-gray-700 dark:text-gray-300 mb-2 font-medium">Message</label>
+                <textarea id="message" rows={5} {...register('message')} className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary dark:focus:ring-pink-400 focus:border-transparent bg-white dark:bg-gray-700 text-gray-800 dark:text-white" />
+                {errors.message && <p className="text-red-500 dark:text-red-400 text-sm mt-1">{errors.message.message}</p>}
               </div>
-              <button type="submit" disabled={isSubmitting} className="w-full btn-primary hover:shadow-lg text-white py-3 rounded-lg transition duration-300">
+              <button type="submit" disabled={isSubmitting} className="w-full bg-gradient-to-r from-pink-600 to-orange-500 dark:from-pink-500 dark:to-orange-400 text-white py-3 rounded-lg transition duration-300 hover:from-pink-700 hover:to-orange-600 dark:hover:from-pink-600 dark:hover:to-orange-500 disabled:opacity-50">
                 {isSubmitting ? 'Sending...' : 'Send Message'} <FontAwesomeIcon icon={faPaperPlane} className="ml-2" />
               </button>
             </form>
           </div>
-          <div className="md:w-1/2 bg-white p-8 rounded-xl shadow-md">
-            <h3 className="text-2xl font-bold mb-6 font-playfair-display">Contact Information</h3>
+          <div className="md:w-1/2 bg-white dark:bg-gray-800 p-8 rounded-xl shadow-md">
+            <h3 className="text-2xl font-bold mb-6 font-playfair-display text-gray-800 dark:text-white">Contact Information</h3>
             <div className="space-y-6">
               <div className="flex items-start">
-                <div className="bg-primary bg-opacity-10 p-3 rounded-full mr-4">
+                <div className="bg-primary dark:bg-pink-600 bg-opacity-10 dark:bg-opacity-20 p-3 rounded-full mr-4">
                   <FontAwesomeIcon icon={faMapMarkerAlt} className="text-white" />
                 </div>
                 <div>
-                  <h4 className="font-bold">Our Location</h4>
-                  <p className="text-gray-600">ShaadiSharthi Headquarters, 123 Wedding Street, Mumbai 400001, India</p>
+                  <h4 className="font-bold text-gray-800 dark:text-white">Our Location</h4>
+                  <p className="text-gray-600 dark:text-gray-400">ShaadiSharthi Headquarters, 123 Wedding Street, Mumbai 400001, India</p>
                 </div>
               </div>
               <div className="flex items-start">
-                <div className="bg-primary bg-opacity-10 p-3 rounded-full mr-4">
+                <div className="bg-primary dark:bg-pink-600 bg-opacity-10 dark:bg-opacity-20 p-3 rounded-full mr-4">
                   <FontAwesomeIcon icon={faPhone} className="text-white" />
                 </div>
                 <div>
-                  <h4 className="font-bold">Phone Number</h4>
-                  <p className="text-gray-600">+91 98765 43210 (10AM - 7PM)</p>
-                  <p className="text-gray-600">+91 87654 32109 (Emergency)</p>
+                  <h4 className="font-bold text-gray-800 dark:text-white">Phone Number</h4>
+                  <p className="text-gray-600 dark:text-gray-400">+91 98765 43210 (10AM - 7PM)</p>
+                  <p className="text-gray-600 dark:text-gray-400">+91 87654 32109 (Emergency)</p>
                 </div>
               </div>
               <div className="flex items-start">
-                <div className="bg-primary bg-opacity-10 p-3 rounded-full mr-4">
+                <div className="bg-primary dark:bg-pink-600 bg-opacity-10 dark:bg-opacity-20 p-3 rounded-full mr-4">
                   <FontAwesomeIcon icon={faEnvelope} className="text-white" />
                 </div>
                 <div>
-                  <h4 className="font-bold">Email Address</h4>
-                  <p className="text-gray-600">info@shaadisharthi.com</p>
-                  <p className="text-gray-600">support@shaadisharthi.com</p>
+                  <h4 className="font-bold text-gray-800 dark:text-white">Email Address</h4>
+                  <p className="text-gray-600 dark:text-gray-400">info@shaadisharthi.com</p>
+                  <p className="text-gray-600 dark:text-gray-400">support@shaadisharthi.com</p>
                 </div>
               </div>
               <div className="flex items-start">
-                <div className="bg-primary bg-opacity-10 p-3 rounded-full mr-4">
+                <div className="bg-primary dark:bg-pink-600 bg-opacity-10 dark:bg-opacity-20 p-3 rounded-full mr-4">
                   <FontAwesomeIcon icon={faClock} className="text-white" />
                 </div>
                 <div>
-                  <h4 className="font-bold">Working Hours</h4>
-                  <p className="text-gray-600">Monday - Saturday: 9:00 AM - 7:00 PM</p>
-                  <p className="text-gray-600">Sunday: Emergency Support Only</p>
+                  <h4 className="font-bold text-gray-800 dark:text-white">Working Hours</h4>
+                  <p className="text-gray-600 dark:text-gray-400">Monday - Saturday: 9:00 AM - 7:00 PM</p>
+                  <p className="text-gray-600 dark:text-gray-400">Sunday: Emergency Support Only</p>
                 </div>
               </div>
             </div>
             <div className="mt-8">
-              <h4 className="font-bold mb-4 font-playfair-display">Follow Us</h4>
+              <h4 className="font-bold mb-4 font-playfair-display text-gray-800 dark:text-white">Follow Us</h4>
               <div className="flex space-x-4">
-                <a href="#" className="bg-primary bg-opacity-10 hover:bg-primary p-3 rounded-full transition duration-300 group">
+                <a href="#" className="bg-primary dark:bg-pink-600 bg-opacity-10 dark:bg-opacity-20 hover:bg-primary dark:hover:bg-pink-600 p-3 rounded-full transition duration-300 group">
                   <FontAwesomeIcon icon={faFacebookF} className="text-white" />
                 </a>
-                <a href="#" className="bg-primary bg-opacity-10 hover:bg-primary p-3 rounded-full transition duration-300 group">
+                <a href="#" className="bg-primary dark:bg-pink-600 bg-opacity-10 dark:bg-opacity-20 hover:bg-primary dark:hover:bg-pink-600 p-3 rounded-full transition duration-300 group">
                   <FontAwesomeIcon icon={faInstagram} className="text-white" />
                 </a>
-                <a href="#" className="bg-primary bg-opacity-10 hover:bg-primary p-3 rounded-full transition duration-300 group">
+                <a href="#" className="bg-primary dark:bg-pink-600 bg-opacity-10 dark:bg-opacity-20 hover:bg-primary dark:hover:bg-pink-600 p-3 rounded-full transition duration-300 group">
                   <FontAwesomeIcon icon={faPinterestP} className="text-white" />
                 </a>
-                <a href="#" className="bg-primary bg-opacity-10 hover:bg-primary p-3 rounded-full transition duration-300 group">
+                <a href="#" className="bg-primary dark:bg-pink-600 bg-opacity-10 dark:bg-opacity-20 hover:bg-primary dark:hover:bg-pink-600 p-3 rounded-full transition duration-300 group">
                   <FontAwesomeIcon icon={faYoutube} className="text-white" />
                 </a>
               </div>

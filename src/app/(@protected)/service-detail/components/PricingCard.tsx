@@ -19,11 +19,11 @@ export function PricingCard({ service }: PricingCardProps) {
   };
 
   return (
-    <div className="bg-white rounded-xl shadow-md p-6">
-      <h3 className="text-xl font-heading font-bold text-gray-900 mb-4">Pricing</h3>
+    <div className="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6">
+      <h3 className="text-xl font-heading font-bold text-gray-900 dark:text-white mb-4">Pricing</h3>
       <p className="text-2xl font-bold text-primary mb-4">{formattedPrice}</p>
-      <p className="text-gray-600 mb-2">{phoneNumber}</p>
-      <p className="text-gray-600 mb-4">{email}</p>
+      <p className="text-gray-600 dark:text-gray-300 mb-2">{phoneNumber}</p>
+      <p className="text-gray-600 dark:text-gray-300 mb-4">{email}</p>
       <button onClick={handleBookNow} className="gradient-btn">
         Book Now
       </button>

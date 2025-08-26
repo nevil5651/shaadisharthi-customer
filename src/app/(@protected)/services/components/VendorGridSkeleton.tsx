@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import VendorCardSkeleton from '@/app/(@protected)/services/components/VendorCardSkeleton';
+import VendorCardSkeleton from './VendorCardSkeleton';
 
 interface VendorGridSkeletonProps {
   count?: number;

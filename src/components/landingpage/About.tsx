@@ -1,4 +1,3 @@
-// components/About.tsx
 import Image from 'next/image';
 import Link from 'next/link';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -7,7 +6,7 @@ import SectionHeader from './SectionHeader';
 
 const About = () => {
   return (
-    <section id="about" className="py-16 bg-white">
+    <section id="about" className="py-16 bg-white dark:bg-gray-900">
       <div className="container mx-auto px-4">
         <div className="flex flex-col md:flex-row items-center">
           <div className="md:w-1/2 mb-8 md:mb-0 md:pr-8">
@@ -15,15 +14,15 @@ const About = () => {
           </div>
           <div className="md:w-1/2">
             <SectionHeader subtitle="ABOUT US" title="Your Wedding, Our Passion" />
-            <p className="text-gray-600 mb-4">Founded in 2023, ShaadiSharthi was born from a simple idea: wedding planning should be joyful, not stressful. Our team of wedding enthusiasts and tech experts came together to create India's most trusted wedding vendor marketplace.</p>
-            <p className="text-gray-600 mb-6">We've helped over 5,000 couples plan their dream weddings by connecting them with verified, top-rated vendors across the country. Our platform makes it easy to compare options, read reviews, and book everything you need in one place.</p>
+            <p className="text-gray-600 dark:text-gray-300 mb-4">Founded in 2023, ShaadiSharthi was born from a simple idea: wedding planning should be joyful, not stressful. Our team of wedding enthusiasts and tech experts came together to create India's most trusted wedding vendor marketplace.</p>
+            <p className="text-gray-600 dark:text-gray-300 mb-6">We've helped over 5,000 couples plan their dream weddings by connecting them with verified, top-rated vendors across the country. Our platform makes it easy to compare options, read reviews, and book everything you need in one place.</p>
             <div className="flex flex-wrap gap-4">
               {['Verified Vendors', 'Transparent Pricing', '24/7 Support'].map((item, index) => (
                 <div key={index} className="flex items-center">
-                  <div className="w-12 h-12 bg-primary bg-opacity-10 rounded-full flex items-center justify-center mr-3">
-                    <FontAwesomeIcon icon={faCheck} className="text-white" />
+                  <div className="w-12 h-12 bg-primary dark:bg-pink-600 bg-opacity-10 dark:bg-opacity-20 rounded-full flex items-center justify-center mr-3">
+                    <FontAwesomeIcon icon={faCheck} className="text-white"/>
                   </div>
-                  <span className="font-medium">{item}</span>
+                  <span className="font-medium text-gray-800 dark:text-white">{item}</span>
                 </div>
               ))}
             </div>

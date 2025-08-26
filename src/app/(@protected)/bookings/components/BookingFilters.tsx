@@ -24,7 +24,7 @@ export const BookingFilters = ({
   ];
 
   return (
-    <div className="bg-white rounded-xl shadow-lg p-6 mb-8 border border-gray-100">
+    <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 mb-8 border border-gray-100 dark:border-gray-700">
       <div className="flex flex-col md:flex-row gap-4 items-end">
         {/* Search Input */}
         <div className="flex-1 w-full">
@@ -36,9 +36,7 @@ export const BookingFilters = ({
               type="text"
               value={filters.search}
               onChange={(e) => onFilterChange('search', e.target.value)}
-              className="block w-full pl-10 pr-10 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:outline-none focus:ring-pink-300 focus:border-pink-500 bg-gray-50 transition-all"
-               //className="w-full rounded-lg border border-gray-300 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary focus:ring-opacity-50 p-2"
-              
+              className="block w-full pl-10 pr-10 py-2.5 border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:outline-none focus:ring-pink-300 focus:border-pink-500 bg-gray-50 dark:bg-gray-700 dark:text-white transition-all"
               placeholder="Search bookings..."
             />
             {filters.search && (
@@ -58,7 +56,7 @@ export const BookingFilters = ({
             <select
               value={filters.status}
               onChange={(e) => onFilterChange('status', e.target.value)}
-              className="appearance-none  block w-full pl-3 pr-8 py-2.5 border border-gray-200 focus:outline-none rounded-lg focus:ring-2 focus:ring-pink-300 focus:border-pink-500 bg-gray-50 cursor-pointer transition-all"
+              className="appearance-none block w-full pl-3 pr-8 py-2.5 border border-gray-200 dark:border-gray-600 focus:outline-none rounded-lg focus:ring-2 focus:ring-pink-300 focus:border-pink-500 bg-gray-50 dark:bg-gray-700 dark:text-white cursor-pointer transition-all"
             >
               {statusOptions.map((option) => (
                 <option key={option.value} value={option.value}>
@@ -80,10 +78,10 @@ export const BookingFilters = ({
               value={filters.dateFrom}
               onChange={(e) => onFilterChange('dateFrom', e.target.value)}
               max={filters.dateTo || undefined}
-              className="block w-full pl-3 pr-3 py-2.5 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-300 focus:border-pink-500 bg-gray-50 transition-all"
+              className="block w-full pl-3 pr-3 py-2.5 border border-gray-200 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-300 focus:border-pink-500 bg-gray-50 dark:bg-gray-700 dark:text-white transition-all"
             />
             {filters.dateFrom && (
-              <span className="absolute -top-2 left-2 px-1 text-xs bg-white text-pink-600">From</span>
+              <span className="absolute -top-2 left-2 px-1 text-xs bg-white dark:bg-gray-800 text-pink-600 dark:text-pink-400">From</span>
             )}
           </div>
           <div className="relative">
@@ -92,10 +90,10 @@ export const BookingFilters = ({
               value={filters.dateTo}
               onChange={(e) => onFilterChange('dateTo', e.target.value)}
               min={filters.dateFrom || undefined}
-              className="block w-full pl-3 pr-3 focus:outline-none py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-pink-300 focus:border-pink-500 bg-gray-50 transition-all"
+              className="block w-full pl-3 pr-3 focus:outline-none py-2.5 border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-pink-300 focus:border-pink-500 bg-gray-50 dark:bg-gray-700 dark:text-white transition-all"
             />
             {filters.dateTo && (
-              <span className="absolute -top-2 left-2 px-1 text-xs bg-white text-pink-600">To</span>
+              <span className="absolute -top-2 left-2 px-1 text-xs bg-white dark:bg-gray-800 text-pink-600 dark:text-pink-400">To</span>
             )}
           </div>
         </div>
@@ -103,9 +101,9 @@ export const BookingFilters = ({
         {/* Reset Button */}
         <button
           onClick={onReset}
-          className="px-4 py-2.5 border border-pink-200 rounded-lg bg-pink-50 text-pink-600 hover:bg-pink-100 transition-all flex items-center gap-2 whitespace-nowrap"
+          className="px-4 py-2.5 border border-pink-200 dark:border-pink-700 rounded-lg bg-pink-50 dark:bg-pink-900/30 text-pink-600 dark:text-pink-300 hover:bg-pink-100 dark:hover:bg-pink-900/50 transition-all flex items-center gap-2 whitespace-nowrap"
         >
-          <FaFilter className="text-pink-500" />
+          <FaFilter className="text-pink-500 dark:text-pink-400" />
           Reset Filters
         </button>
       </div>

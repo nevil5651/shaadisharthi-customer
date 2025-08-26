@@ -1,5 +1,5 @@
 'use client'
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useForm } from 'react-hook-form';
@@ -9,7 +9,13 @@ import axios from 'axios';
 import { toast } from 'react-toastify';
 import AuthCard from '@/components/cards/AuthCard';
 import { FaUser, FaEnvelope, FaPhone, FaPhoneAlt, FaLock, FaEye, FaEyeSlash } from 'react-icons/fa';
-import SocialLogin from '@/components/ui/SocialLogin';
+import dynamic from 'next/dynamic';
+
+// Dynamically import SocialLogin to reduce initial bundle size
+const SocialLogin = dynamic(() => import('@/components/ui/SocialLogin'), {
+  ssr: false,
+  loading: () => <div className="h-16 flex items-center justify-center text-gray-600 dark:text-gray-400">Loading social login options...</div>
+});
 
 // Updated validation schema with token (optional for now)
 export const registerSchema = z.object({
@@ -28,6 +34,58 @@ export const registerSchema = z.object({
 
 export type RegisterFormInputs = z.infer<typeof registerSchema>;
 
+interface FormInputProps extends React.InputHTMLAttributes<HTMLInputElement> {
+  icon?: React.ElementType;
+  type: string;
+  placeholder?: string;
+  disabled?: boolean;
+  error?: string;
+  showPasswordToggle?: boolean;
+  isPasswordVisible?: boolean;
+  onTogglePassword?: () => void;
+}
+
+// Memoized form inputs to prevent unnecessary re-renders
+const FormInput: React.FC<FormInputProps> = ({
+  icon,
+  type,
+  placeholder,
+  disabled,
+  error,
+  showPasswordToggle,
+  isPasswordVisible,
+  onTogglePassword,
+  ...registerProps
+}) => {
+  const InputIcon = useMemo(() => icon, [icon]);
+  
+  return (
+    <div>
+      <div className="relative">
+        <div className="input-icon">{InputIcon && <InputIcon />}</div>
+        <input 
+          type={type} 
+          placeholder={placeholder} 
+          className={`form-input w-full pl-10 pr-3 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:placeholder-gray-400 ${disabled ? 'bg-gray-100 dark:bg-gray-600 cursor-not-allowed' : ''}`} 
+          disabled={disabled} 
+          {...registerProps} 
+        />
+        {showPasswordToggle && (
+          <button 
+            type="button" 
+            className="password-toggle absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 dark:hover:text-gray-300" 
+            onClick={onTogglePassword}
+            disabled={disabled}
+          >
+            {isPasswordVisible ? <FaEyeSlash /> : <FaEye />}
+          </button>
+        )}
+      </div>
+      {error && <p className="text-red-500 dark:text-red-400 text-sm mt-1">{error}</p>}
+    </div>
+  );
+};
+
 export default function Register() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -40,39 +98,41 @@ export default function Register() {
 
   const { register, handleSubmit, formState: { errors, isSubmitting }, setValue } = useForm<RegisterFormInputs>({
     resolver: zodResolver(registerSchema),
+    mode: 'onChange' // Validate on change for better UX
   });
 
-  useEffect(() => {
+  // Memoize the token verification function
+  const verifyToken = useCallback(async () => {
     if (!token) {
       router.push('/verify-email');
       return;
     }
 
-    const verifyToken = async () => {
-      setIsLoading(true);
-      setApiError(null);
-      try {
-        const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-        const response = await axios.get(`${apiUrl}/Customer/cstmr-email-verification?token=${token}`);
-        if (response.data.email) {
-          setValue('email', response.data.email);
-          setValue('token', token);
-          setIsVerified(true);
-        } else {
-          throw new Error('Invalid response');
-        }
-      } catch (err) {
-        setApiError('Invalid or expired verification token. Redirecting...');
-        setTimeout(() => router.push('/verify-email'), 3000);
-      } finally {
-        setIsLoading(false);
+    setIsLoading(true);
+    setApiError(null);
+    try {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+      const response = await axios.get(`${apiUrl}/Customer/cstmr-email-verification?token=${token}`);
+      if (response.data.email) {
+        setValue('email', response.data.email);
+        setValue('token', token);
+        setIsVerified(true);
+      } else {
+        throw new Error('Invalid response');
       }
-    };
-
-    verifyToken();
+    } catch (err) {
+      setApiError('Invalid or expired verification token. Redirecting...');
+      setTimeout(() => router.push('/verify-email'), 3000);
+    } finally {
+      setIsLoading(false);
+    }
   }, [token, router, setValue]);
 
-  const onSubmit = async (data: RegisterFormInputs) => {
+  useEffect(() => {
+    verifyToken();
+  }, [verifyToken]);
+
+  const onSubmit = useCallback(async (data: RegisterFormInputs) => {
     setIsLoading(true);
     setApiError(null);
     const toastId = toast.loading("Creating your account...");
@@ -95,7 +155,6 @@ export default function Register() {
       });
 
       // Redirect after a short delay to allow the user to see the toast.
-      // The form remains disabled via the `isLoading` state.
       setTimeout(() => {
         router.push('/login');
       }, 2000);
@@ -113,24 +172,32 @@ export default function Register() {
       // Only re-enable the form on failure
       setIsLoading(false);
     }
-  };
+  }, [router]);
+
+  const togglePassword = useCallback(() => {
+    setShowPassword(prev => !prev);
+  }, []);
+
+  const toggleConfirmPassword = useCallback(() => {
+    setShowConfirmPassword(prev => !prev);
+  }, []);
 
   if (!isVerified && token) {
     return (
-      <div className="auth-page">
+      <div className="auth-page min-h-screen flex items-center justify-center bg-gradient-to-br from-pink-50 to-purple-50 dark:from-gray-900 dark:to-gray-800 py-8 px-4">
         <AuthCard title="Verifying..." subtitle="Please wait while we verify your email">
-          {apiError && <p className="text-red-500 text-center">{apiError}</p>}
+          {apiError && <p className="text-red-500 dark:text-red-400 text-center">{apiError}</p>}
         </AuthCard>
       </div>
     );
   }
 
   return (
-    <div className="auth-page">
+    <div className="auth-page min-h-screen flex items-center justify-center bg-gradient-to-br from-pink-50 to-purple-50 dark:from-gray-900 dark:to-gray-800 py-8 px-4">
       <AuthCard title="Create Your Account" subtitle="Join us to begin your journey">
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           {apiError && (
-            <div className="p-3 mb-4 text-sm text-red-700 bg-red-100 rounded-lg" role="alert">
+            <div className="p-3 mb-4 text-sm text-red-700 bg-red-100 rounded-lg dark:bg-red-900 dark:bg-opacity-20 dark:text-red-300" role="alert">
               {apiError}
             </div>
           )}
@@ -139,70 +206,70 @@ export default function Register() {
           <input type="hidden" {...register('token')} />
 
           {/* Name Field */}
-          <div>
-            <div className="relative">
-              <div className="input-icon"><FaUser /></div>
-              <input type="text" {...register('name')} placeholder="Full Name" className="form-input" disabled={isLoading} />
-            </div>
-            {errors.name && <p className="text-red-500 text-sm mt-1">{errors.name.message}</p>}
-          </div>
+          <FormInput
+            icon={FaUser}
+            type="text"
+            placeholder="Full Name"
+            disabled={isLoading}
+            error={errors.name?.message}
+            {...register('name')}
+          />
 
           {/* Email Field (prefilled and disabled if verified) */}
-          <div>
-            <div className="relative">
-              <div className="input-icon"><FaEnvelope /></div>
-              <input
-                type="email"
-                {...register('email')}
-                placeholder="Email Address"
-                className="form-input bg-gray-100 cursor-not-allowed"
-                disabled={isVerified || isLoading}
-              />
-            </div>
-            {errors.email && <p className="text-red-500 text-sm mt-1">{errors.email.message}</p>}
-          </div>
+          <FormInput
+            icon={FaEnvelope}
+            type="email"
+            placeholder="Email Address"
+            disabled={isVerified || isLoading}
+            error={errors.email?.message}
+            {...register('email')}
+          />
 
           {/* Phone Field */}
-          <div>
-            <div className="relative">
-              <div className="input-icon"><FaPhone /></div>
-              <input type="tel" {...register('phone')} placeholder="Phone Number" className="form-input" disabled={isLoading} />
-            </div>
-            {errors.phone && <p className="text-red-500 text-sm mt-1">{errors.phone.message}</p>}
-          </div>
+          <FormInput
+            icon={FaPhone}
+            type="tel"
+            placeholder="Phone Number"
+            disabled={isLoading}
+            error={errors.phone?.message}
+            {...register('phone')}
+          />
 
           {/* Alternate Phone Field */}
-          <div>
-            <div className="relative">
-              <div className="input-icon"><FaPhoneAlt /></div>
-              <input type="tel" {...register('altPhone')} placeholder="Alternate Phone Number (Optional)" className="form-input" disabled={isLoading} />
-            </div>
-            {errors.altPhone && <p className="text-red-500 text-sm mt-1">{errors.altPhone.message}</p>}
-          </div>
+          <FormInput
+            icon={FaPhoneAlt}
+            type="tel"
+            placeholder="Alternate Phone Number (Optional)"
+            disabled={isLoading}
+            error={errors.altPhone?.message}
+            {...register('altPhone')}
+          />
 
           {/* Password Field */}
-          <div>
-            <div className="relative">
-              <div className="input-icon"><FaLock /></div>
-              <input type={showPassword ? "text" : "password"} {...register('password')} placeholder="Password" className="form-input" disabled={isLoading} />
-              <button type="button" className="password-toggle" onClick={() => setShowPassword(!showPassword)}>
-                {showPassword ? <FaEyeSlash /> : <FaEye />}
-              </button>
-            </div>
-            {errors.password && <p className="text-red-500 text-sm mt-1">{errors.password.message}</p>}
-          </div>
+          <FormInput
+            icon={FaLock}
+            type={showPassword ? "text" : "password"}
+            placeholder="Password"
+            disabled={isLoading}
+            error={errors.password?.message}
+            showPasswordToggle={true}
+            isPasswordVisible={showPassword}
+            onTogglePassword={togglePassword}
+            {...register('password')}
+          />
 
           {/* Confirm Password Field */}
-          <div>
-            <div className="relative">
-              <div className="input-icon"><FaLock /></div>
-              <input type={showConfirmPassword ? "text" : "password"} {...register('confirmPassword')} placeholder="Confirm Password" className="form-input" disabled={isLoading} />
-              <button type="button" className="password-toggle" onClick={() => setShowConfirmPassword(!showConfirmPassword)}>
-                {showConfirmPassword ? <FaEyeSlash /> : <FaEye />}
-              </button>
-            </div>
-            {errors.confirmPassword && <p className="text-red-500 text-sm mt-1">{errors.confirmPassword.message}</p>}
-          </div>
+          <FormInput
+            icon={FaLock}
+            type={showConfirmPassword ? "text" : "password"}
+            placeholder="Confirm Password"
+            disabled={isLoading}
+            error={errors.confirmPassword?.message}
+            showPasswordToggle={true}
+            isPasswordVisible={showConfirmPassword}
+            onTogglePassword={toggleConfirmPassword}
+            {...register('confirmPassword')}
+          />
 
           {/* Terms and Conditions */}
           <div className="flex items-start mb-6">
@@ -211,27 +278,27 @@ export default function Register() {
                 id="terms"
                 type="checkbox"
                 {...register('termsAccepted')}
-                className="w-4 h-4 text-pink-600 border-gray-300 rounded focus:ring-pink-500"
+                className="w-4 h-4 text-pink-600 border-gray-300 rounded focus:ring-pink-500 dark:bg-gray-700 dark:border-gray-600"
                 disabled={isLoading}
               />
             </div>
             <div className="ml-3 text-sm">
-              <label htmlFor="terms" className="text-gray-700">
+              <label htmlFor="terms" className="text-gray-700 dark:text-gray-300">
                 I agree to the{' '}
-                <Link href="/terms" className="text-pink-600 hover:underline">
+                <Link href="/terms" className="text-pink-600 dark:text-pink-400 hover:underline">
                   Terms & Conditions
                 </Link>{' '}
                 and{' '}
-                <Link href="/privacy" className="text-pink-600 hover:underline">
+                <Link href="/privacy" className="text-pink-600 dark:text-pink-400 hover:underline">
                   Privacy Policy
                 </Link>
               </label>
             </div>
           </div>
-          {errors.termsAccepted && <p className="text-red-500 text-sm -mt-4 mb-4">{errors.termsAccepted.message}</p>}
+          {errors.termsAccepted && <p className="text-red-500 dark:text-red-400 text-sm -mt-4 mb-4">{errors.termsAccepted.message}</p>}
 
           {/* Submit Button */}
-          <button type="submit" className="gradient-btn" disabled={isLoading || isSubmitting}>
+          <button type="submit" className="gradient-btn w-full bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 text-white font-bold py-2 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-500 transition duration-150 ease-in-out disabled:opacity-50 dark:focus:ring-offset-gray-800" disabled={isLoading || isSubmitting}>
             {isLoading ? (
               <div className="flex items-center justify-center">
                 <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -245,10 +312,10 @@ export default function Register() {
 
           <SocialLogin />
           
-          <div className="text-center text-gray-700">
+          <div className="text-center text-gray-700 dark:text-gray-300">
             <p>
               Already have an account?{' '}
-              <Link href="/login" className="text-pink-600 font-medium hover:underline">
+              <Link href="/login" className="text-pink-600 dark:text-pink-400 font-medium hover:underline">
                 Sign In
               </Link>
             </p>

@@ -10,7 +10,7 @@ const Gallery = () => {
   ];
 
   return (
-    <section className="py-0 bg-white">
+    <section className="py-0 bg-white dark:bg-gray-900">
       <div className="grid grid-cols-2 md:grid-cols-4">
         {images.map((src, index) => (
           <div key={index} className="h-48 md:h-64 overflow-hidden">

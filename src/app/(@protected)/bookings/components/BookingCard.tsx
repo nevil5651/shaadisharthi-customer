@@ -10,10 +10,10 @@ type BookingCardProps = {
 };
 
 const statusColors = {
-    Pending: 'bg-yellow-100 text-yellow-800',
-    Confirmed: 'bg-green-100 text-green-800',
-    Cancelled: 'bg-red-100 text-red-800',
-    Completed: 'bg-blue-100 text-blue-800'
+    Pending: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200',
+    Confirmed: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200',
+    Cancelled: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200',
+    Completed: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200'
 };
 
 export const BookingCard = ({ 
@@ -25,7 +25,7 @@ export const BookingCard = ({
     const normalizedStatus = normalizeBookingStatus(booking.status);
     
     return (
-        <div className="bg-white rounded-lg shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition">
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden hover:shadow-md transition">
             <div className="flex flex-col md:flex-row">
                 <div className="w-full md:w-1/3 h-48 relative">
                     <img
@@ -39,28 +39,28 @@ export const BookingCard = ({
                 </div>
                 
                 <div className="p-6 md:w-2/3">
-                    <h3 className="text-xl font-bold text-gray-800 mb-2">{booking.serviceName}</h3>
+                    <h3 className="text-xl font-bold text-gray-800 dark:text-white mb-2">{booking.serviceName}</h3>
                     
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                        <div className="flex items-center text-gray-600">
+                        <div className="flex items-center text-gray-600 dark:text-gray-300">
                             <FaUserTie className="text-pink-500 mr-2" />
                             <span className="font-medium mr-1">Provider:</span>
                             {booking.providerName}
                         </div>
                         
-                        <div className="flex items-center text-gray-600">
+                        <div className="flex items-center text-gray-600 dark:text-gray-300">
                             <FaCalendarAlt className="text-pink-500 mr-2" />
                             <span className="font-medium mr-1">Date:</span>
                             {new Date(booking.date).toLocaleDateString()}
                         </div>
                         
-                        <div className="flex items-center text-gray-600">
+                        <div className="flex items-center text-gray-600 dark:text-gray-300">
                             <FaClock className="text-pink-500 mr-2" />
                             <span className="font-medium mr-1">Time:</span>
                             {booking.time}
                         </div>
                         
-                        <div className="flex items-center text-gray-600">
+                        <div className="flex items-center text-gray-600 dark:text-gray-300">
                             <FaRupeeSign className="text-pink-500 mr-2" />
                             <span className="font-medium mr-1">Amount:</span>
                             ₹{booking.amount.toLocaleString()}
@@ -71,7 +71,7 @@ export const BookingCard = ({
                         {isCancellable(normalizedStatus) && (
                             <button
                                 onClick={() => onCancel(booking.id)}
-                                className="flex items-center px-4 py-2 border border-red-500 text-red-500 rounded-lg hover:bg-red-50 transition"
+                                className="flex items-center px-4 py-2 border border-red-500 text-red-500 dark:text-red-400 dark:border-red-400 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/30 transition"
                             >
                                 <FaTimes className="mr-2" /> Cancel
                             </button>

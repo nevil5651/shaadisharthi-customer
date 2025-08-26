@@ -199,7 +199,7 @@ export default function ServiceDetailPage({ params }: PageProps) {
 
   if (serviceError) {
     return (
-      <div className="container mx-auto px-4 py-8 text-red-600">
+      <div className="container mx-auto px-4 py-8 text-red-600 dark:text-red-400">
         {serviceError}
       </div>
     );
@@ -207,7 +207,7 @@ export default function ServiceDetailPage({ params }: PageProps) {
 
   return (
     <ErrorBoundary>
-      <main className="container bg-gray-50 font-['Poppins'] mx-auto px-4 py-8">
+      <main className="container bg-gray-50 dark:bg-gray-900 font-['Poppins'] mx-auto px-4 py-8">
         {!service || serviceLoading ? (
           <ServiceHeroSkeleton />
         ) : (
@@ -216,18 +216,18 @@ export default function ServiceDetailPage({ params }: PageProps) {
         
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">
           <div className="lg:col-span-2 space-y-8">
-            <section className="bg-white rounded-xl shadow-md p-6">
-              <h2 className="text-2xl font-heading font-bold text-gray-900 mb-4">
+            <section className="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6">
+              <h2 className="text-2xl font-heading font-bold text-gray-900 dark:text-white mb-4">
                 About This Service
               </h2>
               {!service || serviceLoading ? (
                 <>
-                  <div className="h-4 bg-gray-300 rounded w-full mb-2 animate-pulse"></div>
-                  <div className="h-4 bg-gray-300 rounded w-full mb-2 animate-pulse"></div>
-                  <div className="h-4 bg-gray-300 rounded w-3/4 animate-pulse"></div>
+                  <div className="h-4 bg-gray-300 dark:bg-gray-700 rounded w-full mb-2 animate-pulse"></div>
+                  <div className="h-4 bg-gray-300 dark:bg-gray-700 rounded w-full mb-2 animate-pulse"></div>
+                  <div className="h-4 bg-gray-300 dark:bg-gray-700 rounded w-3/4 animate-pulse"></div>
                 </>
               ) : (
-                <p className="text-gray-700">{service.description}</p>
+                <p className="text-gray-700 dark:text-gray-300">{service.description}</p>
               )}
             </section>
             
@@ -236,7 +236,7 @@ export default function ServiceDetailPage({ params }: PageProps) {
             )}
             
             {reviewsError ? (
-              <div className="text-red-600 text-center py-4">{reviewsError}</div>
+              <div className="text-red-600 dark:text-red-400 text-center py-4">{reviewsError}</div>
             ) : (
               <ReviewsList reviews={reviews} serviceId={service?.serviceId || 0} />
             )}
@@ -250,7 +250,7 @@ export default function ServiceDetailPage({ params }: PageProps) {
                     <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-primary mx-auto mt-4"></div>
                   </>
                 ) : (
-                  <span className="text-gray-500">Scroll to load more reviews...</span>
+                  <span className="text-gray-500 dark:text-gray-400">Scroll to load more reviews...</span>
                 )}
               </div>
             )}
@@ -258,12 +258,12 @@ export default function ServiceDetailPage({ params }: PageProps) {
           
           <div className="lg:col-span-1 space-y-6">
             {!service || serviceLoading ? (
-              <div className="bg-white rounded-xl shadow-md p-6 animate-pulse">
-                <div className="h-6 bg-gray-300 rounded w-1/3 mb-4"></div>
-                <div className="h-8 bg-gray-300 rounded w-1/2 mb-4"></div>
-                <div className="h-4 bg-gray-300 rounded w-full mb-2"></div>
-                <div className="h-4 bg-gray-300 rounded w-full mb-4"></div>
-                <div className="h-10 bg-gray-300 rounded w-full"></div>
+              <div className="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6 animate-pulse">
+                <div className="h-6 bg-gray-300 dark:bg-gray-700 rounded w-1/3 mb-4"></div>
+                <div className="h-8 bg-gray-300 dark:bg-gray-700 rounded w-1/2 mb-4"></div>
+                <div className="h-4 bg-gray-300 dark:bg-gray-700 rounded w-full mb-2"></div>
+                <div className="h-4 bg-gray-300 dark:bg-gray-700 rounded w-full mb-4"></div>
+                <div className="h-10 bg-gray-300 dark:bg-gray-700 rounded w-full"></div>
               </div>
             ) : (
               <PricingCard service={service} />

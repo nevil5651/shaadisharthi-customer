@@ -16,17 +16,17 @@ const HowItWorks = () => {
   ];
 
   return (
-    <section className="py-16 bg-white">
+    <section className="py-16 bg-white dark:bg-gray-900">
       <div className="container mx-auto px-4">
         <SectionHeader subtitle="OUR PROCESS" title="Planning Made Simple" />
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {steps.map((step) => (
-            <div key={step.number} className="text-center p-6 bg-gray-50 rounded-xl">
-              <div className="w-20 h-20 bg-primary bg-opacity-10 rounded-full flex items-center justify-center mx-auto mb-4">
-                <span className="text-3xl font-bold text-white">{step.number}</span>
+            <div key={step.number} className="text-center dark:bg-gray-800 dark:text-white p-6 bg-gray-50 dark:bg-gray-800 rounded-xl">
+              <div className="w-20 h-20 bg-primary dark:bg-pink-600 bg-opacity-10 dark:bg-opacity-20 rounded-full flex items-center justify-center mx-auto mb-4">
+                <span className="text-3xl font-bold text-white ">{step.number}</span>
               </div>
-              <h3 className="text-xl font-bold mb-2 font-playfair-display">{step.title}</h3>
-              <p className="text-gray-600">{step.description}</p>
+              <h3 className="text-xl font-bold mb-2 font-playfair-display text-gray-800 dark:text-white">{step.title}</h3>
+              <p className="text-gray-600 dark:text-gray-400">{step.description}</p>
             </div>
           ))}
         </div>
@@ -41,7 +41,7 @@ const HowItWorks = () => {
                 onClick={() => router.push('/verify-email')}
                 className="bg-white text-primary hover:bg-gray-100 py-3 px-8 rounded-full text-lg font-medium transition duration-300"
               >
-                Get Started <FontAwesomeIcon icon={faArrowRight} className="ml-2" />
+                Get Started <FontAwesomeIcon icon={faArrowRight} className="ml-2 dark:text-primary" />
               </button>
             </div>
           </div>

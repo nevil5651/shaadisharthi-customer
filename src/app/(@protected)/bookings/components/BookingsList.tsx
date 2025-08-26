@@ -30,7 +30,7 @@ export const BookingsList = ({
     return (
       <div className="space-y-6">
         {[...Array(3)].map((_, i) => (
-          <div key={i} className="bg-white rounded-xl shadow-sm p-6 h-48 animate-pulse" />
+          <div key={i} className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 h-48 animate-pulse" />
         ))}
       </div>
     );
@@ -38,7 +38,7 @@ export const BookingsList = ({
 
   if (error) {
     return (
-      <div className="bg-red-50 border-l-4 border-red-500 p-4 mb-6 rounded-lg">
+      <div className="bg-red-50 dark:bg-red-900/20 border-l-4 border-red-500 p-4 mb-6 rounded-lg">
         <div className="flex items-center">
           <div className="flex-shrink-0">
             <svg className="h-5 w-5 text-red-500" viewBox="0 0 20 20" fill="currentColor">
@@ -46,7 +46,7 @@ export const BookingsList = ({
             </svg>
           </div>
           <div className="ml-3">
-            <p className="text-sm text-red-700">{error}</p>
+            <p className="text-sm text-red-700 dark:text-red-300">{error}</p>
           </div>
         </div>
       </div>
@@ -56,9 +56,9 @@ export const BookingsList = ({
   if (!loading && !error && bookings.length === 0) {
     return (
       <div className="text-center py-12">
-        <FaSearch className="mx-auto text-gray-400 text-4xl mb-4" />
-        <h3 className="text-lg font-medium text-gray-900">No bookings found</h3>
-        <p className="mt-1 text-sm text-gray-500">
+        <FaSearch className="mx-auto text-gray-400 dark:text-gray-500 text-4xl mb-4" />
+        <h3 className="text-lg font-medium text-gray-900 dark:text-white">No bookings found</h3>
+        <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
           Try adjusting your search or filter criteria
         </p>
       </div>
@@ -85,30 +85,22 @@ export const BookingsList = ({
             <button 
               onClick={() => onPageChange(currentPage - 1)}
               disabled={currentPage === 1 || loading}
-              className="p-2 rounded-lg border border-gray-200 disabled:opacity-50 hover:bg-pink-50 transition"
+              className="p-2 rounded-lg border border-gray-200 dark:border-gray-600 disabled:opacity-50 hover:bg-pink-50 dark:hover:bg-pink-900/30 transition text-gray-700 dark:text-gray-300"
             >
               <FiChevronLeft />
             </button>
             
-            <span className="px-4 py-2 text-gray-700">
+            <span className="px-4 py-2 text-gray-700 dark:text-gray-300">
               Page {currentPage} of {totalPages}
             </span>
             
             <button 
-  onClick={() => onPageChange(currentPage - 1)}
-  disabled={currentPage === 1 || loading}
-  className="p-2 rounded-lg border border-gray-200 disabled:opacity-50 hover:bg-pink-50 transition"
->
-  <FiChevronLeft />
-</button>
-
-<button 
-  onClick={() => onPageChange(currentPage + 1)}
-  disabled={currentPage === totalPages || loading}
-  className="p-2 rounded-lg border border-gray-200 disabled:opacity-50 hover:bg-pink-50 transition"
->
-  <FiChevronRight />
-</button>
+              onClick={() => onPageChange(currentPage + 1)}
+              disabled={currentPage === totalPages || loading}
+              className="p-2 rounded-lg border border-gray-200 dark:border-gray-600 disabled:opacity-50 hover:bg-pink-50 dark:hover:bg-pink-900/30 transition text-gray-700 dark:text-gray-300"
+            >
+              <FiChevronRight />
+            </button>
           </div>
         </div>
       )}

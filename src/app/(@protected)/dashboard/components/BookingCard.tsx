@@ -3,38 +3,38 @@ import { FaCalendarAlt, FaUserTie, FaClock } from 'react-icons/fa';
 export default function BookingCard({ booking }: {
   booking: {
     id: number;
-    serviceName: string; // Updated to match API response
+    serviceName: string;
     date: string;
     time: string;
-    providerName: string; // Updated to match API response
+    providerName: string;
     status: string;
   }
 }) {
   const statusColors = {
-    confirmed: 'bg-green-100 text-green-800',
-    pending: 'bg-yellow-100 text-yellow-800',
-    cancelled: 'bg-red-100 text-red-800',
-    completed: 'bg-blue-100 text-blue-800'
+    confirmed: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200',
+    pending: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200',
+    cancelled: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200',
+    completed: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200'
   };
 
   // Convert backend status to lowercase for consistency
   const normalizedStatus = booking.status.toLowerCase();
 
   return (
-    <div className="bg-white rounded-xl shadow-sm p-6 hover:shadow-md transition-all">
+    <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 hover:shadow-md transition-all">
       <div className="flex justify-between items-start mb-4">
-        <h3 className="text-lg font-bold text-gray-800">{booking.serviceName}</h3>
+        <h3 className="text-lg font-bold text-gray-800 dark:text-white">{booking.serviceName}</h3>
         <span className={`px-3 py-1 rounded-full text-xs ${statusColors[normalizedStatus as keyof typeof statusColors]}`}>
           {normalizedStatus.toUpperCase()}
         </span>
       </div>
       
       <div className="space-y-3">
-        <div className="flex items-center text-gray-600">
+        <div className="flex items-center text-gray-600 dark:text-gray-300">
           <FaUserTie className="text-primary mr-3" />
           <span>{booking.providerName}</span>
         </div>
-        <div className="flex items-center text-gray-600">
+        <div className="flex items-center text-gray-600 dark:text-gray-300">
           <FaCalendarAlt className="text-primary mr-3" />
           <span>{new Date(booking.date).toLocaleDateString('en-US', { 
             weekday: 'short', 
@@ -43,7 +43,7 @@ export default function BookingCard({ booking }: {
             day: 'numeric' 
           })}</span>
         </div>
-        <div className="flex items-center text-gray-600">
+        <div className="flex items-center text-gray-600 dark:text-gray-300">
           <FaClock className="text-primary mr-3" />
           <span>{booking.time}</span>
         </div>

@@ -309,3 +309,165 @@ body {
   border-color: #e83e8c;
   box-shadow: 0 0 0 2px rgba(232, 62, 140, 0.2);
 }
+
+/* ==================== */
+/* DARK MODE ENHANCEMENTS */
+/* ==================== */
+
+/* System-level dark mode enhancements */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --dark-bg-primary: #111827;
+    --dark-bg-secondary: #1f2937;
+    --dark-bg-tertiary: #374151;
+    --dark-text-primary: #f9fafb;
+    --dark-text-secondary: #e5e7eb;
+    --dark-text-muted: #9ca3af;
+    --dark-border: #4b5563;
+    --dark-ring: rgba(199, 210, 254, 0.5);
+  }
+  
+  /* Smooth transitions for theme switching */
+  * {
+    transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+  }
+  
+  /* Enhanced scrollbar for dark mode */
+  ::-webkit-scrollbar {
+    width: 8px;
+  }
+  
+  ::-webkit-scrollbar-track {
+    background: var(--dark-bg-secondary);
+  }
+  
+  ::-webkit-scrollbar-thumb {
+    background: var(--dark-bg-tertiary);
+    border-radius: 4px;
+  }
+  
+  ::-webkit-scrollbar-thumb:hover {
+    background: #4b5563;
+  }
+  
+  /* Selection color for dark mode */
+  ::selection {
+    background: rgba(79, 70, 229, 0.3);
+    color: var(--dark-text-primary);
+  }
+  
+  /* Placeholder text color */
+  ::-webkit-input-placeholder {
+    color: var(--dark-text-muted);
+  }
+  ::-moz-placeholder {
+    color: var(--dark-text-muted);
+  }
+  :-ms-input-placeholder {
+    color: var(--dark-text-muted);
+  }
+  :-moz-placeholder {
+    color: var(--dark-text-muted);
+  }
+  
+  /* Focus styles for better accessibility */
+  .focus\:ring-primary:focus {
+    --tw-ring-color: rgba(199, 210, 254, 0.5) !important;
+  }
+  
+  /* Enhanced images in dark mode */
+  img {
+    filter: brightness(0.9) contrast(1.1);
+  }
+  
+  /* SVG icon enhancements */
+  svg:not([class*="text-"]) {
+    color: var(--dark-text-secondary);
+  }
+  
+  /* Code and preformatted text */
+  code, pre {
+    background-color: var(--dark-bg-tertiary) !important;
+    color: var(--dark-text-primary) !important;
+  }
+  
+  /* Table enhancements */
+  table {
+    border-color: var(--dark-border) !important;
+  }
+  
+  th, td {
+    border-color: var(--dark-border) !important;
+  }
+  
+  /* Loading states */
+  .animate-pulse {
+    background-color: var(--dark-bg-tertiary);
+  }
+  
+  /* Gradient text enhancements */
+  .text-gradient {
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  
+  /* Card hover effects */
+  .shadow-sm:hover {
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2), 0 2px 4px -1px rgba(0, 0, 0, 0.1);
+  }
+  
+  /* Form enhancements */
+  input:not([type="checkbox"]):not([type="radio"]),
+  select,
+  textarea {
+    background-color: var(--dark-bg-secondary);
+    border-color: var(--dark-border);
+  }
+  
+  /* Disabled state enhancements */
+  [disabled] {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+  
+  /* Button enhancements */
+  button:not(:disabled):hover {
+    transform: translateY(-1px);
+  }
+  
+  /* Animation for toast notifications */
+  @keyframes slideIn {
+    from {
+      transform: translateX(100%);
+      opacity: 0;
+    }
+    to {
+      transform: translateX(0);
+      opacity: 1;
+    }
+  }
+  
+  .Toastify__toast {
+    animation: slideIn 0.3s ease-out;
+  }
+}
+
+/* Manual dark mode class (when user toggles dark mode) */
+.dark {
+  /* Ensure all the above enhancements work with manual dark mode too */
+}
+
+/* Print styles for dark mode */
+@media print and (prefers-color-scheme: dark) {
+  * {
+    background: white !important;
+    color: black !important;
+    box-shadow: none !important;
+    text-shadow: none !important;
+  }
+  
+  a::after {
+    content: " (" attr(href) ")";
+  }
+}

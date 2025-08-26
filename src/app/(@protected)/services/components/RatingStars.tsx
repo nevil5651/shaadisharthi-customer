@@ -34,7 +34,7 @@ export function RatingStars({ rating, setRating, interactive = false }: RatingSt
 function StarIcon({ filled }: { filled: boolean }) {
   return (
     <svg
-      className={`w-5 h-5 ${filled ? 'text-yellow-400' : 'text-gray-300'}`}
+      className={`w-5 h-5 ${filled ? 'text-yellow-400' : 'text-gray-300 dark:text-gray-600'}`}
       fill="currentColor"
       viewBox="0 0 20 20"
     >

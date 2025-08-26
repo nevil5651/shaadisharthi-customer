@@ -32,11 +32,11 @@ class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundarySta
       }
       
       return (
-        <div className="min-h-screen flex items-center justify-center p-4">
+        <div className="min-h-screen flex items-center justify-center p-4 bg-white dark:bg-gray-900">
           <div className="text-center max-w-md">
             <div className="text-4xl mb-4">😔</div>
-            <h2 className="text-xl font-semibold mb-2">Something went wrong</h2>
-            <p className="text-gray-600 mb-4">
+            <h2 className="text-xl font-semibold mb-2 text-gray-800 dark:text-white">Something went wrong</h2>
+            <p className="text-gray-600 dark:text-gray-300 mb-4">
               We're having trouble loading this content. Please try refreshing the page.
             </p>
             <button
