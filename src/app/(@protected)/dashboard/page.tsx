@@ -36,7 +36,7 @@ const StatsCard = ({ title, value, icon, color }: {
 }) => (
   <div className={`bg-gradient-to-r ${color} rounded-xl p-6 text-white`}>
     <div className="flex items-center">
-      <div className="bg-white bg-opacity-20 rounded-full p-3 mr-4">
+      <div className="bg-white text-gray-500 dark:text-gray-500 bg-opacity-20 rounded-full p-3 mr-4">
         {icon}
       </div>
       <div>
@@ -57,8 +57,8 @@ const preloadImages = (services: Service[]) => {
 
 export default function Dashboard() {
   const stats = [
-    { title: 'Upcoming', value: 3, icon: <FaCalendarCheck />, color: 'from-primary to-secondary' },
-    { title: 'Saved', value: 12, icon: <FaHeart />, color: 'from-purple-500 to-indigo-600' },
+    { title: 'Upcoming', value: 3, icon: <FaCalendarCheck />, color: 'from-teal-500 to-cyan-600' },
+    { title: 'Saved', value: 0, icon: <FaHeart />, color: 'from-purple-500 to-indigo-600' },
     { title: 'Messages', value: 5, icon: <FaComments />, color: 'from-orange-500 to-pink-500' }
   ];
 

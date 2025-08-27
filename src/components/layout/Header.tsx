@@ -7,6 +7,7 @@ import {
   FaUser,
   FaRing
 } from 'react-icons/fa';
+import ThemeToggle from '../ThemeToggle';
 
 // Extract dropdown components to prevent unnecessary re-renders
 const NotificationDropdown = memo(({ notifOpen }: { notifOpen: boolean }) => {
@@ -33,18 +34,18 @@ const UserDropdown = memo(({
   if (!userMenuOpen) return null;
   
   return (
-    <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-2 z-50">
-      <a href="/account" className="block px-4 py-2 text-gray-700 hover:bg-gray-100">
+    <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-700 dark:text-white rounded-md shadow-lg py-2 z-50">
+      <a href="/account" className="block px-4 py-2 text-gray-700 dark:text-white dark:hover:bg-gray-600 hover:bg-gray-100">
         My Profile
       </a>
-      <a href="/bookings" className="block px-4 py-2 text-gray-700 hover:bg-gray-100">
+      <a href="/bookings" className="block px-4 py-2 text-gray-700 dark:text-white dark:hover:bg-gray-600 hover:bg-gray-100">
         My Bookings
       </a>
       <div className="border-t border-gray-200 my-1"></div>
       <button
         onClick={logout}
         disabled={isLoggingOut}
-        className="block w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100">
+        className="block w-full text-left px-4 py-2 text-gray-700 dark:text-white dark:hover:bg-gray-600 hover:bg-gray-100">
         {isLoggingOut ? 'Logging out...' : 'Logout'}
       </button>
     </div>
@@ -103,6 +104,10 @@ function Header() {
               </button>
               
               <NotificationDropdown notifOpen={notifOpen} />
+            </div>
+
+            <div className=" top-4 right-4">
+              <ThemeToggle />
             </div>
 
             <a href="/cart" className="text-gray-600 dark:text-gray-300 hover:text-pink-500">

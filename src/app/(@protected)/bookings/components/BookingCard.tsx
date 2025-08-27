@@ -10,10 +10,10 @@ type BookingCardProps = {
 };
 
 const statusColors = {
-    Pending: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200',
-    Confirmed: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200',
-    Cancelled: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200',
-    Completed: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200'
+    Pending: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-black-200',
+    Confirmed: 'bg-green-200 text-green-800 dark:bg-green-900 dark:text-green-100',
+    Cancelled: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-500',
+    Completed: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-500'
 };
 
 export const BookingCard = ({ 
@@ -50,8 +50,13 @@ export const BookingCard = ({
                         
                         <div className="flex items-center text-gray-600 dark:text-gray-300">
                             <FaCalendarAlt className="text-pink-500 mr-2" />
-                            <span className="font-medium mr-1">Date:</span>
-                            {new Date(booking.date).toLocaleDateString()}
+                            {/* <span className="font-medium mr-1">Date:</span> */}
+                            {new Date(booking.date).toLocaleDateString('en-US', {
+                                weekday: 'short',
+                                year: 'numeric',
+                                month: 'short',
+                                day: 'numeric'
+                            })}
                         </div>
                         
                         <div className="flex items-center text-gray-600 dark:text-gray-300">

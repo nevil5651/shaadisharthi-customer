@@ -11,14 +11,18 @@ export default function BookingCard({ booking }: {
   }
 }) {
   const statusColors = {
-    confirmed: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200',
-    pending: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200',
-    cancelled: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200',
-    completed: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200'
+    pending: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-black-200',
+    confirmed: 'bg-green-200 text-green-800 dark:bg-green-900 dark:text-green-100',
+    cancelled: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-500',
+    completed: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-500'
   };
 
   // Convert backend status to lowercase for consistency
-  const normalizedStatus = booking.status.toLowerCase();
+  let normalizedStatus = booking.status.toLowerCase();
+  if (normalizedStatus === 'accepted') {
+    normalizedStatus = 'confirmed';
+  }
+  
 
   return (
     <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 hover:shadow-md transition-all">

@@ -51,12 +51,12 @@ const FilterSection: React.FC<FilterSectionProps> = ({ filters, setFilters, onRe
   }, [filters]);
 
   return (
-    <div className="filter-section bg-white rounded-lg shadow-sm p-6 mb-8">
+    <div className="filter-section bg-white dark:bg-gray-800 rounded-lg shadow-sm dark:shadow-md p-6 mb-8">
       <div className="flex justify-between items-center">
-        <h2 className="text-xl font-semibold text-gray-800">Filters</h2>
+        <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-200">Filters</h2>
         <button
           id="filterToggle"
-          className="filter-toggle flex items-center text-secondary font-medium hover:text-opacity-80"
+          className="filter-toggle flex items-center text-secondary dark:text-pink-400 font-medium hover:text-opacity-80 dark:hover:text-opacity-80"
           onClick={toggleFilters}
           aria-expanded={showFilters}
         >
@@ -73,14 +73,14 @@ const FilterSection: React.FC<FilterSectionProps> = ({ filters, setFilters, onRe
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
           {/* Category Filter */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
               Category
             </label>
             <select
               name="category"
               value={localFilters.category}
               onChange={handleFilterChange}
-              className="w-full rounded-lg border border-gray-300 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary focus:ring-opacity-50 p-2"
+              className="w-full rounded-lg border border-gray-300 dark:border-gray-600 focus:border-primary dark:focus:border-pink-500 focus:outline-none focus:ring-2 focus:ring-primary dark:focus:ring-pink-500 focus:ring-opacity-50 dark:focus:ring-opacity-50 p-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-200"
             >
               <option value="">All Categories</option>
               {categories.map((cat) => (
@@ -93,14 +93,14 @@ const FilterSection: React.FC<FilterSectionProps> = ({ filters, setFilters, onRe
 
           {/* Location Filter */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
               Location
             </label>
             <select
               name="location"
               value={localFilters.location}
               onChange={handleFilterChange}
-              className="w-full rounded-lg border border-gray-300 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary focus:ring-opacity-50 p-2"
+              className="w-full rounded-lg border border-gray-300 dark:border-gray-600 focus:border-primary dark:focus:border-pink-500 focus:outline-none focus:ring-2 focus:ring-primary dark:focus:ring-pink-500 focus:ring-opacity-50 dark:focus:ring-opacity-50 p-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-200"
             >
               <option value="">All Locations</option>
               {locations.map((loc) => (
@@ -113,7 +113,7 @@ const FilterSection: React.FC<FilterSectionProps> = ({ filters, setFilters, onRe
 
           {/* Price Range */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
               Price Range
             </label>
             <div className="flex items-center space-x-2">
@@ -123,30 +123,30 @@ const FilterSection: React.FC<FilterSectionProps> = ({ filters, setFilters, onRe
                 placeholder="Min"
                 value={localFilters.minPrice || ''}
                 onChange={handleFilterChange}
-                className="w-1/2 rounded-lg border border-gray-300 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary focus:ring-opacity-50 p-2"
+                className="w-1/2 rounded-lg border border-gray-300 dark:border-gray-600 focus:border-primary dark:focus:border-pink-500 focus:outline-none focus:ring-2 focus:ring-primary dark:focus:ring-pink-500 focus:ring-opacity-50 dark:focus:ring-opacity-50 p-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-200"
               />
-              <span className="text-gray-500">-</span>
+              <span className="text-gray-500 dark:text-gray-400">-</span>
               <input
                 type="number"
                 name="maxPrice"
                 placeholder="Max"
                 value={localFilters.maxPrice || ''}
                 onChange={handleFilterChange}
-                className="w-1/2 rounded-lg border border-gray-300 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary focus:ring-opacity-50 p-2"
+                className="w-1/2 rounded-lg border border-gray-300 dark:border-gray-600 focus:border-primary dark:focus:border-pink-500 focus:outline-none focus:ring-2 focus:ring-primary dark:focus:ring-pink-500 focus:ring-opacity-50 dark:focus:ring-opacity-50 p-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-200"
               />
             </div>
           </div>
 
           {/* Rating Filter */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
               Minimum Rating
             </label>
             <select
               name="rating"
               value={localFilters.rating}
               onChange={handleFilterChange}
-              className="w-full rounded-lg border border-gray-300 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary focus:ring-opacity-50 p-2"
+              className="w-full rounded-lg border border-gray-300 dark:border-gray-600 focus:border-primary dark:focus:border-pink-500 focus:outline-none focus:ring-2 focus:ring-primary dark:focus:ring-pink-500 focus:ring-opacity-50 dark:focus:ring-opacity-50 p-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-200"
             >
               <option value="">Any Rating</option>
               {ratings.map((r) => (
@@ -160,14 +160,14 @@ const FilterSection: React.FC<FilterSectionProps> = ({ filters, setFilters, onRe
           {/* Sort By */}
           <div className="md:col-span-4 flex justify-between items-center">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Sort By
               </label>
               <select
                 name="sortBy"
                 value={localFilters.sortBy}
                 onChange={handleFilterChange}
-                className="rounded-lg border border-gray-300 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary focus:ring-opacity-50 p-2"
+                className="rounded-lg border border-gray-300 dark:border-gray-600 focus:border-primary dark:focus:border-pink-500 focus:outline-none focus:ring-2 focus:ring-primary dark:focus:ring-pink-500 focus:ring-opacity-50 dark:focus:ring-opacity-50 p-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-200"
               >
                 {sortOptions.map((opt) => (
                   <option key={opt.value} value={opt.value}>
@@ -180,7 +180,7 @@ const FilterSection: React.FC<FilterSectionProps> = ({ filters, setFilters, onRe
               <button
                 type="button"
                 onClick={onResetFilters}
-                className="px-4 py-2 border text-black border-gray-500 rounded-lg hover:bg-gray-100 transition-colors"
+                className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors text-gray-900 dark:text-gray-200"
               >
                 Reset
               </button>

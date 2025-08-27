@@ -102,7 +102,7 @@ const ServicePageContent: React.FC = () => {
       <main ref={mainRef} className="flex-grow container mx-auto px-4 py-8">
         {/* Page Header */}
         <div className="text-center mb-12">
-          <h1 className="text-3xl md:text-4xl font-serif font-bold text-gray-800 dark:text-white mb-4">
+          <h1 className="text-3xl md:text-4xl font-serif font-bold text-gray-800 dark:text-gray-200">
             Wedding Vendors
           </h1>
           <p className="text-lg text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
@@ -121,7 +121,7 @@ const ServicePageContent: React.FC = () => {
 
         {/* Vendor Categories */}
         <div className="mb-8">
-          <h2 className="text-xl font-semibold text-gray-800 dark:text-white mb-4">
+          <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-200 mb-4">
             Browse by Category
           </h2>
           <div className="relative">
@@ -139,7 +139,7 @@ const ServicePageContent: React.FC = () => {
             </div>
             <button
               onClick={() => setShowAllCategories(!showAllCategories)}
-              className="absolute bottom-0 right-0 bg-white dark:bg-gray-800 px-3 py-1 text-primary font-medium rounded-md shadow-sm"
+              className="absolute bottom-0 right-0 bg-white dark:bg-gray-800 px-3 py-1 text-primary dark:text-pink-400 font-medium rounded-md shadow-sm"
               aria-expanded={showAllCategories}
               aria-label={showAllCategories ? 'Show fewer categories' : 'Show all categories'}
             >
@@ -151,7 +151,7 @@ const ServicePageContent: React.FC = () => {
 
         {/* Results Header */}
         <div className="flex items-center justify-between mb-8">
-          <h2 className="text-xl font-semibold text-gray-800 dark:text-white">
+          <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-200">
             {memoizedFilters.category ? `${memoizedFilters.category} Vendors` : 'All Vendors'}
             <span className="text-sm font-normal text-gray-500 dark:text-gray-400 ml-2">
               ({services.length} results)

@@ -182,11 +182,11 @@ body {
 
 /* Vendor page specific styles */
 .filter-section {
-  @apply bg-white rounded-lg shadow-sm p-6 mb-8 ;
+  @apply  rounded-lg shadow-sm p-6 mb-8 ;
 }
 
 .vendor-card {
-  @apply bg-white rounded-lg shadow-sm overflow-hidden transition-shadow;
+  @apply rounded-lg shadow-sm overflow-hidden transition-shadow;
   transition: all 0.3s ease;
 }
 

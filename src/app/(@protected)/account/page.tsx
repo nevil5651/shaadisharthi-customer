@@ -244,7 +244,7 @@ if (!user) {
                   <div className="p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
                     <h3 className="text-lg font-semibold text-gray-800 dark:text-white mb-1">Change Password</h3>
                     <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">Last changed: 30 days ago</p>
-                    <button className="w-full bg-pink-600 dark:bg-pink-500 bg-opacity-10 text-pink-600 dark:text-pink-400 py-2 px-4 rounded-lg hover:bg-opacity-20 dark:hover:bg-opacity-20 transition-all">
+                    <button className="w-full bg-pink-600 dark:bg-pink-500 bg-opacity-10 text-white dark:text-white py-2 px-4 rounded-lg hover:bg-opacity-20 dark:hover:bg-opacity-20 transition-all">
                       Update Password
                     </button>
                   </div>
@@ -252,7 +252,7 @@ if (!user) {
                   <div className="p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
                     <h3 className="text-lg font-semibold text-gray-800 dark:text-white mb-1">Two-Factor Authentication</h3>
                     <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">Status: Enabled</p>
-                    <button className="w-full bg-pink-600 dark:bg-pink-500 bg-opacity-10 text-pink-600 dark:text-pink-400 py-2 px-4 rounded-lg hover:bg-opacity-20 dark:hover:bg-opacity-20 transition-all">
+                    <button className="w-full bg-pink-600 dark:bg-pink-500 bg-opacity-10 text-white dark:text-white py-2 px-4 rounded-lg hover:bg-opacity-20 dark:hover:bg-opacity-20 transition-all">
                       Manage 2FA
                     </button>
                   </div>
@@ -266,7 +266,7 @@ if (!user) {
                 <div className="space-y-3">
                   <div className="flex items-start p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
                     <div className="bg-pink-600 dark:bg-pink-500 bg-opacity-10 p-2 rounded-full mr-3">
-                      <i className="fas fa-sign-in-alt text-pink-600 dark:text-pink-400"></i>
+                      <i className="fas fa-sign-in-alt text-white dark:text-white-800"></i>
                     </div>
                     <div>
                       <h3 className="text-gray-800 dark:text-white font-medium">Logged In</h3>
