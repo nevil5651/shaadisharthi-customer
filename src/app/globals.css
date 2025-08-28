@@ -449,9 +449,9 @@ body {
     }
   }
   
-  .Toastify__toast {
+  /* .Toastify__toast {
     animation: slideIn 0.3s ease-out;
-  }
+  } */
 }
 
 /* Manual dark mode class (when user toggles dark mode) */
