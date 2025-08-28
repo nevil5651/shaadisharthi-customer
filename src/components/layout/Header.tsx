@@ -106,9 +106,9 @@ function Header() {
               <NotificationDropdown notifOpen={notifOpen} />
             </div>
 
-            <div className=" top-4 right-4">
+            {/* <div className=" top-4 right-4">
               <ThemeToggle />
-            </div>
+            </div> */}
 
             <a href="/cart" className="text-gray-600 dark:text-gray-300 hover:text-pink-500">
               <FaShoppingBag className="text-xl" />

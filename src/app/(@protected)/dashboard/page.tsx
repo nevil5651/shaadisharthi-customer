@@ -8,6 +8,7 @@ import api from '@/lib/axios';
 import { isAxiosError } from 'axios';
 import { BookingCardSkeleton } from './components/BookingCardSkeleton';
 import ServiceCardSkeleton from './components/ServiceCardSkeleton';
+import { useRecommendedServices } from '@/hooks/useRecommendedServices';
 
 interface Booking {
   id: number;
@@ -16,15 +17,6 @@ interface Booking {
   time: string;
   providerName: string;
   status: string;
-}
-
-interface Service {
-  id: number;
-  name: string;
-  category: string;
-  rating: number;
-  price: number;
-  image: string;
 }
 
 // Extract Stats component to prevent re-renders
@@ -47,49 +39,35 @@ const StatsCard = ({ title, value, icon, color }: {
   </div>
 );
 
-// Preload recommended services images
-const preloadImages = (services: Service[]) => {
-  services.forEach(service => {
-    const img = new Image();
-    img.src = service.image;
-  });
-};
-
 export default function Dashboard() {
-  const stats = [
-    { title: 'Upcoming', value: 3, icon: <FaCalendarCheck />, color: 'from-teal-500 to-cyan-600' },
+  const [stats, setStats] = useState([
+    { title: 'Upcoming', value: 0, icon: <FaCalendarCheck />, color: 'from-teal-500 to-cyan-600' },
     { title: 'Saved', value: 0, icon: <FaHeart />, color: 'from-purple-500 to-indigo-600' },
-    { title: 'Messages', value: 5, icon: <FaComments />, color: 'from-orange-500 to-pink-500' }
-  ];
+    { title: 'Messages', value: 0, icon: <FaComments />, color: 'from-orange-500 to-pink-500' }
+  ]);
 
-  const recommendedServices = [
-    { id: 1, name: 'Premium Photography', category: 'Photography', rating: 4.9, price: 25000, image: '/img/photography.jpg' },
-    { id: 2, name: 'Luxury Venue', category: 'Venues', rating: 4.7, price: 150000, image: '/img/venue.jpg' },
-    { id: 3, name: 'Gourmet Catering', category: 'Food', rating: 4.8, price: 80000, image: '/img/catering.jpg' },
-    { id: 4, name: 'Bridal Makeup', category: 'Beauty', rating: 4.6, price: 15000, image: '/img/makeup.jpg' }
-  ];
+  const { services: recommendedServices, isLoading: servicesLoading, error: servicesError, retryFetch } = useRecommendedServices();
 
   const [upcomingBookings, setUpcomingBookings] = useState<Booking[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Preload images on component mount
-  useEffect(() => {
-    preloadImages(recommendedServices);
-  }, []);
-
   const fetchUpcomingBookings = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
-      const response = await api.get('/Customer/cstmr-upcoming-bookings');
+      const response = await api.get('Customer/cstmr-upcoming-bookings');
       setUpcomingBookings(response.data.bookings || []);
+      // Update the 'Upcoming' stat with totalBookings from the response
+      setStats((prevStats) =>
+        prevStats.map((stat) =>
+          stat.title === 'Upcoming' ? { ...stat, value: response.data.totalBookings || 0 } : stat
+        )
+      );
     } catch (err) {
       console.error('Failed to fetch upcoming bookings:', err);
       if (isAxiosError(err)) {
         setError(err.response?.data?.message || err.message || 'An unexpected error occurred.');
-      } else if (err instanceof Error) {
-        setError(err.message);
       } else {
         setError('An unexpected error occurred.');
       }
@@ -103,8 +81,9 @@ export default function Dashboard() {
   }, [fetchUpcomingBookings]);
 
   return (
-    <div className="bg-gray-50 dark:bg-gray-900 min-h-screen">
-      {/* Hero Banner */}
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+
+{/* Hero Banner */}
       <section className="bg-gradient-to-r from-pink-100 to-purple-100 dark:from-pink-900 dark:to-purple-900 py-16 md:py-24">
         <div className="container mx-auto px-4 text-center">
           <h1 className="text-4xl md:text-5xl font-serif font-bold text-gray-800 dark:text-white mb-4">
@@ -122,7 +101,6 @@ export default function Dashboard() {
         </div>
       </section>
 
-      {/* Main Content */}
       <main className="container mx-auto px-4 py-12">
         {/* Welcome Section */}
         <section className="mb-12">
@@ -156,15 +134,35 @@ export default function Dashboard() {
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            <Suspense fallback={
+            {servicesLoading ? (
               Array.from({ length: 4 }).map((_, index) => (
                 <ServiceCardSkeleton key={index} />
               ))
-            }>
-              {recommendedServices.map(service => (
-                <ServiceCard key={service.id} service={service} />
-              ))}
-            </Suspense>
+            ) : servicesError ? (
+              <div className="col-span-full text-center py-8">
+                <p className="text-red-600 dark:text-red-400 mb-4">{servicesError}</p>
+                <button
+                  onClick={retryFetch}
+                  className="px-4 py-2 bg-primary text-white rounded hover:bg-primary-dark"
+                >
+                  Retry
+                </button>
+              </div>
+            ) : recommendedServices.length === 0 ? (
+              <div className="col-span-full text-center py-8 text-gray-500 dark:text-gray-400">
+                No recommended services available.
+              </div>
+            ) : (
+              <Suspense fallback={
+                Array.from({ length: 4 }).map((_, index) => (
+                  <ServiceCardSkeleton key={index} />
+                ))
+              }>
+                {recommendedServices.map(service => (
+                  <ServiceCard key={service.id} service={service} />
+                ))}
+              </Suspense>
+            )}
           </div>
         </section>
 

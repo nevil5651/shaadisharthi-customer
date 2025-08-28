@@ -27,9 +27,9 @@ const Nav: React.FC = () => {
             <Link href="#testimonials" className="text-gray-700 dark:text-gray-300 hover:text-primary dark:hover:text-pink-400 font-medium transition duration-300">Testimonials</Link>
             <Link href="#contact" className="text-gray-700 dark:text-gray-300 hover:text-primary dark:hover:text-pink-400 font-medium transition duration-300">Contact</Link>
           </div>
-          <div className=" top-4 right-4">
+          {/* <div className=" top-4 right-4">
               <ThemeToggle />
-            </div>
+            </div> */}
           <div className="flex items-center space-x-4">
             <button
               onClick={() => router.push('/login')}
