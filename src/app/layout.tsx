@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from 'next';
 import { Playfair_Display, Poppins } from 'next/font/google';
 import { Geist, Geist_Mono } from "next/font/google";
+import { ThemeProvider } from "next-themes"; 
 import './globals.css';
 
 const playfair = Playfair_Display({
@@ -38,12 +39,21 @@ export const viewport: Viewport = {
 
 export default function RootLayout({
   children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+}: {
+  children: React.ReactNode
+}) {
   return (
-    <html lang="en">
-      <body className={`${poppins.className} ${playfair.className}`}>{children}</body>
+    <html lang="en" suppressHydrationWarning>
+      <body className={`${geistSans.variable} ${geistMono.variable} ${playfair.variable} ${poppins.variable}`}>
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
+        >
+          {children}
+        </ThemeProvider>
+      </body>
     </html>
-  );
+  )
 }

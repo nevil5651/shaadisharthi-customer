@@ -32,6 +32,7 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: 'Poppins', sans-serif;
+  
 }
 
 /* Landing Page */
@@ -86,7 +87,7 @@ body {
 #about,
 #testimonials,
 #contact {
-  scroll-margin-top: 42px; /* Header height (~50px) + desired offset (12px) */
+  scroll-margin-top: 42px; /* Header height (~30px) + desired offset (12px) */
 }
 
 .text-primary {
@@ -455,8 +456,19 @@ body {
 
 /* Manual dark mode class (when user toggles dark mode) */
 .dark {
-  /* Ensure all the above enhancements work with manual dark mode too */
+  --background: #0a0a0a;
+  --foreground: #ededed;
+
+  --dark-bg-primary: #111827;
+  --dark-bg-secondary: #1f2937;
+  --dark-bg-tertiary: #374151;
+  --dark-text-primary: #f9fafb;
+  --dark-text-secondary: #e5e7eb;
+  --dark-text-muted: #9ca3af;
+  --dark-border: #4b5563;
+  --dark-ring: rgba(199, 210, 254, 0.5);
 }
+
 
 /* Print styles for dark mode */
 @media print and (prefers-color-scheme: dark) {
@@ -470,4 +482,106 @@ body {
   a::after {
     content: " (" attr(href) ")";
   }
+}
+
+/* ==================== */
+/* DARK MODE OVERRIDES  */
+/* ==================== */
+
+.dark body {
+  background: var(--dark-bg-primary, #0a0a0a);
+  color: var(--dark-text-primary, #ededed);
+}
+
+/* Headings and text */
+.dark h1,
+.dark h2,
+.dark h3,
+.dark h4,
+.dark h5,
+.dark h6 {
+  color: var(--dark-text-primary, #f9fafb);
+}
+
+.dark p,
+.dark span,
+.dark li,
+.dark label {
+  color: var(--dark-text-secondary, #e5e7eb);
+}
+
+/* Hero section */
+.dark .hero-section {
+  background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)),
+    url('https://images.unsplash.com/photo-1519225421980-715cb0215aed?ixlib=rb-1.2.1&auto=format&fit=crop&w=1600&q=80')
+    center/cover no-repeat;
+}
+
+/* Service / vendor cards */
+.dark .service-card,
+.dark .vendor-card {
+  background-color: var(--dark-bg-secondary, #1f2937);
+  color: var(--dark-text-primary, #f9fafb);
+  border-color: var(--dark-border, #374151);
+}
+
+.dark .service-card:hover,
+.dark .vendor-card:hover {
+  background-color: var(--dark-bg-tertiary, #374151);
+}
+
+/* Auth / login page */
+.dark .auth-page {
+  background: linear-gradient(135deg, #111827 0%, #1f2937 100%);
+}
+
+/* Form inputs */
+.dark input,
+.dark textarea,
+.dark select {
+  background-color: var(--dark-bg-secondary, #1f2937);
+  border-color: var(--dark-border, #374151);
+  color: var(--dark-text-primary, #f9fafb);
+}
+
+.dark input::placeholder,
+.dark textarea::placeholder {
+  color: var(--dark-text-muted, #9ca3af);
+}
+
+/* Buttons */
+.dark .btn-primary {
+  background: linear-gradient(45deg, var(--secondary, #6f42c1), var(--primary, #e83e8c));
+  color: white;
+}
+
+.dark .btn-secondary {
+  background: #374151;
+  color: white;
+}
+
+.dark .btn-secondary:hover {
+  background: #4b5563;
+}
+
+/* Tabs, modals, etc. */
+.dark .tab-content {
+  background-color: var(--dark-bg-secondary, #1f2937);
+  color: var(--dark-text-primary, #f9fafb);
+}
+
+.dark .modal,
+.dark .filter-section {
+  background-color: var(--dark-bg-secondary, #1f2937);
+  color: var(--dark-text-primary, #f9fafb);
+  border-color: var(--dark-border, #374151);
+}
+
+/* Scrollbar */
+.dark ::-webkit-scrollbar-track {
+  background: var(--dark-bg-secondary, #1f2937);
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  background: var(--dark-bg-tertiary, #374151);
 }

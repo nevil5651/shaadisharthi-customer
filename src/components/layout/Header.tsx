@@ -9,7 +9,7 @@ import {
 } from 'react-icons/fa';
 import ThemeToggle from '../ThemeToggle';
 
-// Extract dropdown components to prevent unnecessary re-renders
+
 const NotificationDropdown = memo(({ notifOpen }: { notifOpen: boolean }) => {
   if (!notifOpen) return null;
   
