@@ -1,4 +1,4 @@
-// components/ServiceCardSkeleton.tsx
+
 const ServiceCardSkeleton = () => (
   <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm overflow-hidden">
     <div className="animate-pulse">
