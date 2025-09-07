@@ -20,7 +20,10 @@ const nextConfig: NextConfig = {
     ], 
   
   },
-  /* config options here */
+  basePath: '/customer',
+  env: {
+    NEXT_PUBLIC_API_URL: '/api'
+  }
 };
 
 export default nextConfig;
