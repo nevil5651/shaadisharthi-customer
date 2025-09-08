@@ -5,7 +5,6 @@ import { AuthProvider } from '@/context/AuthContext';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import { redirect } from 'next/navigation';
-import { Geist, Geist_Mono } from 'next/font/google';
 import { Metadata } from 'next';
 import ToastProvider from '@/components/ToastProvider'
 import AuthHandler from '@/components/auth/AuthHandler'
@@ -13,15 +12,7 @@ import AuthHandler from '@/components/auth/AuthHandler'
 interface LayoutProps {
   children: React.ReactNode;
 }
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
 
 export const metadata: Metadata = {
   title: 'ShaadiSharthi',

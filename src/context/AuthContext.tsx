@@ -1,6 +1,6 @@
 'use client'
 
-import React, { createContext, useContext, useState, useEffect, useRef } from 'react'
+import React, { createContext, useState, useEffect, useRef, useCallback } from 'react'
 import { toast } from 'react-toastify'
 import { useRouter } from 'next/navigation'
 import { usePathname } from "next/navigation";
@@ -73,7 +73,39 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     localStorage.removeItem(USER_CACHE_KEY)
   }
 
-  const fetchProfile = async (forceRefresh = false) => {
+const logout = useCallback(async () => {
+  if (isLoggingOut) return // Prevent multiple clicks
+
+  setIsLoggingOut(true)
+  const toastId = toast.loading('Logging out...')
+
+  try {
+    // Then attempt to call the logout API
+    await fetch('api/auth/logout', {
+      method: 'POST',
+      credentials: 'include' // Ensure cookies are sent
+    })
+    
+    // On success, set a flag for the login page to show the success toast
+    // and redirect immediately. The loading toast will disappear with the page.
+    if (typeof window !== 'undefined') {
+      sessionStorage.setItem('logout_status', 'success')
+    }
+    toast.update(toastId, { render: 'Logged out successfully', type: 'success', isLoading: false, autoClose: 3000 })
+    setUser(null)
+    clearCachedUser()
+    // window.location.assign('login')
+    router.push('/login')
+    
+  } catch (error) {
+    console.error('Logout error:', error)
+    // On failure, just show an error and allow the user to retry.
+    toast.update(toastId, { render: 'Logout failed. Please try again.', type: 'error', isLoading: false, autoClose: 3000 })
+    setIsLoggingOut(false) // Re-enable the button
+  }
+}, [isLoggingOut, router]);
+
+  const fetchProfile = useCallback(async (forceRefresh = false) => {
     // Prevent multiple simultaneous fetches
     if (fetchInProgress.current) return
     if (publicRoutes.includes(pathname)) {
@@ -139,14 +171,14 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       setIsLoading(false)
       fetchInProgress.current = false
     }
-  }
+  }, [pathname, router, logout]);
 
   useEffect(() => {
     // Initial load - check if user is logged in
     fetchProfile().catch(() => {/* Error handled in fetchProfile */})
-  }, [pathname])
+  }, [fetchProfile])
 
-  const login = async (credentials: Credentials) => {
+  const login = useCallback(async (credentials: Credentials) => {
     setIsLoading(true)
     try {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL
@@ -154,7 +186,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         throw new Error("API URL is not configured")
       }
 
-      // 1. Authenticate with backend
       const backendRes = await fetch(`${apiUrl}/Customer/signin`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -168,72 +199,27 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
       const { token } = await backendRes.json()
 
-      // 2. Create session with Next.js API
       const sessionRes = await fetch('api/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ token }),
       })
 
-      if (!sessionRes.ok) {
-        return { success: false, error: 'Failed to create session' }
-      }
+      if (!sessionRes.ok) return { success: false, error: 'Failed to create session' }
 
-      // 3. Redirect immediately without waiting for profile
-       router.push('/dashboard')
+      router.push('/dashboard')
       toast.success('Logged in successfully')
-
-      // 4. Kick off profile fetch in background
-      fetchProfile(true).catch(error => {
-        console.error('Background profile fetch failed:', error)
-      })
-
+      fetchProfile(true).catch(error => console.error('Background profile fetch failed:', error))
       return { success: true }
     } catch (error) {
       console.error('Login error:', error)
-      return { 
-        success: false, 
-        error: error instanceof Error ? error.message : 'Login failed' 
-      }
+      return { success: false, error: error instanceof Error ? error.message : 'Login failed' }
     } finally {
       setIsLoading(false)
     }
-  }
+  }, [fetchProfile, router]);
 
- 
-const logout = async () => {
-  if (isLoggingOut) return // Prevent multiple clicks
-
-  setIsLoggingOut(true)
-  const toastId = toast.loading('Logging out...')
-
-  try {
-    // Then attempt to call the logout API
-    await fetch('api/auth/logout', {
-      method: 'POST',
-      credentials: 'include' // Ensure cookies are sent
-    })
-    
-    // On success, set a flag for the login page to show the success toast
-    // and redirect immediately. The loading toast will disappear with the page.
-    if (typeof window !== 'undefined') {
-      sessionStorage.setItem('logout_status', 'success')
-    }
-    toast.update(toastId, { render: 'Logged out successfully', type: 'success', isLoading: false, autoClose: 3000 })
-    setUser(null)
-    clearCachedUser()
-    // window.location.assign('login')
-    router.push('/login')
-    
-  } catch (error) {
-    console.error('Logout error:', error)
-    // On failure, just show an error and allow the user to retry.
-    toast.update(toastId, { render: 'Logout failed. Please try again.', type: 'error', isLoading: false, autoClose: 3000 })
-    setIsLoggingOut(false) // Re-enable the button
-  }
-}
-
-  const updateUser = async (updatedData: Partial<User>) => {
+  const updateUser = useCallback(async (updatedData: Partial<User>) => {
     setUser(prev => {
       if (!prev) return null
       const newUser = {
@@ -245,13 +231,14 @@ const logout = async () => {
       setCachedUser(newUser) // Update cache
       return newUser
     })
-  }
+  }, []);
 
-  const updateAccountDetails = async (updatedData: Partial<User>) => {
+  const updateAccountDetails = useCallback(async (updatedData: Partial<User>) => {
   try {
     setIsLoading(true)
     
     // Remove email if present (shouldn't be editable)
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { email, ...updatePayload } = updatedData
     
     const response = await fetch('api/auth/update', {
@@ -286,7 +273,7 @@ const logout = async () => {
   } finally {
     setIsLoading(false)
   }
-}
+}, []);
 
   const value = {
     user,

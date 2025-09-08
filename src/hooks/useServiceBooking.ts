@@ -15,23 +15,11 @@ export const useServiceBooking = (serviceId: string, preloadedServiceData: strin
       setLoading(true);
       setError(null);
 
-      if (preloadedServiceData) {
-        try {
-          const decodedString = decodeURIComponent(escape(atob(preloadedServiceData)));
-          const parsedService = JSON.parse(decodedString) as Service;
-          setService(parsedService);
-          setLoading(false);
-          return;
-        } catch (err) {
-          setError('Failed to load preloaded service data. Falling back to fetch.');
-        }
-      }
-
       if (serviceId) {
         try {
           const data = await fetchService(serviceId);
-          setService(data as any);
-        } catch (err) {
+          setService(data);
+        } catch  {
           setError('Failed to load service details');
         } finally {
           setLoading(false);

@@ -1,7 +1,6 @@
 'use client'
 import { useState, useCallback } from 'react';
-import { useRouter } from 'next/navigation';
-import { useForm } from 'react-hook-form';
+import { useForm, UseFormRegister } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import axios from 'axios';
@@ -17,7 +16,7 @@ const forgotPasswordSchema = z.object({
 type ForgotPasswordFormInputs = z.infer<typeof forgotPasswordSchema>;
 
 interface EmailInputProps {
-  register: any;
+  register: UseFormRegister<ForgotPasswordFormInputs>;
   error: { message?: string } | undefined;
   disabled: boolean;
 }
@@ -54,7 +53,6 @@ export default function ForgotPassword() {
   const [isLoading, setIsLoading] = useState(false);
   const [apiMessage, setApiMessage] = useState<string | null>(null);
   const [apiError, setApiError] = useState<string | null>(null);
-  const router = useRouter();
 
   const { register, handleSubmit, formState: { errors } } = useForm<ForgotPasswordFormInputs>({
     resolver: zodResolver(forgotPasswordSchema),

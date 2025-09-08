@@ -31,7 +31,7 @@ const Contact = () => {
       await axios.post('/api/contact', data, { timeout: 5000 });
       toast.success('Message sent successfully!');
       reset();
-    } catch (error) {
+    } catch  {
       toast.error('Failed to send message. Please try again.');
     }
   };

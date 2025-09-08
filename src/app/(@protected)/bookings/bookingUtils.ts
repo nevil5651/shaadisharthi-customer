@@ -1,4 +1,4 @@
-// lib/bookingUtils.ts
+
 
 // Maps backend statuses to frontend display statuses
 export const normalizeBookingStatus = (status: string): string => {
@@ -31,7 +31,7 @@ export const formatDateForAPI = (dateString: string): string => {
   try {
     const date = new Date(dateString);
     return date.toISOString().split('T')[0];
-  } catch (e) {
+  } catch {
     console.error('Invalid date format:', dateString);
     return '';
   }

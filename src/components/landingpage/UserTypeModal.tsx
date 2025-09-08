@@ -7,10 +7,9 @@ import { faRing, faTimes, faUser, faUserTie } from '@fortawesome/free-solid-svg-
 interface UserTypeModalProps {
   action: 'login' | 'register' | null;
   onClose: () => void;
-  setAction: (action: 'login' | 'register' | null) => void;
 }
 
-const UserTypeModal: React.FC<UserTypeModalProps> = ({ action, onClose, setAction }) => {
+const UserTypeModal: React.FC<UserTypeModalProps> = ({ action, onClose }) => {
   const router = useRouter();
 
   if (!action) return null;
@@ -34,10 +33,10 @@ const UserTypeModal: React.FC<UserTypeModalProps> = ({ action, onClose, setActio
         <div className="p-8 text-center">
           <div className="flex flex-col space-y-4">
             <button onClick={() => handleSelect('customer')} className="btn-primary hover:shadow-lg text-white py-3 px-8 rounded-full text-lg transition duration-300">
-              <FontAwesomeIcon icon={faUser} className="mr-2" /> I'm a Customer
+              <FontAwesomeIcon icon={faUser} className="mr-2" /> I&apos;m a Customer
             </button>
             <button onClick={() => handleSelect('provider')} className="bg-transparent hover:bg-gray-100 dark:hover:bg-gray-700 text-primary dark:text-pink-400 py-3 px-8 border-2 border-primary dark:border-pink-400 rounded-full text-lg transition duration-300">
-              <FontAwesomeIcon icon={faUserTie} className="mr-2" /> I'm a Service Provider
+              <FontAwesomeIcon icon={faUserTie} className="mr-2" /> I&apos;m a Service Provider
             </button>
           </div>
         </div>

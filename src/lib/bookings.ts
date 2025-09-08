@@ -10,4 +10,3 @@ export interface Booking {
   status: 'pending' | 'confirmed' | 'cancelled' | 'completed';
   paymentStatus: 'paid' | 'unpaid';
 }
-

@@ -1,16 +1,24 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import api from '@/lib/axios';
 import { isAxiosError } from 'axios';
 import { toast } from 'react-toastify';
+import { Service } from '@/lib/types';
 
-// Define Service type matching the dashboard's simplified version
-interface Service {
-  id: number;
-  name: string;
-  category: string;
-  rating: number;
+// This interface represents the shape of the service object coming directly from the backend API.
+interface BackendService {
+  providerId?: string;
+  serviceId: number;
+  serviceName: string;
+  description?: string;
   price: number;
-  image: string;
+  rating: number;
+  reviewCount?: number;
+  location?: string;
+  imageUrl?: string;
+  category: string;
+  businessName?: string;
+  email?: string | null;
+  phone?: string | null;
 }
 
 export const useRecommendedServices = (limit: number = 4) => {
@@ -19,7 +27,7 @@ export const useRecommendedServices = (limit: number = 4) => {
   const [error, setError] = useState<string | null>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
 
-  const fetchRecommended = async () => {
+  const fetchRecommended = useCallback(async () => {
     if (abortControllerRef.current) {
       abortControllerRef.current.abort();
     }
@@ -41,19 +49,28 @@ export const useRecommendedServices = (limit: number = 4) => {
 
       const backendServices = response.data.services || [];
 
-      // Map to simplified Service type for dashboard
-      const formattedServices: Service[] = backendServices.map((service: any) => ({
-        id: service.serviceId,
+      // Map to the canonical Service type
+      const formattedServices: Service[] = backendServices.map((service: BackendService) => ({
+        providerId: service.providerId || String(service.serviceId), // Fallback
+        serviceId: service.serviceId,
         name: service.serviceName,
-        category: service.category,
-        rating: service.rating,
+        description: service.description || '', // Default
         price: service.price,
-        image: service.imageUrl || '/img/default-service.jpg',
+        rating: service.rating,
+        reviewCount: service.reviewCount || 0, // Default
+        location: service.location || '', // Default
+        imageUrl: service.imageUrl || '/img/default-service.jpg',
+        category: service.category,
+        businessName: service.businessName || service.serviceName, // Default
+        email: service.email || null,
+        phone: service.phone || null,
       }));
 
       setServices(formattedServices);
-    } catch (err: any) {
-      if (err.name === 'AbortError' || signal.aborted) return;
+    } catch (err: unknown) {
+      if (signal.aborted || (err instanceof Error && err.name === 'AbortError')) {
+        return;
+      }
       const message = isAxiosError(err) && err.response?.status === 429 
         ? 'Too many requests. Please try again later.' 
         : 'Failed to load recommended services.';
@@ -62,19 +79,19 @@ export const useRecommendedServices = (limit: number = 4) => {
     } finally {
       if (!signal.aborted) setIsLoading(false);
     }
-  };
+  }, [limit]);
 
   useEffect(() => {
     fetchRecommended();
     return () => {
       if (abortControllerRef.current) abortControllerRef.current.abort();
     };
-  }, []); // Fetch once on mount
+  }, [fetchRecommended]);
 
-  const retryFetch = () => {
+  const retryFetch = useCallback(() => {
     setError(null);
     fetchRecommended();
-  };
+  }, [fetchRecommended]);
 
   return { services, isLoading, error, retryFetch };
 };

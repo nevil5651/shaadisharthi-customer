@@ -1,15 +1,7 @@
 import Image from 'next/image';
 import { FaStar, FaRegStar } from 'react-icons/fa';
 import { useState } from 'react';
-
-interface Service {
-  id: number;
-  name: string;
-  category: string;
-  rating: number;
-  price: number;
-  image: string;
-}
+import { Service } from '@/lib/types';
 
 export default function ServiceCard({ service }: { service: Service }) {
   const [imageLoaded, setImageLoaded] = useState(false);
@@ -61,7 +53,7 @@ export default function ServiceCard({ service }: { service: Service }) {
     return `/${imgUrl}`;
   };
 
-  const imageUrl = getImageUrl(service.image);
+  const imageUrl = getImageUrl(service.imageUrl);
 
   return (
     <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm overflow-hidden flex flex-col h-full border border-gray-100 dark:border-gray-700">

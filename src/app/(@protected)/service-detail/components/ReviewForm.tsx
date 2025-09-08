@@ -6,9 +6,10 @@ import { RatingStars } from '@/app/(@protected)/services/components/RatingStars'
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useForm } from 'react-hook-form';
-import { submitReview, Review } from '@/lib/service';
+import { Review } from '@/lib/service';
 import { toast } from 'react-toastify';
 import api from '@/lib/axios';
+import { isAxiosError } from 'axios';
 
 const reviewSchema = z.object({
     rating: z.number().min(1, "Please select a rating").max(5, "Rating cannot exceed 5"),
@@ -20,7 +21,15 @@ type ReviewFormData = z.infer<typeof reviewSchema>;
 interface ReviewFormProps {
     serviceId: number;
     onSubmitSuccess?: (newReview: Review | null) => void; 
-    onServerUpdate?: (serverReviews: Review[]) => void;   
+    onServerUpdate?: (serverReviews: Review[]) => void;
+}
+
+interface ServerReview {
+    reviewId: number | string;
+    customerName: string;
+    rating: number;
+    reviewText: string;
+    createdAt: string;
 }
 
 
@@ -72,7 +81,7 @@ export function ReviewForm({ serviceId, onSubmitSuccess, onServerUpdate }: Revie
             });
 
             // Server returns updated page-1 array
-            const serverData: any[] = res.data;
+            const serverData: ServerReview[] = res.data;
             const serverReviews: Review[] = serverData.map((r) => ({
                 reviewId: String(r.reviewId),
                 customerName: r.customerName,
@@ -86,8 +95,13 @@ export function ReviewForm({ serviceId, onSubmitSuccess, onServerUpdate }: Revie
 
             toast.success('Review submitted successfully!');
             reset();
-        } catch (error: any) {
-            const errorMessage = error?.response?.data?.error || error?.message || 'Failed to submit review. Please try again.';
+        } catch (error) {
+            let errorMessage = 'Failed to submit review. Please try again.';
+            if (isAxiosError(error)) {
+                errorMessage = error.response?.data?.error || error.message;
+            } else if (error instanceof Error) {
+                errorMessage = error.message;
+            }
             toast.error(errorMessage);
             console.error('Error submitting review:', error);
             // remove optimistic item

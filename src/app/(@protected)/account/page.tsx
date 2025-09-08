@@ -63,7 +63,7 @@ const handleSubmit = async (e: React.FormEvent) => {
 
   try {
 
-    const result:any = await updateAccountDetails(formData)
+    const result = await updateAccountDetails(formData)
     
     if (!result.success) {
       throw new Error(result.error || 'Failed to update profile')

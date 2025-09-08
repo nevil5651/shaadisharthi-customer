@@ -14,8 +14,8 @@ const About = () => {
           </div>
           <div className="md:w-1/2">
             <SectionHeader subtitle="ABOUT US" title="Your Wedding, Our Passion" />
-            <p className="text-gray-600 dark:text-gray-300 mb-4">Founded in 2023, ShaadiSharthi was born from a simple idea: wedding planning should be joyful, not stressful. Our team of wedding enthusiasts and tech experts came together to create India's most trusted wedding vendor marketplace.</p>
-            <p className="text-gray-600 dark:text-gray-300 mb-6">We've helped over 5,000 couples plan their dream weddings by connecting them with verified, top-rated vendors across the country. Our platform makes it easy to compare options, read reviews, and book everything you need in one place.</p>
+            <p className="text-gray-600 dark:text-gray-300 mb-4">Founded in 2023, ShaadiSharthi was born from a simple idea: wedding planning should be joyful, not stressful. Our team of wedding enthusiasts and tech experts came together to create India&apos;s most trusted wedding vendor marketplace.</p>
+            <p className="text-gray-600 dark:text-gray-300 mb-6">We&apos;ve helped over 5,000 couples plan their dream weddings by connecting them with verified, top-rated vendors across the country. Our platform makes it easy to compare options, read reviews, and book everything you need in one place.</p>
             <div className="flex flex-wrap gap-4">
               {['Verified Vendors', 'Transparent Pricing', '24/7 Support'].map((item, index) => (
                 <div key={index} className="flex items-center">

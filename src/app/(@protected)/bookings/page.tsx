@@ -7,7 +7,7 @@ import { BookingsList } from './components/BookingsList';
 import { useQuery } from '@tanstack/react-query';
 import api from '@/lib/axios';
 import { isAxiosError } from 'axios';
-import { useEffect, useState, useCallback, ComponentProps } from 'react';
+import { useEffect, useState, ComponentProps, useMemo } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { debounce } from 'lodash';
 import { normalizeBookingStatus, formatDateForAPI } from './bookingUtils';
@@ -87,7 +87,7 @@ function BookingsContent() {
         enabled: !!filters,
     });
 
-    const debouncedUpdateFilters = useCallback(debounce(updateFilters, 300), [updateFilters]);
+    const debouncedUpdateFilters = useMemo(() => debounce(updateFilters, 300), [updateFilters]);
 
     const handleFilterChange = (name: string, value: string) => {
     // Reset to first page only when actual filter values change
@@ -152,7 +152,7 @@ function BookingsContent() {
         }
     };
 
-    const handlePayNow = (bookingId: string) => {
+    const handlePayNow = () => {
   toast.info(
     "We apologize, but online payment is not yet available. Please arrange payment directly with the service provider.",
     {
@@ -182,7 +182,7 @@ function BookingsContent() {
                 error={error?.message || null}
                 onCancel={onCancel}
                 currentPage={currentPage}
-                onPay={handlePayNow}
+                onPay={() => handlePayNow()}
                 totalPages={data?.totalPages || 1}
                 onPageChange={handlePageChange}
             />

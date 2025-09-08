@@ -9,11 +9,17 @@ export async function POST(req: NextRequest) {
       headers: { 'Content-Type': 'application/json' },
     });
     return NextResponse.json({ success: true, data: res.data }, { status: 200 });
-  } catch (error: any) {
-    console.error('Newsletter API error:', error.message);
+  } catch (error: unknown) {
+    let statusCode = 500;
+    if (axios.isAxiosError(error)) {
+      console.error('Newsletter API error:', error.message);
+      statusCode = error.response?.status || 500;
+    } else if (error instanceof Error) {
+      console.error('Newsletter API error:', error.message);
+    }
     return NextResponse.json(
       { success: false, error: 'Failed to subscribe. Please try again.' },
-      { status: error.response?.status || 500 }
+      { status: statusCode }
     );
   }
 }

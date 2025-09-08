@@ -1,6 +1,6 @@
 import type { Metadata, Viewport } from 'next';
 import { Playfair_Display, Poppins } from 'next/font/google';
-import { Geist, Geist_Mono } from "next/font/google";
+//import { Geist, Geist_Mono } from "next/font/google";
 import { ThemeProvider } from "next-themes"; 
 import './globals.css';
 
@@ -10,15 +10,15 @@ const playfair = Playfair_Display({
   display: 'swap',
 });
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
+// const geistSans = Geist({
+//   variable: "--font-geist-sans",
+//   subsets: ["latin"],
+// });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
+// const geistMono = Geist_Mono({
+//   variable: "--font-geist-mono",
+//   subsets: ["latin"],
+// });
 
 const poppins = Poppins({
   subsets: ['latin'],
@@ -44,7 +44,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={`${geistSans.variable} ${geistMono.variable} ${playfair.variable} ${poppins.variable}`}>
+      <body className={`$ ${playfair.variable} ${poppins.variable}`}>
         <ThemeProvider
           attribute="class"
           defaultTheme="system"

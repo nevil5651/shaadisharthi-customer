@@ -1,5 +1,5 @@
-'use client'
-import { useState, useEffect, useCallback, useMemo } from 'react';
+'use client';
+import { useState, useEffect, useCallback, useMemo, Suspense } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useForm } from 'react-hook-form';
@@ -11,6 +11,21 @@ import AuthCard from '@/components/cards/AuthCard';
 import { FaUser, FaEnvelope, FaPhone, FaPhoneAlt, FaLock, FaEye, FaEyeSlash } from 'react-icons/fa';
 import dynamic from 'next/dynamic';
 
+function Loading() {
+  return (
+    <div className="auth-page min-h-screen flex items-center justify-center bg-gradient-to-br from-pink-50 to-purple-50 dark:from-gray-900 dark:to-gray-800 py-8 px-4">
+      <AuthCard title="Loading..." subtitle="Please wait">
+        <div className="flex items-center justify-center p-8">
+          <svg className="animate-spin h-8 w-8 text-pink-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+          </svg>
+        </div>
+      </AuthCard>
+    </div>
+  );
+}
+
 // Dynamically import SocialLogin to reduce initial bundle size
 const SocialLogin = dynamic(() => import('@/components/ui/SocialLogin'), {
   ssr: false,
@@ -18,7 +33,7 @@ const SocialLogin = dynamic(() => import('@/components/ui/SocialLogin'), {
 });
 
 // Updated validation schema with token (optional for now)
-export const registerSchema = z.object({
+const registerSchema = z.object({
   name: z.string().min(1, { message: 'Full name is required.' }),
   email: z.string().min(1, { message: 'Email is required.' }).email({ message: 'Invalid email address.' }),
   phone: z.string().length(10, { message: 'Phone number must be 10 digits.' }).regex(/^\d+$/, { message: 'Invalid phone number.' }),
@@ -86,7 +101,7 @@ const FormInput: React.FC<FormInputProps> = ({
   );
 };
 
-export default function Register() {
+function RegisterForm() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -120,7 +135,7 @@ export default function Register() {
       } else {
         throw new Error('Invalid response');
       }
-    } catch (err) {
+    } catch {
       setApiError('Invalid or expired verification token. Redirecting...');
       setTimeout(() => router.push('/verify-email'), 3000);
     } finally {
@@ -142,7 +157,7 @@ export default function Register() {
       if (!apiUrl) {
         throw new Error("API URL is not configured.");
       }
-
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { confirmPassword, termsAccepted, ...payload } = data;
 
       await axios.post(`${apiUrl}/Customer/cstmr-rgt`, payload);
@@ -325,3 +340,11 @@ export default function Register() {
     </div>
   );
 };
+
+export default function RegisterPage() {
+  return (
+    <Suspense fallback={<Loading />}>
+      <RegisterForm />
+    </Suspense>
+  );
+}

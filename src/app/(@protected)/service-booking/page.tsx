@@ -1,18 +1,17 @@
 'use client'
 import { useForm } from 'react-hook-form';
-import { useState, useEffect, Suspense } from 'react';
+import { useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useServiceBooking } from '@/hooks/useServiceBooking';
 import { BookingFormData } from '@/lib/serviceBooking';
 import { toast } from 'react-toastify';
-import { FaRing, FaSpinner, FaCalendarCheck } from 'react-icons/fa'; // Added missing icons
+import { FaSpinner, FaCalendarCheck } from 'react-icons/fa'; // Added missing icons
 
 const ServiceBookingForm = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const id = searchParams.get('id') || '';
-  const serviceData = searchParams.get('serviceData');
-  const { service, loading, error, submitBooking } = useServiceBooking(id, serviceData);
+  const { service, loading, error, submitBooking } = useServiceBooking(id);
 
   const {
     register,
@@ -47,7 +46,7 @@ const ServiceBookingForm = () => {
       } else {
         toast.error(result.error || 'Booking failed. Please try again.');
       }
-    } catch (err) {
+    } catch {
       toast.error('An unexpected error occurred. Please try again.');
     }
   };

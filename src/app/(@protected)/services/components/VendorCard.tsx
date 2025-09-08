@@ -2,6 +2,7 @@ import React, { memo } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { RatingStars } from './RatingStars';
+import { Service } from '@/lib/types';
 import {
   CameraIcon,
   BuildingIcon,
@@ -23,21 +24,10 @@ import {
   ArrowRightIcon,
 } from './Icons';
 
-interface Vendor {
-  id: string;
-  serviceId: number;
-  serviceName: string;
-  businessName: string;
-  imageUrl: string;
-  price: number;
-  rating: number;
-  reviewCount: number;
-  location: string;
-  category: string;
-}
+
 
 interface VendorCardProps {
-  vendor: Vendor;
+  vendor: Service;
 }
 
 const VendorCard: React.FC<VendorCardProps> = ({ vendor }) => {
@@ -100,7 +90,7 @@ const VendorCard: React.FC<VendorCardProps> = ({ vendor }) => {
       <div className="relative h-48 overflow-hidden">
         <Image
           src={imageUrl}
-          alt={vendor.serviceName}
+          alt={vendor.name || vendor.businessName || 'Vendor Image'}
           fill
           sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
           className="object-cover transition-transform duration-500 hover:scale-105"
@@ -114,10 +104,10 @@ const VendorCard: React.FC<VendorCardProps> = ({ vendor }) => {
       </div>
 
       <div className="p-5 flex flex-col flex-grow">
-        <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-1 line-clamp-1 relative group" title={vendor.serviceName}>
-          {vendor.serviceName}
+        <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-1 line-clamp-1 relative group" title={vendor.name}>
+          {vendor.name}
           <span className="absolute hidden group-hover:block bg-gray-800 dark:bg-gray-700 text-white dark:text-gray-200 text-xs rounded py-1 px-2 -top-8 left-1/2 transform -translate-x-1/2 z-10">
-            {vendor.serviceName}
+            {vendor.name}
           </span>
         </h3>
 
@@ -156,8 +146,8 @@ const VendorCard: React.FC<VendorCardProps> = ({ vendor }) => {
 
 const areEqual = (prevProps: VendorCardProps, nextProps: VendorCardProps) => {
   return (
-    prevProps.vendor.id === nextProps.vendor.id &&
-    prevProps.vendor.serviceName === nextProps.vendor.serviceName &&
+    prevProps.vendor.serviceId === nextProps.vendor.serviceId &&
+    prevProps.vendor.name === nextProps.vendor.name &&
     prevProps.vendor.businessName === nextProps.vendor.businessName &&
     prevProps.vendor.category === nextProps.vendor.category &&
     prevProps.vendor.location === nextProps.vendor.location &&

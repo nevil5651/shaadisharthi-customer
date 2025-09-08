@@ -6,7 +6,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faRing, faBars, faTimes } from '@fortawesome/free-solid-svg-icons';
-import ThemeToggle from '../ThemeToggle';
+
 
 const Nav: React.FC = () => {
   const router = useRouter();

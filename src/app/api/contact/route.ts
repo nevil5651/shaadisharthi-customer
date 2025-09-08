@@ -9,11 +9,21 @@ export async function POST(req: NextRequest) {
       headers: { 'Content-Type': 'application/json' },
     });
     return NextResponse.json({ success: true, data: res.data }, { status: 200 });
-  } catch (error: any) {
-    console.error('Contact API error:', error.message);
+  } catch (error: unknown) {
+    let errorMessage = 'Failed to send message. Please try again.';
+    let statusCode = 500;
+
+    if (axios.isAxiosError(error)) {
+      console.error('Contact API error:', error.message);
+      errorMessage = error.response?.data?.error || error.message;
+      statusCode = error.response?.status || 500;
+    } else if (error instanceof Error) {
+      console.error('Contact API error:', error.message);
+      errorMessage = error.message;
+    }
     return NextResponse.json(
-      { success: false, error: 'Failed to send message. Please try again.' },
-      { status: error.response?.status || 500 }
+      { success: false, error: errorMessage },
+      { status: statusCode }
     );
   }
 }

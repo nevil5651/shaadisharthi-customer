@@ -28,7 +28,7 @@ const Footer = () => {
       await axios.post('/api/newsletter', data, { timeout: 5000 });
       toast.success('Subscribed successfully!');
       reset();
-    } catch (error) {
+    } catch  {
       toast.error('Failed to subscribe. Please try again.');
     }
   };
@@ -43,7 +43,7 @@ const Footer = () => {
               <FontAwesomeIcon icon={faRing} className="text-white" />
               <span className="text-2xl logo-text text-white">ShaadiSharthi</span>
             </div>
-            <p className="text-gray-400 mb-4">India's premier wedding planning platform connecting couples with the best wedding vendors.</p>
+            <p className="text-gray-400 mb-4">India&apos;s premier wedding planning platform connecting couples with the best wedding vendors.</p>
             <div className="flex space-x-4">
   <a href="#" className="text-gray-400 hover:text-primary dark:hover:text-pink-400 transition duration-300" aria-label="Facebook">
     <FontAwesomeIcon icon={faFacebookF} className="text-white" />

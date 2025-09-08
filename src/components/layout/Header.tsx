@@ -7,7 +7,6 @@ import {
   FaUser,
   FaRing
 } from 'react-icons/fa';
-import ThemeToggle from '../ThemeToggle';
 import Link from 'next/link'; // Added import
 
 const NotificationDropdown = memo(({ notifOpen }: { notifOpen: boolean }) => {

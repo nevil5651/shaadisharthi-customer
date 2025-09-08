@@ -165,7 +165,7 @@ const ServicePageContent: React.FC = () => {
             <AnimatePresence>
               {services.map((vendor) => (
                 <motion.div
-                  key={vendor.id}
+                  key={vendor.serviceId}
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0 }}

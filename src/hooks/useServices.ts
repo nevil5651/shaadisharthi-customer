@@ -4,19 +4,7 @@ import api from '@/lib/axios';
 import { isAxiosError } from 'axios';
 import debounce from 'lodash/debounce';
 import { toast } from 'react-toastify';
-
-export interface Service {
-  id: string;
-  serviceId: number;
-  serviceName: string;
-  businessName: string;
-  imageUrl: string;
-  price: number;
-  rating: number;
-  reviewCount: number;
-  location: string;
-  category: string;
-}
+import { Service } from '@/lib/types';
 
 export interface ServiceFilters {
   category: string;
@@ -25,6 +13,23 @@ export interface ServiceFilters {
   maxPrice: string;
   rating: string;
   sortBy: string;
+}
+
+// This interface represents the shape of the service object coming directly from the backend API.
+interface BackendService {
+  providerId?: string;
+  serviceId: number;
+  serviceName: string;
+  description?: string;
+  price: number;
+  rating: number;
+  reviewCount: number;
+  location: string;
+  imageUrl?: string;
+  category: string;
+  businessName: string;
+  email?: string | null;
+  phone?: string | null;
 }
 
 export const useServices = (initialFilters: ServiceFilters) => {
@@ -104,18 +109,28 @@ export const useServices = (initialFilters: ServiceFilters) => {
 
       const { services: backendServices, hasMore: more } = response.data;
 
-      const formattedServices = backendServices.map((service: any, index: number) => ({
-        ...service,
-        id: `${service.serviceId}-${targetPage}-${index}`,
+      const formattedServices: Service[] = backendServices.map((service: BackendService) => ({
+        providerId: service.providerId || String(service.serviceId), // Fallback for providerId
+        serviceId: service.serviceId,
+        name: service.serviceName, // Map serviceName to name
+        description: service.description || '', // Provide a default
+        price: service.price,
+        rating: service.rating,
+        reviewCount: service.reviewCount,
+        location: service.location,
         imageUrl: service.imageUrl || '/img/default-vendor.jpg',
+        category: service.category,
+        businessName: service.businessName,
+        email: service.email || null,
+        phone: service.phone || null,
       }));
 
       setServices(prev => isNewSearch ? formattedServices : [...prev, ...formattedServices]);
       setHasMore(more);
       hasMoreRef.current = more;
       
-    } catch (err: any) {
-      if (err.name === 'AbortError' || err.message === 'canceled' || signal.aborted) {
+    } catch (err: unknown) {
+      if (signal.aborted || (err instanceof Error && err.name === 'AbortError')) {
         return;
       }
       
@@ -143,8 +158,8 @@ export const useServices = (initialFilters: ServiceFilters) => {
   }, [filters, fetchServices]);
 
   // Debounced filter updates
-  const debouncedSetFilters = useCallback(
-    debounce((newFilters: ServiceFilters) => {
+  const debouncedSetFilters = useMemo(
+    () => debounce((newFilters: ServiceFilters) => {
       setFilters(newFilters);
     }, 300),
     []

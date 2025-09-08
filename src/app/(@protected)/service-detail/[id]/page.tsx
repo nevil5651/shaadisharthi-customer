@@ -26,7 +26,7 @@ export default function ServiceDetailPage({ params }: PageProps) {
   const [service, setService] = useState<Service | null>(null);
   const [reviews, setReviews] = useState<Review[]>([]);
   const [hasMore, setHasMore] = useState(true);
-  const [page, setPage] = useState(1);
+  const pageRef = useRef(1);
   const [serviceLoading, setServiceLoading] = useState(false);
   const [reviewsLoading, setReviewsLoading] = useState(false);
   const [serviceError, setServiceError] = useState<string | null>(null);
@@ -81,7 +81,7 @@ export default function ServiceDetailPage({ params }: PageProps) {
       return;
     }
 
-    const targetPage = reset ? 1 : page;
+    const targetPage = reset ? 1 : pageRef.current;
     
     // Don't fetch the same page again
     if (!reset && targetPage === lastPageRef.current) {
@@ -96,7 +96,7 @@ export default function ServiceDetailPage({ params }: PageProps) {
       if (cachedData.timestamp > Date.now() - 30000) { // 30 second cache
         setReviews(prev => reset ? cachedData.data.reviews : [...prev, ...cachedData.data.reviews]);
         setHasMore(cachedData.data.hasMore);
-        setPage(prev => reset ? 2 : prev + 1);
+        pageRef.current = targetPage + 1;
         lastPageRef.current = targetPage;
         return;
       }
@@ -115,7 +115,7 @@ export default function ServiceDetailPage({ params }: PageProps) {
       
       setReviews(prev => reset ? reviewsData.reviews : [...prev, ...reviewsData.reviews]);
       setHasMore(reviewsData.hasMore);
-      setPage(prev => reset ? 2 : prev + 1);
+      pageRef.current = targetPage + 1;
       lastPageRef.current = targetPage;
       setReviewsError(null);
     } catch (err: unknown) {
@@ -130,17 +130,17 @@ export default function ServiceDetailPage({ params }: PageProps) {
       setReviewsLoading(false);
       isFetchingRef.current = false;
     }
-  }, [serviceId, page]);
+  }, [serviceId]);
 
   // Initial data loading
   useEffect(() => {
     setReviews([]);
-    setPage(1);
+    pageRef.current = 1;
     lastPageRef.current = 0;
     setHasMore(true);
     loadService();
     loadReviews(true);
-  }, [serviceId, loadService]);
+  }, [serviceId, loadService, loadReviews]);
 
   // Infinite scroll setup with cleanup - SIMPLIFIED
   useEffect(() => {
@@ -182,7 +182,7 @@ export default function ServiceDetailPage({ params }: PageProps) {
 
   const handleServerReviews = useCallback((serverList: Review[]) => {
     setReviews(serverList);
-    setPage(2);
+    pageRef.current = 2;
     setHasMore(true);
     lastPageRef.current = 1;
     

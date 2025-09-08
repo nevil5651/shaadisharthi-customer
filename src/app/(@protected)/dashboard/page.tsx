@@ -160,7 +160,7 @@ export default function Dashboard() {
                 ))
               }>
                 {recommendedServices.map(service => (
-                  <ServiceCard key={service.id} service={service} />
+                  <ServiceCard key={service.serviceId} service={service} />
                 ))}
               </Suspense>
             )}
