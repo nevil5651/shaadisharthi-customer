@@ -1,5 +1,5 @@
 import { RatingStars } from '@/app/(@protected)/services/components/RatingStars';
-import { Service } from '@/lib/types';
+import { Service } from '@/lib/service';
 import Image from 'next/image';
 
 interface ServiceHeroProps {

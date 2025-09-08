@@ -1,41 +1,31 @@
-import type { Metadata, Viewport } from 'next';
-import { Playfair_Display, Poppins } from 'next/font/google';
-//import { Geist, Geist_Mono } from "next/font/google";
-import { ThemeProvider } from "next-themes"; 
+import { Poppins, Lora } from 'next/font/google';
+import { ThemeProvider } from 'next-themes';
 import './globals.css';
+import QueryProvider from '@/components/QueryProvider';
 
-const playfair = Playfair_Display({
-  subsets: ['latin'],
-  variable: '--font-playfair-display',
-  display: 'swap',
-});
+export const metadata = {
+  title: 'ShaadiSharthi - Your Wedding Planning Partner',
+  description: "Discover India's finest wedding vendors and plan your perfect day with ease",
+};
 
-// const geistSans = Geist({
-//   variable: "--font-geist-sans",
-//   subsets: ["latin"],
-// });
-
-// const geistMono = Geist_Mono({
-//   variable: "--font-geist-mono",
-//   subsets: ["latin"],
-// });
+export const viewport = {
+  width: 'device-width',
+  initialScale: 1,
+};
 
 const poppins = Poppins({
   subsets: ['latin'],
-  weight: ['300', '400', '500', '600'],
-  variable: '--font-poppins',
   display: 'swap',
+  variable: '--font-poppins',
+  weight: ['300', '400', '500', '600', '700']
 });
 
-export const metadata: Metadata = {
-  title: 'ShaadiSharthi - Your Wedding Planning Partner',
-  description: 'Discover India\'s finest wedding vendors and plan your perfect day with ease',
-};
-
-export const viewport: Viewport = {
-  width: 'device-width',
-  initialScale: 1.0,
-};
+const lora = Lora({
+  subsets: ['latin'],
+  display: 'swap',
+  variable: '--font-lora',
+  weight: ['400', '500', '600', '700']
+});
 
 export default function RootLayout({
   children,
@@ -44,15 +34,12 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={`$ ${playfair.variable} ${poppins.variable}`}>
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="system"
-          enableSystem
-          disableTransitionOnChange
-        >
-          {children}
-        </ThemeProvider>
+      <body className={`$ {poppins.variable} ${lora.variable}`}>
+        <QueryProvider>
+          <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+            {children}
+          </ThemeProvider>
+        </QueryProvider>
       </body>
     </html>
   )
