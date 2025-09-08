@@ -9,7 +9,7 @@ import { PricingCard } from '../components/PricingCard';
 import { ReviewsList } from '../components/ReviewsList';
 import { ReviewForm } from '../components/ReviewForm';
 import { MediaGallery } from '../components/MediaGallery';
-import { fetchService, fetchReviews, ReviewsResponse, Service, Review } from '@/lib/service';
+import { fetchService, fetchReviews, Service, Review } from '@/lib/service';
 import React from 'react';
 
 interface PageProps {
@@ -211,7 +211,7 @@ export default function ServiceDetailPage({ params }: PageProps) {
         {!service || serviceLoading ? (
           <ServiceHeroSkeleton />
         ) : (
-          <ServiceHero service={service as any} reviews={reviews} />
+          <ServiceHero service={service} />
         )}
         
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">
@@ -238,7 +238,7 @@ export default function ServiceDetailPage({ params }: PageProps) {
             {reviewsError ? (
               <div className="text-red-600 dark:text-red-400 text-center py-4">{reviewsError}</div>
             ) : (
-              <ReviewsList reviews={reviews} serviceId={service?.serviceId || 0} />
+              <ReviewsList reviews={reviews} />
             )}
             
             {hasMore && (

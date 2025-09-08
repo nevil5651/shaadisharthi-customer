@@ -16,8 +16,14 @@ const forgotPasswordSchema = z.object({
 
 type ForgotPasswordFormInputs = z.infer<typeof forgotPasswordSchema>;
 
+interface EmailInputProps {
+  register: any;
+  error: { message?: string } | undefined;
+  disabled: boolean;
+}
+
 // Memoized input component
-const EmailInput = ({ register, error, disabled }: { register: any, error: any, disabled: boolean }) => (
+const EmailInput = ({ register, error, disabled }: EmailInputProps) => (
   <div>
     <div className="relative">
       <div className="input-icon"><FaEnvelope /></div>
@@ -34,7 +40,7 @@ const EmailInput = ({ register, error, disabled }: { register: any, error: any, 
 );
 
 // Loading spinner component
-const LoadingSpinner = ({ text = "Sending..." }) => (
+const LoadingSpinner = ({ text = "Sending..." }: { text?: string }) => (
   <div className="flex items-center justify-center">
     <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
       <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>

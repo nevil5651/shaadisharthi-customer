@@ -2,7 +2,8 @@
 
 import React, { useEffect, useState } from 'react'
 import { useAuth } from '@/context/useAuth'
-import Head from 'next/head'
+import Link from 'next/link'
+import Image from 'next/image'
 
 const AccountPage = () => {
   const { user, updateAccountDetails, logout,isLoggingOut } = useAuth()
@@ -10,7 +11,7 @@ const AccountPage = () => {
   const [formData, setFormData] = useState({
   name: user?.name || '',
   phone_no: user?.phone_no || '',
-  address: user?.address || ''
+  address: user?.address || '',
 })
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState('')
@@ -20,16 +21,18 @@ useEffect(() => {
   if (user) {
     setFormData({
       name: user.name || '',
-      phone_no: user.phone_no || '',
-      address: user.address || ''
+        phone_no: user.phone_no || '',
+        address: user.address || '',
     })
   }
 }, [user])
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  
+const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
   const { name, value } = e.target
-  setFormData(prev => ({ 
-    ...prev, 
+
+    setFormData((prev) => ({
+    ...prev,
     [name]: value || '' // Ensure empty string instead of undefined
   }))
 }
@@ -51,7 +54,7 @@ useEffect(() => {
     setSuccess('')
   }
 
-  
+
 const handleSubmit = async (e: React.FormEvent) => {
   e.preventDefault()
   setIsLoading(true)
@@ -59,7 +62,8 @@ const handleSubmit = async (e: React.FormEvent) => {
   setSuccess('')
 
   try {
-    const result = await updateAccountDetails(formData)
+
+    const result:any = await updateAccountDetails(formData)
     
     if (!result.success) {
       throw new Error(result.error || 'Failed to update profile')
@@ -99,7 +103,7 @@ if (!user) {
         <div className="container mx-auto px-4 py-8">
           {/* Breadcrumb */}
           <div className="mb-6 flex items-center text-sm text-gray-600 dark:text-gray-400">
-            <a href="/" className="hover:text-pink-600 dark:hover:text-pink-400">Home</a>
+            <Link href="/" className="hover:text-pink-600 dark:hover:text-pink-400">Home</Link>
             <span className="mx-2">/</span>
             <span className="text-gray-900 dark:text-white font-medium">My Account</span>
           </div>
@@ -120,10 +124,12 @@ if (!user) {
               <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
                 <div className="flex flex-col md:flex-row items-center md:items-start gap-6">
                   <div className="relative">
-                    <img 
+
+                    <Image
                       src={user.avatar || `https://ui-avatars.com/api/?name=${user.name}&background=random`}
                       alt="Profile" 
                       className="w-24 h-24 rounded-full border-4 border-white dark:border-gray-800 shadow-md"
+                      width={96} height={96}
                     />
                     <label className="absolute bottom-0 right-0 bg-pink-600 dark:bg-pink-500 p-2 rounded-full cursor-pointer hover:bg-purple-600 dark:hover:bg-purple-500 transition-all">
                       <input type="file" className="hidden" accept="image/*" id="profileImageInput" />
@@ -137,13 +143,14 @@ if (!user) {
                   </div>
                 </div>
               </div>
-              
+    
               {/* Personal Information */}
               <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
                 <div className="flex justify-between items-center mb-6">
                   <h2 className="text-2xl font-['Playfair_Display'] font-bold text-gray-800 dark:text-white">Personal Information</h2>
                   {!isEditing ? (
-                    <button 
+                    
+                    <button
                       onClick={handleEdit}
                       className="text-pink-600 dark:text-pink-400 hover:text-purple-600 dark:hover:text-purple-400 font-medium"
                     >
@@ -152,6 +159,7 @@ if (!user) {
                   ) : null}
                 </div>
                 
+
                 <form onSubmit={handleSubmit}>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
@@ -170,7 +178,7 @@ if (!user) {
                       <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Email</label>
                       <input
                         type="email"
-                        value={user.email}
+                        value={user?.email}
                         className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-pink-600 dark:focus:ring-pink-400 text-black dark:text-gray-300 cursor-not-allowed"
                         disabled
                         readOnly
@@ -200,12 +208,14 @@ if (!user) {
                     </div>
                   </div>
                   
+
                   {isEditing && (
                     <div className="mt-6">
-                      <button 
-                        type="submit" 
+                      
+                      <button
+                        type="submit"
                         disabled={isLoading}
-                        className="bg-gradient-to-r from-pink-600 to-orange-500 dark:from-pink-500 dark:to-orange-400 text-white py-3 px-6 rounded-lg font-medium mr-4 disabled:opacity-50"
+                        className="bg-gradient-to-r from-pink-600 to-orange-500 dark:from-pink-500 dark:to-orange-400 text-white py-3 px-6 rounded-lg font-medium mr-4 disabled:opacity-50 disabled:cursor-not-allowed"
                       >
                         {isLoading ? 'Saving...' : 'Save Changes'}
                       </button>
@@ -234,12 +244,14 @@ if (!user) {
               </div>
             </div>
             
+
             {/* Right Column - Security, Activity, Actions */}
             <div className="lg:col-span-1 space-y-6">
               {/* Security Settings */}
               <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
                 <h2 className="text-2xl font-['Playfair_Display'] font-bold text-gray-800 dark:text-white mb-4">Security Settings</h2>
                 
+
                 <div className="space-y-4">
                   <div className="p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
                     <h3 className="text-lg font-semibold text-gray-800 dark:text-white mb-1">Change Password</h3>
@@ -249,6 +261,7 @@ if (!user) {
                     </button>
                   </div>
                   
+
                   <div className="p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
                     <h3 className="text-lg font-semibold text-gray-800 dark:text-white mb-1">Two-Factor Authentication</h3>
                     <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">Status: Enabled</p>
@@ -259,13 +272,15 @@ if (!user) {
                 </div>
               </div>
               
+
               {/* Recent Activity */}
               <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
                 <h2 className="text-2xl font-['Playfair_Display'] font-bold text-gray-800 dark:text-white mb-4">Recent Activity</h2>
                 
+
                 <div className="space-y-3">
                   <div className="flex items-start p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
-                    <div className="bg-pink-600 dark:bg-pink-500 bg-opacity-10 p-2 rounded-full mr-3">
+                    <div className="bg-pink-600 dark:bg-pink-500 bg-opacity-10 p-2 rounded-full mr-3" role='img' aria-label="Logged In">
                       <i className="fas fa-sign-in-alt text-white dark:text-white-800"></i>
                     </div>
                     <div>
@@ -283,12 +298,15 @@ if (!user) {
                 </div>
               </div>
               
+
               {/* Account Actions */}
               <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
                 <h2 className="text-2xl font-['Playfair_Display'] font-bold text-gray-800 dark:text-white mb-4">Account Actions</h2>
                 
+
                 <div className="space-y-3">
-                  <button 
+                   
+                  <button
                     onClick={logout}
                     disabled={isLoggingOut}
                     className="w-full bg-red-500 dark:bg-red-600 text-white py-3 px-4 rounded-lg hover:bg-red-600 dark:hover:bg-red-700 transition-all"

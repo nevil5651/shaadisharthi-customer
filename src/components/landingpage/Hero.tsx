@@ -22,12 +22,14 @@ const Hero: React.FC = () => {
             >
               Find Services <FontAwesomeIcon icon={faSearch} className="ml-2" />
             </button>
-            <Link
-              href="http://localhost:4200/login" // External URL for service provider
-              className="bg-transparent hover:bg-white text-white hover:text-black py-3 px-8 border-2 border-white rounded-full text-lg transition duration-300"
-            >
-              Become a Vendor <FontAwesomeIcon icon={faUserTie} className="ml-2 hover:text-black" />
-            </Link>
+            <a
+  href="http://localhost:4200/login"
+  target="_blank"
+  rel="noopener noreferrer"
+  className="bg-transparent hover:bg-white text-white hover:text-black py-3 px-8 border-2 border-white rounded-full text-lg transition duration-300"
+>
+  Become a Vendor <FontAwesomeIcon icon={faUserTie} className="ml-2 hover:text-black" />
+</a>
           </div>
         </div>
       </div>

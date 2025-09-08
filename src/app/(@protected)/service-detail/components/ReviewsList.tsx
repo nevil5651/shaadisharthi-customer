@@ -6,7 +6,6 @@ import { memo } from 'react';
 
 interface ReviewsListProps {
   reviews: Review[];
-  serviceId: number;
 }
 
 // Memoize review item to prevent unnecessary re-renders
@@ -41,7 +40,7 @@ const ReviewItem = memo(({ review }: { review: Review }) => {
 
 ReviewItem.displayName = 'ReviewItem';
 
-export function ReviewsList({ reviews, serviceId }: ReviewsListProps) {
+export function ReviewsList({ reviews }: ReviewsListProps) {
   return (
     <section className="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6">
       <div className="flex justify-between items-center mb-6">

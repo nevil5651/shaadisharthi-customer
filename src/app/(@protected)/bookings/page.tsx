@@ -6,10 +6,13 @@ import { BookingFilters } from './components/BookingFilters';
 import { BookingsList } from './components/BookingsList';
 import { useQuery } from '@tanstack/react-query';
 import api from '@/lib/axios';
+import { isAxiosError } from 'axios';
 import { useEffect, useState, useCallback, ComponentProps } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { debounce } from 'lodash';
 import { normalizeBookingStatus, formatDateForAPI } from './bookingUtils';
+
+import { Booking } from '@/lib/bookings';
 
 const queryClient = new QueryClient({
     defaultOptions: {
@@ -36,7 +39,7 @@ function BookingsContent() {
     const { filters, updateFilters, resetFilters } = useBookingContext();
     const [currentPage, setCurrentPage] = useState(1);
 
-    const { data, isLoading, error, refetch } = useQuery({
+    const { data, isLoading, error, refetch } = useQuery<{ bookings: Booking[], totalPages: number }, Error>({
         queryKey: ['bookings', filters, currentPage],
         queryFn: () => {
             // Prepare API parameters
@@ -63,7 +66,7 @@ function BookingsContent() {
                     // Normalize statuses in API response
                     const normalizedData = {
                         ...res.data,
-                        bookings: (res.data.bookings || []).map((booking: any) => ({
+                        bookings: (res.data.bookings || []).map((booking: Booking) => ({
                             ...booking,
                             status: normalizeBookingStatus(booking.status)
                         }))
@@ -131,9 +134,15 @@ function BookingsContent() {
             });
 
             refetch(); // Refresh the bookings list
-        } catch (err: any) {
+        } catch (err) {
             console.error('Cancellation failed:', err);
-            const errorMessage = err.response?.data?.message || err.message || 'An unknown error occurred';
+            let errorMessage = 'An unknown error occurred';
+            if (isAxiosError(err)) {
+                errorMessage = err.response?.data?.message || err.message;
+            } else if (err instanceof Error) {
+                errorMessage = err.message;
+            }
+
             toast.update(toastId, {
                 render: `Cancellation failed: ${errorMessage}`,
                 type: 'error',

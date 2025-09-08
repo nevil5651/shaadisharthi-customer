@@ -2,16 +2,16 @@ import Image from 'next/image';
 import { FaStar, FaRegStar } from 'react-icons/fa';
 import { useState } from 'react';
 
-export default function ServiceCard({ service }: {
-  service: {
-    id: number;
-    name: string;
-    category: string;
-    rating: number;
-    price: number;
-    image: string;
-  }
-}) {
+interface Service {
+  id: number;
+  name: string;
+  category: string;
+  rating: number;
+  price: number;
+  image: string;
+}
+
+export default function ServiceCard({ service }: { service: Service }) {
   const [imageLoaded, setImageLoaded] = useState(false);
   const [imageError, setImageError] = useState(false);
 

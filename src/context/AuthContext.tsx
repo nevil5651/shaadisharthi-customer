@@ -95,7 +95,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         }
       }
 
-      const res = await fetch('/api/auth/me', {
+      const res = await fetch('api/auth/me', {
         credentials: 'include',
         cache: forceRefresh ? 'no-cache' : 'default'
       })
@@ -169,7 +169,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       const { token } = await backendRes.json()
 
       // 2. Create session with Next.js API
-      const sessionRes = await fetch('/api/auth/login', {
+      const sessionRes = await fetch('api/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ token }),
@@ -209,7 +209,7 @@ const logout = async () => {
 
   try {
     // Then attempt to call the logout API
-    await fetch('/api/auth/logout', {
+    await fetch('api/auth/logout', {
       method: 'POST',
       credentials: 'include' // Ensure cookies are sent
     })
@@ -222,7 +222,8 @@ const logout = async () => {
     toast.update(toastId, { render: 'Logged out successfully', type: 'success', isLoading: false, autoClose: 3000 })
     setUser(null)
     clearCachedUser()
-    window.location.assign('/login')
+    // window.location.assign('login')
+    router.push('/login')
     
   } catch (error) {
     console.error('Logout error:', error)
@@ -253,7 +254,7 @@ const logout = async () => {
     // Remove email if present (shouldn't be editable)
     const { email, ...updatePayload } = updatedData
     
-    const response = await fetch('/api/auth/update', {
+    const response = await fetch('api/auth/update', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

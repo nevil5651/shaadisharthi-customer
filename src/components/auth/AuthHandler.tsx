@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect } from 'react'
+import { useEffect, useCallback } from 'react'
 import { useAuth } from '@/context/useAuth'
 import { usePathname } from 'next/navigation'
 
@@ -15,6 +15,20 @@ const CACHE_EXPIRATION_MS = 60 * 1000 // 1 minute
 export default function AuthHandler() {
   const { user, fetchProfile } = useAuth()
   const pathname = usePathname()
+
+  const refreshProfile = useCallback(async () => {
+    try {
+      console.log('AuthHandler: Refreshing user profile...');
+      await fetchProfile(true) // Force refresh
+      // Update cache timestamp after successful fetch
+      if (typeof window !== 'undefined') {
+        const cacheData = { timestamp: Date.now() }
+        localStorage.setItem(USER_CACHE_KEY, JSON.stringify(cacheData))
+      }
+    } catch (error) {
+      console.error('Failed to refresh user profile:', error)
+    }
+  }, [fetchProfile])
 
   useEffect(() => {
     // This component is only concerned with refreshing the user profile on navigation.
@@ -31,16 +45,8 @@ export default function AuthHandler() {
       return
     }
 
-    const refreshProfile = async () => {
-      try {
-        console.log('AuthHandler: Refreshing user profile...');
-        await fetchProfile(true) // Force refresh
-        // Update cache timestamp after successful fetch
-        const cacheData = { timestamp: Date.now() }
-        localStorage.setItem(USER_CACHE_KEY, JSON.stringify(cacheData))
-      } catch (error) {
-        console.error('Failed to refresh user profile:', error)
-      }
+    if (typeof window === 'undefined') {
+      return // Don't run on server side
     }
 
     const cachedItem = localStorage.getItem(USER_CACHE_KEY)
@@ -72,7 +78,7 @@ export default function AuthHandler() {
       console.error('Failed to parse user cache:', error)
       refreshProfile()
     }
-  }, [pathname, user, fetchProfile])
+  }, [pathname, user, refreshProfile])
 
   return null
 }

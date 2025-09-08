@@ -1,5 +1,6 @@
 'use client'
 import { Booking } from '@/lib/bookings';
+import Image from 'next/image';
 import { FaUserTie, FaCalendarAlt, FaClock, FaRupeeSign, FaTimes, FaCheck } from 'react-icons/fa';
 import { normalizeBookingStatus, isCancellable, showPaymentButton } from '../bookingUtils';
 
@@ -28,10 +29,11 @@ export const BookingCard = ({
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden hover:shadow-md transition">
             <div className="flex flex-col md:flex-row">
                 <div className="w-full md:w-1/3 h-48 relative">
-                    <img
+                    <Image
                         src={booking.serviceImage}
                         alt={booking.serviceName}
-                        className="w-full h-full object-cover"
+                        fill
+                        className="object-cover"
                     />
                     <span className={`absolute top-3 right-3 px-2 py-1 rounded-full text-xs font-medium ${statusColors[normalizedStatus as keyof typeof statusColors]}`}>
                         {normalizedStatus.toUpperCase()}

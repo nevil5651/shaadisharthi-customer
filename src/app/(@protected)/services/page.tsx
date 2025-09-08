@@ -1,5 +1,5 @@
 'use client';
-import React, { useState, useRef, useMemo, Suspense, useEffect } from 'react';
+import React, { useState, useRef, useMemo, Suspense } from 'react';
 import Head from 'next/head';
 import { motion, AnimatePresence } from 'framer-motion';
 import dynamic from 'next/dynamic';
@@ -70,14 +70,14 @@ const ServicePageContent: React.FC = () => {
 
   const memoizedFilters = useMemo(() => filters, [filters]);
 
-  const handleFilterChange = (e: React.ChangeEvent<HTMLSelectElement | HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setFilters({ ...memoizedFilters, [name]: value });
-  };
+  // const handleFilterChange = (e: React.ChangeEvent<HTMLSelectElement | HTMLInputElement>) => {
+  //   const { name, value } = e.target;
+  //   setFilters({ ...filters, [name]: value });
+  // };
 
-  const handleResetFilters = () => {
-    resetFilters();
-  };
+  // const handleResetFilters = () => {
+  //   resetFilters();
+  // };
 
   const handleCategoryClick = (category: string) => {
     setFilters({
@@ -171,7 +171,7 @@ const ServicePageContent: React.FC = () => {
                   exit={{ opacity: 0 }}
                   transition={{ duration: 0.3 }}
                 >
-                  <VendorCard vendor={vendor as any} />
+                  <VendorCard vendor={vendor} />
                 </motion.div>
               ))}
             </AnimatePresence>

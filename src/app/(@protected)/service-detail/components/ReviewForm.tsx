@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { RatingStars } from '@/app/(@protected)/services/components/RatingStars';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -53,7 +53,7 @@ export function ReviewForm({ serviceId, onSubmitSuccess, onServerUpdate }: Revie
     const maxCharacters = 500;
     const remainingCharacters = maxCharacters - (reviewText?.length || 0);
 
-    const onSubmit = async (data: ReviewFormData) => {
+    const onSubmit = useCallback(async (data: ReviewFormData) => {
         const optimisticReview: Review = {
             reviewId: `temp-${Date.now()}`,
             customerName: 'You', // Replace with actual user name from auth context
@@ -93,7 +93,7 @@ export function ReviewForm({ serviceId, onSubmitSuccess, onServerUpdate }: Revie
             // remove optimistic item
             onSubmitSuccess?.(null);
         }
-    };
+    }, [serviceId, reset, onSubmitSuccess, onServerUpdate]);
 
     return (
         <div className="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6">

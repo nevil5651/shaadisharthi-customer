@@ -45,19 +45,19 @@ const Footer = () => {
             </div>
             <p className="text-gray-400 mb-4">India's premier wedding planning platform connecting couples with the best wedding vendors.</p>
             <div className="flex space-x-4">
-              <a href="#" className="text-gray-400 hover:text-primary dark:hover:text-pink-400 transition duration-300">
-                <FontAwesomeIcon icon={faFacebookF} className="text-white" />
-              </a>
-              <a href="#" className="text-gray-400 hover:text-primary dark:hover:text-pink-400 transition duration-300">
-                <FontAwesomeIcon icon={faInstagram} className="text-white" />
-              </a>
-              <a href="#" className="text-gray-400 hover:text-primary dark:hover:text-pink-400 transition duration-300">
-                <FontAwesomeIcon icon={faPinterestP} className="text-white"/>
-              </a>
-              <a href="#" className="text-gray-400 hover:text-primary dark:hover:text-pink-400 transition duration-300">
-                <FontAwesomeIcon icon={faYoutube} className="text-white" />
-              </a>
-            </div>
+  <a href="#" className="text-gray-400 hover:text-primary dark:hover:text-pink-400 transition duration-300" aria-label="Facebook">
+    <FontAwesomeIcon icon={faFacebookF} className="text-white" />
+  </a>
+  <a href="#" className="text-gray-400 hover:text-primary dark:hover:text-pink-400 transition duration-300" aria-label="Instagram">
+    <FontAwesomeIcon icon={faInstagram} className="text-white" />
+  </a>
+  <a href="#" className="text-gray-400 hover:text-primary dark:hover:text-pink-400 transition duration-300" aria-label="Pinterest">
+    <FontAwesomeIcon icon={faPinterestP} className="text-white"/>
+  </a>
+  <a href="#" className="text-gray-400 hover:text-primary dark:hover:text-pink-400 transition duration-300" aria-label="YouTube">
+    <FontAwesomeIcon icon={faYoutube} className="text-white" />
+  </a>
+</div>
           </div>
           <div>
             <h4 className="text-lg font-bold mb-4 font-playfair-display text-white">Quick Links</h4>

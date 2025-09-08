@@ -1,7 +1,7 @@
 'use client'
 import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
-import { UseFormRegister } from 'react-hook-form';
+import { UseFormRegister, FieldError } from 'react-hook-form';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -30,7 +30,7 @@ type ResetPasswordFormInputs = z.infer<typeof resetPasswordSchema>;
 
 interface PasswordInputProps {
   register: ReturnType<UseFormRegister<any>>;
-  error?: { message?: string };
+  error?: FieldError;
   disabled?: boolean;
   showPassword: boolean;
   onTogglePassword: () => void;
@@ -69,7 +69,7 @@ const PasswordInput: React.FC<PasswordInputProps> = ({
 );
 
 // Loading spinner component
-const LoadingSpinner = ({ text = "Resetting..." }) => (
+const LoadingSpinner = ({ text = "Resetting..." }: { text?: string }) => (
   <div className="flex items-center justify-center">
     <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
       <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
@@ -89,21 +89,80 @@ export default function ResetPassword() {
   const searchParams = useSearchParams();
   const token = searchParams.get('token');
 
-  const { register, handleSubmit, formState: { errors, isSubmitting }, setValue } = useForm<ResetPasswordFormInputs>({
+  const { register, handleSubmit, formState: { errors }, setValue } = useForm<ResetPasswordFormInputs>({
     resolver: zodResolver(resetPasswordSchema),
-    mode: 'onChange' // Validate on change for better UX
+    mode: 'onChange'
   });
 
-  useEffect(() => {
+  const verifyToken = useCallback(async () => {
     if (!token) {
-      router.push('/forgot-password');
+      setApiError('Invalid or missing reset token. Redirecting...');
+      setTimeout(() => router.push('/forgot-password'), 3000);
       return;
     }
 
-    // Set hidden token field
-    setValue('token', token);
-    setIsValidToken(true); // Assume token is valid; backend will validate on submit
+    setIsLoading(true);
+    setApiError(null);
+    try {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+      const response = await axios.get(`${apiUrl}/Customer/cstmr-reset-password-verify?token=${token}`);
+      if (response.data.valid) {
+        setValue('token', token);
+        setIsValidToken(true);
+      } else {
+        throw new Error('Invalid token');
+      }
+    } catch (err) {
+      setApiError('Invalid or expired reset token. Redirecting...');
+      setTimeout(() => router.push('/forgot-password'), 3000);
+    } finally {
+      setIsLoading(false);
+    }
   }, [token, router, setValue]);
+
+  useEffect(() => {
+    verifyToken();
+  }, [verifyToken]);
+
+  const onSubmit = useCallback(async (data: ResetPasswordFormInputs) => {
+    setIsLoading(true);
+    setApiError(null);
+    const toastId = toast.loading("Resetting your password...");
+
+    try {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+      if (!apiUrl) {
+        throw new Error("API URL is not configured.");
+      }
+
+      const { confirmPassword, ...payload } = data;
+
+      await axios.post(`${apiUrl}/Customer/cstmr-reset-password`, payload);
+
+      toast.update(toastId, {
+        render: 'Password reset successful! Redirecting to login...',
+        type: 'success',
+        isLoading: false,
+        autoClose: 2000,
+      });
+
+      setTimeout(() => {
+        router.push('/login');
+      }, 2000);
+
+    } catch (err) {
+      console.error('Reset password failed:', err);
+      let errorMessage = 'An unexpected error occurred.';
+      if (axios.isAxiosError(err) && err.response) {
+        errorMessage = err.response.data.error || 'Password reset failed. Please try again.';
+      } else if (err instanceof Error) {
+        errorMessage = err.message;
+      }
+      setApiError(errorMessage);
+      toast.update(toastId, { render: errorMessage, type: 'error', isLoading: false, autoClose: 5000 });
+      setIsLoading(false);
+    }
+  }, [router]);
 
   const togglePassword = useCallback(() => {
     setShowPassword(prev => !prev);
@@ -113,53 +172,19 @@ export default function ResetPassword() {
     setShowConfirmPassword(prev => !prev);
   }, []);
 
-  const onSubmit = useCallback(async (data: ResetPasswordFormInputs) => {
-    setIsLoading(true);
-    setApiError(null);
-    
-    try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-      if (!apiUrl) {
-        throw new Error("API URL is not configured.");
-      }
-
-      const { confirmPassword, ...payload } = data;
-      await axios.post(`${apiUrl}/Customer/cstmr-reset-password`, payload);
-      
-      toast.success('Password reset successful! Redirecting to login...', {
-        position: "top-right",
-        autoClose: 3000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-      });
-      
-      setTimeout(() => router.push('/login'), 3000);
-    } catch (err) {
-      if (axios.isAxiosError(err) && err.response) {
-        setApiError(err.response.data.error || 'Failed to reset password. Please try again.');
-      } else {
-        setApiError('An unexpected error occurred.');
-      }
-    } finally {
-      setIsLoading(false);
-    }
-  }, [router]);
-
   if (!isValidToken && token) {
     return (
       <div className="auth-page min-h-screen flex items-center justify-center bg-gradient-to-br from-pink-50 to-purple-50 dark:from-gray-900 dark:to-gray-800 py-8 px-4">
-        <AuthCard title="Verifying..." subtitle="Please wait while we verify your token">
+        <AuthCard title="Verifying..." subtitle="Please wait while we verify your reset link">
           {apiError && <p className="text-red-500 dark:text-red-400 text-center">{apiError}</p>}
         </AuthCard>
+        <ToastContainer position="bottom-right" />
       </div>
     );
   }
 
   return (
     <div className="auth-page min-h-screen flex items-center justify-center bg-gradient-to-br from-pink-50 to-purple-50 dark:from-gray-900 dark:to-gray-800 py-8 px-4">
-      <ToastContainer />
       <AuthCard title="Reset Password" subtitle="Enter your new password">
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           {apiError && (
@@ -192,7 +217,7 @@ export default function ResetPassword() {
           />
 
           {/* Submit Button */}
-          <button type="submit" className="gradient-btn w-full bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 text-white font-bold py-2 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-500 transition duration-150 ease-in-out disabled:opacity-50 dark:focus:ring-offset-gray-800" disabled={isLoading || isSubmitting}>
+          <button type="submit" className="gradient-btn w-full bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 text-white font-bold py-2 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-500 transition duration-150 ease-in-out disabled:opacity-50 dark:focus:ring-offset-gray-800" disabled={isLoading}>
             {isLoading ? <LoadingSpinner /> : 'Reset Password'}
           </button>
 
@@ -206,6 +231,7 @@ export default function ResetPassword() {
           </div>
         </form>
       </AuthCard>
+      <ToastContainer position="bottom-right" />
     </div>
   );
 }

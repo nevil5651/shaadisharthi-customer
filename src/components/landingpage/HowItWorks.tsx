@@ -5,7 +5,13 @@ import { useRouter } from 'next/navigation';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faArrowRight } from '@fortawesome/free-solid-svg-icons';
 import SectionHeader from './SectionHeader';
-import { Step } from '@/lib';
+//import { Step } from '@/lib';
+
+interface Step {
+  number: number;
+  title: string;
+  description: string;
+}
 
 const HowItWorks = () => {
   const router = useRouter();

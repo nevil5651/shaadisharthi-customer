@@ -3,6 +3,8 @@ import api from './axios';
 
 export interface Service {
     serviceId: number;
+    providerId: string; // <-- add this
+    imageUrl: string; 
     name: string;
     businessName: string;
     description: string;

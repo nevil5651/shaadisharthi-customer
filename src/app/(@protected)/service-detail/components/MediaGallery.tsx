@@ -1,4 +1,4 @@
-// components/MediaGallery.tsx
+
 import Image from 'next/image';
 import { Media } from '@/lib/service';
 import { useState } from 'react';

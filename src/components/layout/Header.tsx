@@ -8,7 +8,7 @@ import {
   FaRing
 } from 'react-icons/fa';
 import ThemeToggle from '../ThemeToggle';
-
+import Link from 'next/link'; // Added import
 
 const NotificationDropdown = memo(({ notifOpen }: { notifOpen: boolean }) => {
   if (!notifOpen) return null;
@@ -35,12 +35,12 @@ const UserDropdown = memo(({
   
   return (
     <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-700 dark:text-white rounded-md shadow-lg py-2 z-50">
-      <a href="/account" className="block px-4 py-2 text-gray-700 dark:text-white dark:hover:bg-gray-600 hover:bg-gray-100">
+      <Link href="/account" className="block px-4 py-2 text-gray-700 dark:text-white dark:hover:bg-gray-600 hover:bg-gray-100">
         My Profile
-      </a>
-      <a href="/bookings" className="block px-4 py-2 text-gray-700 dark:text-white dark:hover:bg-gray-600 hover:bg-gray-100">
+      </Link>
+      <Link href="/bookings" className="block px-4 py-2 text-gray-700 dark:text-white dark:hover:bg-gray-600 hover:bg-gray-100">
         My Bookings
-      </a>
+      </Link>
       <div className="border-t border-gray-200 my-1"></div>
       <button
         onClick={logout}
@@ -69,25 +69,25 @@ function Header() {
         <div className="flex items-center justify-between">
           {/* Logo */}
           <div className="flex items-center">
-            <a href="/" className="flex items-center">
+            <Link href="/" className="flex items-center">
               <FaRing className="text-pink-500 text-3xl mr-2" />
               <span className="text-2xl font-bold text-gray-800 dark:text-white font-serif">
                 ShaadiSharthi
               </span>
-            </a>
+            </Link>
           </div>
 
           {/* Navigation */}
           <nav className="hidden md:flex items-center space-x-8">
-            <a href="/dashboard" className="text-gray-700 dark:text-gray-300 hover:text-pink-500 font-medium">
+            <Link href="/dashboard" className="text-gray-700 dark:text-gray-300 hover:text-pink-500 font-medium">
               Home
-            </a>
-            <a href="/services" className="text-gray-700 dark:text-gray-300 hover:text-pink-500 font-medium">
+            </Link>
+            <Link href="/services" className="text-gray-700 dark:text-gray-300 hover:text-pink-500 font-medium">
               Vendors
-            </a>
-            <a href="/bookings" className="text-gray-700 dark:text-gray-300 hover:text-pink-500 font-medium">
+            </Link>
+            <Link href="/bookings" className="text-gray-700 dark:text-gray-300 hover:text-pink-500 font-medium">
               My Bookings
-            </a>
+            </Link>
           </nav>
 
           {/* Icons */}
@@ -96,9 +96,10 @@ function Header() {
               <button 
                 className="text-gray-600 dark:text-gray-300 hover:text-pink-500 relative"
                 onClick={toggleNotif}
+                aria-label="Notifications"
               >
                 <FaBell className="text-xl" />
-                <span className="notification-badge bg-pink-500 text-white rounded-full flex items-center justify-center">
+                <span className="absolute -top-2 -right-2 bg-pink-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
                   3
                 </span>
               </button>
@@ -110,14 +111,15 @@ function Header() {
               <ThemeToggle />
             </div> */}
 
-            <a href="/cart" className="text-gray-600 dark:text-gray-300 hover:text-pink-500">
+            <Link href="/cart" className="text-gray-600 dark:text-gray-300 hover:text-pink-500" aria-label="Shopping Cart">
               <FaShoppingBag className="text-xl" />
-            </a>
+            </Link>
 
             <div className="relative">
               <button 
                 className="user-avatar cursor-pointer flex items-center space-x-2"
                 onClick={toggleUserMenu}
+                aria-label="User menu"
               >
                 <div className="w-8 h-8 rounded-full bg-pink-500 flex items-center justify-center text-white">
                   <FaUser />

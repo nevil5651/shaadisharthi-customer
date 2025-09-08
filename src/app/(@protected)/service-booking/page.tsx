@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { useServiceBooking } from '@/hooks/useServiceBooking';
 import { BookingFormData } from '@/lib/serviceBooking';
 import { toast } from 'react-toastify';
-import { FaRing } from 'react-icons/fa';
+import { FaRing, FaSpinner, FaCalendarCheck } from 'react-icons/fa'; // Added missing icons
 
 const ServiceBookingForm = () => {
   const router = useRouter();
@@ -18,7 +18,6 @@ const ServiceBookingForm = () => {
     register,
     handleSubmit,
     setValue,
-    watch,
     formState: { errors, isSubmitting },
   } = useForm<BookingFormData>();
 
@@ -254,11 +253,11 @@ const ServiceBookingForm = () => {
               >
                 {isSubmitting ? (
                   <span className="flex items-center justify-center">
-                    <i className="fas fa-spinner fa-spin mr-2"></i> Processing...
+                    <FaSpinner className="animate-spin mr-2" /> Processing...
                   </span>
                 ) : (
-                  <span  className="flex items-center justify-center">
-                    <i className="fas fa-calendar-check mr-2"></i> Confirm Booking
+                  <span className="flex items-center justify-center">
+                    <FaCalendarCheck className="mr-2" /> Confirm Booking
                   </span>
                 )}
               </button>

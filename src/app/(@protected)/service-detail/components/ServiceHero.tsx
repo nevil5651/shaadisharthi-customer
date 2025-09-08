@@ -1,15 +1,12 @@
-
 import { RatingStars } from '@/app/(@protected)/services/components/RatingStars';
-import { Review } from '@/lib/service';
 import { Service } from '@/lib/types';
 import Image from 'next/image';
 
 interface ServiceHeroProps {
   service: Service;
-  reviews: Review[];
 }
 
-export default function ServiceHero({ service, reviews }: ServiceHeroProps) {
+export default function ServiceHero({ service }: ServiceHeroProps) {
   return (
     <div className="service-hero rounded-xl p-8 mb-8 bg-gradient-to-r from-pink-50 to-purple-50 dark:from-pink-900/20 dark:to-purple-900/20">
       <div className="flex flex-col md:flex-row items-center">

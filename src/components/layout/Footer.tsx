@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { FaFacebookF, FaInstagram, FaPinterest, FaYoutube } from 'react-icons/fa';
+import { FaFacebookF, FaInstagram, FaPinterest, FaYoutube, FaPaperPlane } from 'react-icons/fa';
 
 const Footer = () => {
   return (
@@ -10,10 +10,18 @@ const Footer = () => {
             <h3 className="text-xl font-serif font-bold mb-4">ShaadiSharthi</h3>
             <p className="text-gray-300 mb-4">Your one-stop platform for crafting unforgettable weddings with ease.</p>
             <div className="flex space-x-4">
-              <a href="#" className="text-gray-300 hover:text-white"><FaFacebookF /></a>
-              <a href="#" className="text-gray-300 hover:text-white"><FaInstagram /></a>
-              <a href="#" className="text-gray-300 hover:text-white"><FaPinterest /></a>
-              <a href="#" className="text-gray-300 hover:text-white"><FaYoutube /></a>
+              <a href="#" className="text-gray-300 hover:text-white" aria-label="Facebook">
+                <FaFacebookF />
+              </a>
+              <a href="#" className="text-gray-300 hover:text-white" aria-label="Instagram">
+                <FaInstagram />
+              </a>
+              <a href="#" className="text-gray-300 hover:text-white" aria-label="Pinterest">
+                <FaPinterest />
+              </a>
+              <a href="#" className="text-gray-300 hover:text-white" aria-label="YouTube">
+                <FaYoutube />
+              </a>
             </div>
           </div>
           
@@ -48,9 +56,10 @@ const Footer = () => {
               />
               <button 
                 type="submit" 
-                className="bg-primary hover:bg-opacity-90 px-4 rounded-r-lg"
+                className="bg-primary hover:bg-opacity-90 px-4 rounded-r-lg flex items-center justify-center"
+                aria-label="Subscribe to newsletter"
               >
-                <i className="fas fa-paper-plane text-white"></i>
+                <FaPaperPlane className="text-white" />
               </button>
             </form>
           </div>

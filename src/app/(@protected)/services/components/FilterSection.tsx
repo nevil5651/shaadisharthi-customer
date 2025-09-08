@@ -20,7 +20,7 @@ const FilterSection: React.FC<FilterSectionProps> = ({ filters, setFilters, onRe
     "Choreographers", "Beauty", "Entertainment"
   ];
 
-  const locations = ["Vadodara", "Rajkot", "Bangalore", "Hyderabad", "Chennai"];
+  const locations = ["Vadodara", "Rajkot", "Jamnagar", "Hyderabad", "Chennai"];
   const ratings = ["5", "4", "3", "2", "1"];
   const sortOptions = [
     { value: "popular", label: "Most Popular" },

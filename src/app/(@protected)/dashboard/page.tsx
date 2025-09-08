@@ -9,6 +9,7 @@ import { isAxiosError } from 'axios';
 import { BookingCardSkeleton } from './components/BookingCardSkeleton';
 import ServiceCardSkeleton from './components/ServiceCardSkeleton';
 import { useRecommendedServices } from '@/hooks/useRecommendedServices';
+import Link from 'next/link'; // Added import
 
 interface Booking {
   id: number;
@@ -92,12 +93,12 @@ export default function Dashboard() {
           <p className="text-lg text-gray-600 dark:text-gray-300 max-w-2xl mx-auto mb-8">
             Discover the best vendors, manage your bookings, and create unforgettable memories
           </p>
-          <a
+          <Link
             href="/services"
             className="inline-flex items-center bg-primary hover:bg-pink-700 text-white font-medium py-3 px-8 rounded-full transition-colors"
           >
             Explore Services <FaArrowRight className="ml-2" />
-          </a>
+          </Link>
         </div>
       </section>
 
@@ -107,7 +108,7 @@ export default function Dashboard() {
           <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 md:p-8">
             <h2 className="text-2xl font-serif font-bold text-gray-800 dark:text-white mb-4">Welcome Back!</h2>
             <p className="text-gray-600 dark:text-gray-300 mb-6">
-              You have {upcomingBookings.length} upcoming booking{upcomingBookings.length !== 1 ? 's' : ''}. Let's make your wedding planning journey smooth and memorable.
+              You have {upcomingBookings.length} upcoming booking{upcomingBookings.length !== 1 ? 's' : ''}. Let&apos;s make your wedding planning journey smooth and memorable.
             </p>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -128,9 +129,9 @@ export default function Dashboard() {
         <section className="mb-12">
           <div className="flex items-center justify-between mb-8">
             <h2 className="text-2xl font-serif font-bold text-gray-800 dark:text-white">Recommended For You</h2>
-            <a href="/services" className="text-primary hover:underline flex items-center">
+            <Link href="/services" className="text-primary hover:underline flex items-center">
               View All <FaArrowRight className="ml-1" />
-            </a>
+            </Link>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -170,9 +171,9 @@ export default function Dashboard() {
         <section className="mb-12">
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-2xl font-serif font-bold text-gray-800 dark:text-white">Upcoming Bookings</h2>
-            <a href="/bookings" className="text-primary hover:underline flex items-center">
+            <Link href="/bookings" className="text-primary hover:underline flex items-center">
               View All <FaArrowRight className="ml-1" />
-            </a>
+            </Link>
           </div>
 
           <div className="space-y-4">

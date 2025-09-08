@@ -7,7 +7,7 @@ export interface User {
 }
 
 export interface Service {
-  providerId(arg0: string, providerId: any): unknown;
+  providerId: string;
   serviceId: number;
   name: string;
   description: string;

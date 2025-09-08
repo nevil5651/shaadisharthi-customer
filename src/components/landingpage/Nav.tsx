@@ -38,7 +38,7 @@ const Nav: React.FC = () => {
               Login
             </button>
             <Link
-              href="http://localhost:3000/verify-email"
+              href="/verify-email"
               className="btn-primary hover:shadow-lg text-white py-2 px-4 rounded-full transition duration-300"
             >
               Register
@@ -62,7 +62,7 @@ const Nav: React.FC = () => {
           >
             Login
           </button>
-          <Link href="http://localhost:3000/verify-email" className="block py-2 text-gray-700 dark:text-gray-300 hover:text-primary dark:hover:text-pink-400 transition duration-300">
+          <Link href="/verify-email" className="block py-2 text-gray-700 dark:text-gray-300 hover:text-primary dark:hover:text-pink-400 transition duration-300">
             Register
           </Link>
         </div>

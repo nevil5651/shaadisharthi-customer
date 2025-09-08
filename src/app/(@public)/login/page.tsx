@@ -183,7 +183,7 @@ export default function Login() {
             </div>
 
             <div className="text-center text-gray-700 dark:text-gray-300 text-sm">
-              Don't have an account?{' '}
+              Don&apos;t have an account?{' '}
               <Link href="/verify-email" className="text-pink-500 font-medium hover:underline dark:text-pink-400">
                 Register now
               </Link>
