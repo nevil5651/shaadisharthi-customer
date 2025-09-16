@@ -10,8 +10,8 @@ import { FaSpinner, FaCalendarCheck } from 'react-icons/fa'; // Added missing ic
 const ServiceBookingForm = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const id = searchParams.get('id') || '';
-  const { service, loading, error, submitBooking } = useServiceBooking(id);
+  const serviceId = searchParams.get('serviceId') || '';
+  const { service, loading, error, submitBooking } = useServiceBooking(serviceId);
 
   const {
     register,
@@ -19,6 +19,14 @@ const ServiceBookingForm = () => {
     setValue,
     formState: { errors, isSubmitting },
   } = useForm<BookingFormData>();
+
+  // Redirect if serviceId is missing
+  useEffect(() => {
+    if (!loading && !serviceId) {
+      toast.error("No service was selected for booking.");
+      router.replace('/services'); // Use replace to not add to history
+    }
+  }, [serviceId, loading, router]);
 
   // Set form default values when service data is loaded
   useEffect(() => {

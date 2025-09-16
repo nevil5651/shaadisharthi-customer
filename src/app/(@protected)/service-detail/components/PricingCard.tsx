@@ -13,9 +13,9 @@ export function PricingCard({ service }: PricingCardProps) {
   const email = service.email || '✉️ Not available';
 
   const handleBookNow = () => {
-    const serviceString = JSON.stringify(service);
-    const encodedService = btoa(unescape(encodeURIComponent(serviceString)));
-    router.push(`/service-booking?serviceData=${encodeURIComponent(encodedService)}`);
+    // Pass only the service ID to the booking page.
+    // The booking page will be responsible for fetching the service details.
+    router.push(`/service-booking?serviceId=${service.serviceId}`);
   };
 
   return (
