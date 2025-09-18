@@ -1,4 +1,3 @@
-// src/app/api/auth/update/route.ts
 import { NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 
@@ -9,6 +8,8 @@ export async function POST(request: Request) {
   if (!sessionCookie) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
+
+  const baseUrl = process.env.NEXT_INTERNAL_API_URL ?? process.env.NEXT_PUBLIC_API_URL
 
   try {
     const updateData = await request.json()
@@ -34,7 +35,7 @@ export async function POST(request: Request) {
     }
 
     // Call your Java backend with proper JSON
-    const backendResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/Customer/cstmr-acc`, {
+    const backendResponse = await fetch(`${baseUrl}/Customer/cstmr-acc`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

@@ -1,7 +1,5 @@
-import type { NextConfig } from "next";
-
-const nextConfig: NextConfig = {
-
+/** @type {import('next').NextConfig} */
+const nextConfig = {
   images: {
     domains: ['res.cloudinary.com', 'ui-avatars.com'],
     remotePatterns: [
@@ -17,11 +15,10 @@ const nextConfig: NextConfig = {
         port: '',
         pathname: '/api/portraits/**', // Allow portrait images from randomuser.me
       },
-    ], 
-  
+    ],
   },
   basePath: '/customer',
-  /* config options here */
+  /* other config options here */
 };
 
-export default nextConfig;
+module.exports = nextConfig;

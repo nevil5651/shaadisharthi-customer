@@ -8,10 +8,12 @@ export async function GET() {
   if (!sessionCookie) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
+  
+  const baseUrl = process.env.NEXT_INTERNAL_API_URL ?? process.env.NEXT_PUBLIC_API_URL
 
   try {
     // Call your actual backend API
-    const backendResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/Customer/cstmr-acc`, {
+    const backendResponse = await fetch(`${baseUrl}/Customer/cstmr-acc`, {
       headers: {
         'Content-Type': 'application/json',
         'Cookie': `session=${sessionCookie}`
