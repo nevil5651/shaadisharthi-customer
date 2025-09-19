@@ -79,7 +79,7 @@ const VendorCard: React.FC<VendorCardProps> = ({ vendor }) => {
   // Normalize image URL to prevent invalid paths
   let imageUrl = vendor.imageUrl || '/img/default-vendor.jpg';
   if (imageUrl === '/img/default-service.jpg' || imageUrl === 'img/default-service.jpg') {
-    imageUrl = '/img/default-vendor.jpg';
+    imageUrl = 'https://res.cloudinary.com/jdscloud/image/upload/v1744811259/shaadisharthi/images/1744811255778_IMG_20191101_180029.jpg.jpg';
   }
   if (!imageUrl.startsWith('http') && !imageUrl.startsWith('/')) {
     imageUrl = `/${imageUrl}`;
