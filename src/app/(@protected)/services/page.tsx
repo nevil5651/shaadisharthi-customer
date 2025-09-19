@@ -53,19 +53,19 @@ const ServicePageContent: React.FC = () => {
     rating: '',
     sortBy: 'popular',
   };
-  
-  const { 
-    services, 
-    filters, 
-    setFilters, 
-    isLoading, 
-    error, 
-    hasMore, 
+
+  const {
+    services,
+    filters,
+    setFilters,
+    isLoading,
+    error,
+    hasMore,
     loaderRef,
     retryFetch,
-    resetFilters 
+    resetFilters
   } = useServices(initialFilters);
-  
+
   const mainRef = useRef<HTMLElement>(null);
 
   const memoizedFilters = useMemo(() => filters, [filters]);
@@ -161,15 +161,17 @@ const ServicePageContent: React.FC = () => {
 
         {/* Vendors Grid */}
         {services.length > 0 || isLoading ? (
+          // Replace this in the Vendors Grid section:
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             <AnimatePresence>
               {services.map((vendor) => (
                 <motion.div
-                  key={vendor.serviceId}
+                  key={vendor.serviceId} // Ensure stable keys
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0 }}
                   transition={{ duration: 0.3 }}
+                  className="min-h-[400px]" // Add minimum height constraint
                 >
                   <VendorCard vendor={vendor} />
                 </motion.div>

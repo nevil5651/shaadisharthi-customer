@@ -37,6 +37,8 @@ body {
 
 /* Landing Page */
 
+
+
 .hero-section {
   background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)),
     url('https://images.unsplash.com/photo-1519225421980-715cb0215aed?ixlib=rb-1.2.1&auto=format&fit=crop&w=1600&q=80')
@@ -189,6 +191,13 @@ body {
 .vendor-card {
   @apply rounded-lg shadow-sm overflow-hidden transition-shadow;
   transition: all 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.vendor-card .flex-grow {
+  flex-grow: 1;
 }
 
 .vendor-card:hover {
@@ -198,6 +207,16 @@ body {
 .vendor-card img {
   image-rendering: -webkit-optimize-contrast;
   backface-visibility: hidden;
+}
+
+@-moz-document url-prefix() {
+  .vendor-grid {
+    grid-auto-rows: 1fr; /* Ensure consistent row heights in Firefox */
+  }
+  
+  .vendor-card {
+    min-height: 400px; /* Force minimum height */
+  }
 }
 
 /* Prevent layout shift during image load 

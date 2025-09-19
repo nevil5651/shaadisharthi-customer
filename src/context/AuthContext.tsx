@@ -181,7 +181,7 @@ const logout = useCallback(async () => {
   const login = useCallback(async (credentials: Credentials) => {
     setIsLoading(true)
     try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL?.trim()
       if (!apiUrl) {
         throw new Error("API URL is not configured")
       }
