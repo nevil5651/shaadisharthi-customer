@@ -47,6 +47,7 @@ export const useServices = (initialFilters: ServiceFilters) => {
   const filtersRef = useRef(filters);
   const hasMoreRef = useRef(hasMore);
   const pageRef = useRef(page);
+  const filterChangeCount = useRef(0);  
 
   // Keep refs in sync
   useEffect(() => {
@@ -55,7 +56,14 @@ export const useServices = (initialFilters: ServiceFilters) => {
     pageRef.current = page;
   }, [filters, hasMore, page]);
 
+  useEffect(() => {
+  // Increment counter when key filters change
+  filterChangeCount.current += 1;
+}, [filters.category, filters.location, filters.sortBy]);
+
   const fetchServices = useCallback(async (isNewSearch = false) => {
+
+    const currentFilterCount = filterChangeCount.current;
     if (isFetchingRef.current) return;
     
     // Don't fetch if no more pages and not a new search
@@ -106,6 +114,10 @@ export const useServices = (initialFilters: ServiceFilters) => {
       });
       
       if (signal.aborted) return;
+
+      if (currentFilterCount !== filterChangeCount.current) {
+      return; // Discard results if filters changed during fetch
+  }
 
       const { services: backendServices, hasMore: more } = response.data;
 

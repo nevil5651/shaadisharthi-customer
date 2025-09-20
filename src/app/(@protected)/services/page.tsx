@@ -1,5 +1,5 @@
 'use client';
-import React, { useState, useRef, useMemo, Suspense } from 'react';
+import React, { useState, useRef, useMemo, Suspense, useEffect } from 'react';
 import Head from 'next/head';
 import { motion, AnimatePresence } from 'framer-motion';
 import dynamic from 'next/dynamic';
@@ -45,6 +45,7 @@ const categories = [
 
 const ServicePageContent: React.FC = () => {
   const [showAllCategories, setShowAllCategories] = useState(false);
+  const [isInitialLoad, setIsInitialLoad] = useState(true);
   const initialFilters: ServiceFilters = {
     category: '',
     location: '',
@@ -69,6 +70,12 @@ const ServicePageContent: React.FC = () => {
   const mainRef = useRef<HTMLElement>(null);
 
   const memoizedFilters = useMemo(() => filters, [filters]);
+
+  useEffect(() => {
+    if (services.length > 0 || error) {
+      setIsInitialLoad(false);
+    }
+  }, [services, error]);
 
   // const handleFilterChange = (e: React.ChangeEvent<HTMLSelectElement | HTMLInputElement>) => {
   //   const { name, value } = e.target;
@@ -160,26 +167,29 @@ const ServicePageContent: React.FC = () => {
         </div>
 
         {/* Vendors Grid */}
-        {services.length > 0 || isLoading ? (
-          // Replace this in the Vendors Grid section:
+
+        {isInitialLoad ? (
+          <VendorGridSkeleton count={8} />
+        ) : services.length > 0 || isLoading ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            <AnimatePresence>
+            <AnimatePresence mode="popLayout">
               {services.map((vendor) => (
                 <motion.div
-                  key={vendor.serviceId} // Ensure stable keys
+                  key={`${vendor.serviceId}-${filters.category}-${filters.location}-${filters.sortBy}`}
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0 }}
+                  exit={{ opacity: 0, scale: 0.95 }}
                   transition={{ duration: 0.3 }}
-                  className="min-h-[400px]" // Add minimum height constraint
+                  layout
                 >
                   <VendorCard vendor={vendor} />
                 </motion.div>
               ))}
             </AnimatePresence>
+            {isLoading && <VendorGridSkeleton count={4} />}
           </div>
         ) : (
-          <EmptyState />
+          <EmptyState onReset={resetFilters} />
         )}
 
         {/* Loading State */}
