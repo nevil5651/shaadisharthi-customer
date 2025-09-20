@@ -14,7 +14,7 @@ const FilterSection: React.FC<FilterSectionProps> = ({ filters, setFilters, onRe
   const [localFilters, setLocalFilters] = React.useState(filters);
 
   const categories = [
-    "Photography", "Venues", "Sound", "Caterers", "Decoration",
+    "Photography", "Venues", "Sound", "Catering", "Decoration",
     "Bridal Wear", "Jewellery", "Favors", "Planners", "Bridal Makeup",
     "Videographers", "Groom Wear", "Mehendi Artists", "Cakes", "Cards",
     "Choreographers", "Beauty", "Entertainment"

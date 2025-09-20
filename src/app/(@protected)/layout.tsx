@@ -8,6 +8,7 @@ import { redirect } from 'next/navigation';
 import { Metadata } from 'next';
 import ToastProvider from '@/components/ToastProvider'
 import AuthHandler from '@/components/auth/AuthHandler'
+import Providers from './services/components/providers';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -42,7 +43,7 @@ export default async function ProtectedLayout({ children }: LayoutProps) {
               <>
                 <ToastProvider />
               </>
-              {children}
+              <Providers>{children}</Providers>
             </div>
           </main>
           <Footer />

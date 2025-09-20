@@ -6,7 +6,10 @@ import dynamic from 'next/dynamic';
 import ErrorBoundary from './components/ErrorBoundary';
 import VendorGridSkeleton from './components/VendorGridSkeleton';
 import EmptyState from './components/EmptyState';
-import { useServices, ServiceFilters } from '@/hooks/useServices';
+import { useServices, useServiceCategories } from '@/hooks/useServicesQuery';
+import { useDebounce } from '@/hooks/useDebounce';
+import { useIntersectionObserver } from '@/hooks/useIntersectionObserver';
+import { ServiceFilters } from '@/hooks/useServicesQuery';
 import { ChevronDownIcon, ChevronUpIcon } from './components/Icons';
 
 // Dynamically import heavy components
@@ -23,29 +26,9 @@ const VendorCard = dynamic(() => import('./components/VendorCard'), {
   loading: () => <div className="h-64 bg-gray-100 dark:bg-gray-800 rounded-lg animate-pulse" />,
 });
 
-const categories = [
-  { name: 'Photography', icon: 'fa-camera', color: { bg: 'bg-indigo-100 dark:bg-indigo-900', text: 'text-indigo-600 dark:text-indigo-300' } },
-  { name: 'Venues', icon: 'fa-building', color: { bg: 'bg-purple-100 dark:bg-purple-900', text: 'text-purple-600 dark:text-purple-300' } },
-  { name: 'Sound', icon: 'fa-volume-up', color: { bg: 'bg-purple-100 dark:bg-purple-900', text: 'text-purple-600 dark:text-purple-300' } },
-  { name: 'Caterers', icon: 'fa-utensils', color: { bg: 'bg-green-100 dark:bg-green-900', text: 'text-green-600 dark:text-green-300' } },
-  { name: 'Decoration', icon: 'fa-paint-brush', color: { bg: 'bg-pink-100 dark:bg-pink-900', text: 'text-pink-600 dark:text-pink-300' } },
-  { name: 'Bridal Wear', icon: 'fa-tshirt', color: { bg: 'bg-red-100 dark:bg-red-900', text: 'text-red-600 dark:text-red-300' } },
-  { name: 'Jewellery', icon: 'fa-gem', color: { bg: 'bg-yellow-100 dark:bg-yellow-900', text: 'text-yellow-600 dark:text-yellow-300' } },
-  { name: 'Favors', icon: 'fa-gift', color: { bg: 'bg-blue-100 dark:bg-blue-900', text: 'text-blue-600 dark:text-blue-300' } },
-  { name: 'Planners', icon: 'fa-clipboard-list', color: { bg: 'bg-teal-100 dark:bg-teal-900', text: 'text-teal-600 dark:text-teal-300' } },
-  { name: 'Bridal Makeup', icon: 'fa-magic', color: { bg: 'bg-pink-100 dark:bg-pink-900', text: 'text-pink-600 dark:text-pink-300' } },
-  { name: 'Videographers', icon: 'fa-video', color: { bg: 'bg-indigo-100 dark:bg-indigo-900', text: 'text-indigo-600 dark:text-indigo-300' } },
-  { name: 'Groom Wear', icon: 'fa-user-tie', color: { bg: 'bg-blue-100 dark:bg-blue-900', text: 'text-blue-600 dark:text-blue-300' } },
-  { name: 'Mehendi Artists', icon: 'fa-paint-brush', color: { bg: 'bg-orange-100 dark:bg-orange-900', text: 'text-orange-600 dark:text-orange-300' } },
-  { name: 'Cakes', icon: 'fa-birthday-cake', color: { bg: 'bg-pink-100 dark:bg-pink-900', text: 'text-pink-600 dark:text-pink-300' } },
-  { name: 'Cards', icon: 'fa-envelope', color: { bg: 'bg-red-100 dark:bg-red-900', text: 'text-red-600 dark:text-red-300' } },
-  { name: 'Choreographers', icon: 'fa-music', color: { bg: 'bg-purple-100 dark:bg-purple-900', text: 'text-purple-600 dark:text-purple-300' } },
-  { name: 'Entertainment', icon: 'fa-star', color: { bg: 'bg-yellow-100 dark:bg-yellow-900', text: 'text-yellow-600 dark:text-yellow-300' } },
-];
-
 const ServicePageContent: React.FC = () => {
   const [showAllCategories, setShowAllCategories] = useState(false);
-  const [isInitialLoad, setIsInitialLoad] = useState(true);
+  //const debouncedFilters = useDebounce(filters, 300);
   const initialFilters: ServiceFilters = {
     category: '',
     location: '',
@@ -55,49 +38,45 @@ const ServicePageContent: React.FC = () => {
     sortBy: 'popular',
   };
 
-  const {
-    services,
-    filters,
-    setFilters,
-    isLoading,
-    error,
-    hasMore,
-    loaderRef,
-    retryFetch,
-    resetFilters
-  } = useServices(initialFilters);
+  const [filters, setFilters] = useState(initialFilters);
+ // const { services, filters, setFilters, isLoading, error, hasMore, loaderRef, retryFetch, resetFilters } = useServices(initialFilters);
+const debouncedFilters = useDebounce(filters, 300);
+  const { data: categories = [] } = useServiceCategories();
+
+  const { data, isLoading, error, fetchNextPage, hasNextPage, isFetchingNextPage } = useServices(debouncedFilters);
 
   const mainRef = useRef<HTMLElement>(null);
 
-  const memoizedFilters = useMemo(() => filters, [filters]);
+  // Flatten all pages of services
+  const services = useMemo(() => {
+    return data?.pages.flatMap(page => page.services) || [];
+  }, [data]);
 
-  useEffect(() => {
-    if (services.length > 0 || error) {
-      setIsInitialLoad(false);
-    }
-  }, [services, error]);
-
-  // const handleFilterChange = (e: React.ChangeEvent<HTMLSelectElement | HTMLInputElement>) => {
-  //   const { name, value } = e.target;
-  //   setFilters({ ...filters, [name]: value });
-  // };
-
-  // const handleResetFilters = () => {
-  //   resetFilters();
-  // };
-
-  const handleCategoryClick = (category: string) => {
-    setFilters({
-      ...memoizedFilters,
-      category: memoizedFilters.category === category ? '' : category,
-    });
+  // Reset filters function
+  const resetFilters = () => {
+    setFilters(initialFilters);
   };
 
-  const handleRetry = () => {
-    retryFetch();
+  const handleCategoryClick = (category: string) => { // Fix: Ensure prev has all properties of ServiceFilters
+    setFilters((prev: ServiceFilters) => ({
+      ...prev,
+      category: prev.category === category ? '' : category,
+    }));
   };
 
   const displayedCategories = showAllCategories ? categories : categories.slice(0, 6);
+
+  // Infinite scroll observer
+  const [observedLoaderRef, isLoaderIntersecting] = useIntersectionObserver({
+    threshold: 0.5,
+    rootMargin: '100px',
+  });
+
+  useEffect(() => {
+    if (isLoaderIntersecting && hasNextPage && !isFetchingNextPage) {
+      fetchNextPage();
+    }
+  }, [isLoaderIntersecting, hasNextPage, isFetchingNextPage, fetchNextPage]);
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-50 dark:bg-gray-900">
@@ -120,7 +99,7 @@ const ServicePageContent: React.FC = () => {
         {/* Filter Section - Sticky */}
         <div className="sticky top-0 z-10 bg-gray-50 dark:bg-gray-900 pt-4 pb-2">
           <FilterSection
-            filters={memoizedFilters}
+            filters={filters}
             setFilters={setFilters}
             onResetFilters={resetFilters}
           />
@@ -139,7 +118,7 @@ const ServicePageContent: React.FC = () => {
                   category={category.name}
                   icon={category.icon}
                   colorClass={category.color}
-                  isSelected={memoizedFilters.category === category.name}
+                  isSelected={filters.category === category.name}
                   onClick={handleCategoryClick}
                 />
               ))}
@@ -159,7 +138,7 @@ const ServicePageContent: React.FC = () => {
         {/* Results Header */}
         <div className="flex items-center justify-between mb-8">
           <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-200">
-            {memoizedFilters.category ? `${memoizedFilters.category} Vendors` : 'All Vendors'}
+            {filters.category ? `${filters.category} Vendors` : 'All Vendors'}
             <span className="text-sm font-normal text-gray-500 dark:text-gray-400 ml-2">
               ({services.length} results)
             </span>
@@ -167,64 +146,56 @@ const ServicePageContent: React.FC = () => {
         </div>
 
         {/* Vendors Grid */}
-
-        {isInitialLoad ? (
+        {isLoading ? (
           <VendorGridSkeleton count={8} />
-        ) : services.length > 0 || isLoading ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            <AnimatePresence mode="popLayout">
-              {services.map((vendor) => (
-                <motion.div
-                  key={`${vendor.serviceId}-${filters.category}-${filters.location}-${filters.sortBy}`}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, scale: 0.95 }}
-                  transition={{ duration: 0.3 }}
-                  layout
-                >
-                  <VendorCard vendor={vendor} />
-                </motion.div>
-              ))}
-            </AnimatePresence>
-            {isLoading && <VendorGridSkeleton count={4} />}
+        ) : error ? (
+          <div className="text-center py-12">
+            <p className="text-red-600 dark:text-red-400 mb-4">Failed to load vendors</p>
+            <button
+              onClick={() => window.location.reload()}
+              className="px-4 py-2 bg-primary text-white rounded hover:bg-primary-dark"
+            >
+              Try Again
+            </button>
           </div>
+        ) : services.length > 0 ? (
+          <>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              <AnimatePresence>
+                {services.map((vendor) => (
+                  <motion.div
+                    key={vendor.serviceId}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.3 }}
+                  >
+                    <VendorCard vendor={vendor} />
+                  </motion.div>
+                ))}
+              </AnimatePresence>
+            </div>
+
+            {/* Load more indicator */}
+            <div
+              ref={observedLoaderRef}
+              className="text-center py-8 min-h-[50px]"
+            >
+              {isFetchingNextPage ? (
+                <div className="flex items-center justify-center gap-2">
+                  <div className="animate-spin rounded-full w-6 h-6 border-b-2 border-pink-600"></div>
+                  <span className="text-pink-600 font-medium">Loading more vendors...</span>
+                </div>
+              ) : hasNextPage ? (
+                <span className="text-gray-600 dark:text-gray-400">Scroll to load more</span>
+              ) : services.length > 0 ? (
+                <span className="text-gray-600 dark:text-gray-400">All vendors loaded</span>
+              ) : null}
+            </div>
+          </>
         ) : (
           <EmptyState onReset={resetFilters} />
         )}
-
-        {/* Loading State */}
-        {isLoading && <VendorGridSkeleton count={8} />}
-
-        {/* Loader */}
-        <div
-          ref={loaderRef}
-          className="text-center py-8 min-h-[50px]"
-          style={{ minHeight: '50px', visibility: 'visible', position: 'relative' }}
-        >
-          {isLoading ? (
-            <div className="flex items-center justify-center gap-2">
-              <div className="animate-spin rounded-full w-6 h-6 border-b-2 border-pink-600"></div>
-              <span className="text-pink-600 font-medium">Fetching more wedding vendors...</span>
-            </div>
-          ) : error ? (
-            <div className="flex flex-col items-center gap-4">
-              <span className="text-red-600 dark:text-red-400">{error}</span>
-              <button
-                onClick={handleRetry}
-                className="px-4 py-2 bg-primary text-white rounded hover:bg-primary-dark"
-              >
-                Retry
-              </button>
-            </div>
-          ) : hasMore ? (
-            <div className="flex items-center justify-center gap-2">
-              <div className="animate-spin rounded-full w-6 h-6 border-b-2 border-pink-600"></div>
-              <span className="text-pink-600 font-medium">Scroll to discover more vendors...</span>
-            </div>
-          ) : (
-            <span className="text-gray-600 dark:text-gray-400">No more vendors to show</span>
-          )}
-        </div>
       </main>
     </div>
   );

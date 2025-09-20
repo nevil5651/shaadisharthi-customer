@@ -41,6 +41,7 @@ export const useServices = (initialFilters: ServiceFilters) => {
   const [error, setError] = useState('');
   const loaderRef = useRef<HTMLDivElement>(null);
   
+  
   // Refs to avoid recreating fetchServices
   const isFetchingRef = useRef(false);
   const abortControllerRef = useRef<AbortController | null>(null);
@@ -209,6 +210,8 @@ export const useServices = (initialFilters: ServiceFilters) => {
     setError('');
     fetchServices(true);
   }, [fetchServices]);
+
+  
 
   return { 
     services, 
