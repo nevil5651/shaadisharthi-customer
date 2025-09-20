@@ -43,7 +43,7 @@ class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundarySta
             <div className="text-4xl mb-4">😔</div>
             <h2 className="text-xl font-semibold mb-2 text-gray-800 dark:text-white">Something went wrong</h2>
             <p className="text-gray-600 dark:text-gray-300 mb-4">
-              We're having trouble loading this content. Please try refreshing the page.
+              We&apos;re having trouble loading this content. Please try refreshing the page.
             </p>
             <button
               onClick={this.resetError}
