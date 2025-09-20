@@ -91,7 +91,7 @@ function Header() {
 
           {/* Icons */}
           <div className="flex items-center space-x-6">
-            <div className="relative">
+            {/* <div className="relative">
               <button 
                 className="text-gray-600 dark:text-gray-300 hover:text-pink-500 relative"
                 onClick={toggleNotif}
@@ -104,15 +104,15 @@ function Header() {
               </button>
               
               <NotificationDropdown notifOpen={notifOpen} />
-            </div>
+            </div> */}
 
             {/* <div className=" top-4 right-4">
               <ThemeToggle />
             </div> */}
 
-            <Link href="/cart" className="text-gray-600 dark:text-gray-300 hover:text-pink-500" aria-label="Shopping Cart">
+            {/* <Link href="/cart" className="text-gray-600 dark:text-gray-300 hover:text-pink-500" aria-label="Shopping Cart">
               <FaShoppingBag className="text-xl" />
-            </Link>
+            </Link> */}
 
             <div className="relative">
               <button 
