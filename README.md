@@ -99,15 +99,24 @@ Customers can explore vendors, filter services, book them, and manage their book
 ```bash
 git clone https://github.com/your-username/shaadisharthi-customer.git
 cd shaadisharthi-customer
+```
 
 ### 2. Install dependencies
+```bash
 npm install
+```
 
 ### 3.Create .env file at Root of Project
+```bash
+touch .env
 NEXT_PUBLIC_API_URL=http://localhost:8080/api
+```
+
 
 ### 4.Run development server
+```bash
 npm run dev
+```
 
 
 
