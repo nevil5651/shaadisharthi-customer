@@ -32,7 +32,7 @@ const ServiceBookingForm = () => {
   useEffect(() => {
     if (service) {
       setValue('service_id', service.serviceId);
-      setValue('service_name', service.name);
+      setValue('service_name', service.serviceName);
       setValue('service_price', service.price);
       setValue('email', service.email || '');
     }
@@ -40,10 +40,10 @@ const ServiceBookingForm = () => {
 
   // Update document title
   useEffect(() => {
-    if (service?.name) {
-      document.title = `Book ${service.name} | ShaadiSharthi`;
+    if (service?.serviceName) {
+      document.title = `Book ${service.serviceName} | ShaadiSharthi`;
     }
-  }, [service?.name]);
+  }, [service?.serviceName]);
 
   const onSubmit = async (data: BookingFormData) => {
     try {
@@ -82,7 +82,7 @@ const ServiceBookingForm = () => {
           
           {/* Service Header */}
           <div className="bg-gradient-to-r text-center mb-4 from-primary/5 to-secondary/5 dark:from-primary/10 dark:to-secondary/10 p-6 border-b border-gray-100 dark:border-gray-700">
-                  <h1 className="text-3xl font-bold font-serif text-gray-800 dark:text-white">  Book {service.name} </h1>
+                  <h1 className="text-3xl font-bold font-serif text-gray-800 dark:text-white">  Book {service.serviceName} </h1>
                   <p className="opacity-90 text-gray-600 dark:text-gray-400">Complete your booking details below</p>
           </div>
           
@@ -91,7 +91,7 @@ const ServiceBookingForm = () => {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
                 <p className="text-sm text-gray-500 dark:text-gray-400">Service</p>
-                <p className="font-medium text-gray-800 dark:text-white">{service.name}</p>
+                <p className="font-medium text-gray-800 dark:text-white">{service.serviceName}</p>
               </div>
               <div>
                 <p className="text-sm text-gray-500 dark:text-gray-400">Provider</p>

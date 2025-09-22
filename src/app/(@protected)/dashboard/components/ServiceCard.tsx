@@ -63,7 +63,7 @@ export default function ServiceCard({ service }: { service: Service }) {
         )}
         <Image
           src={imageUrl}
-          alt={service.name}
+          alt={service.serviceName}
           fill
           className="object-cover"
           onLoad={() => setImageLoaded(true)}
@@ -78,7 +78,7 @@ export default function ServiceCard({ service }: { service: Service }) {
       
       <div className="p-4 flex flex-col flex-grow">
         <h3 className="font-bold text-gray-800 dark:text-white text-lg mb-2 line-clamp-2">
-          {service.name}
+          {service.serviceName}
         </h3>
         
         <div className="mt-auto pt-2">

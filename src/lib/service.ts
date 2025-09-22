@@ -5,7 +5,7 @@ export interface Service {
     serviceId: number;
     providerId: string; // <-- add this
     imageUrl: string; 
-    name: string;
+    serviceName: string;
     businessName: string;
     description: string;
     price: number;

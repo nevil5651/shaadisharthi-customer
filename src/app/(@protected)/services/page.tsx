@@ -92,7 +92,7 @@ const ServicePageContent: React.FC = () => {
       ],
       undefined // Clear cached data
     );
-  }, [filters.sortBy, filters.category, queryClient]); // Reset on major changes
+  }, [filters.sortBy, filters.category, filters.location, filters.minPrice, filters.maxPrice, filters.rating, queryClient]);
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-50 dark:bg-gray-900">
@@ -186,7 +186,7 @@ const ServicePageContent: React.FC = () => {
                     exit={{ opacity: 0 }}
                     transition={{ duration: 0.3 }}
                   >
-                    <VendorCard vendor={vendor} />
+                    <VendorCard service={vendor} />
                   </motion.div>
                 ))}
               </AnimatePresence>

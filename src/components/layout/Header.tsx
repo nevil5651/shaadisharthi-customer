@@ -1,9 +1,7 @@
 'use client'
 import { useAuth } from '@/context/useAuth';
 import { useState, useCallback, memo } from 'react';
-import { 
-  FaBell, 
-  FaShoppingBag, 
+import {
   FaUser,
   FaRing
 } from 'react-icons/fa';
@@ -54,12 +52,10 @@ const UserDropdown = memo(({
 UserDropdown.displayName = 'UserDropdown';
 
 function Header() {
-  const [notifOpen, setNotifOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const { logout, isLoggingOut } = useAuth();
 
   // Memoize click handlers to prevent unnecessary re-renders
-  const toggleNotif = useCallback(() => setNotifOpen(prev => !prev), []);
   const toggleUserMenu = useCallback(() => setUserMenuOpen(prev => !prev), []);
 
   return (

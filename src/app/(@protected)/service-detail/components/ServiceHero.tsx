@@ -13,7 +13,7 @@ export default function ServiceHero({ service }: ServiceHeroProps) {
         {service.imageUrl && service.imageUrl.trim() !== '' ? (
           <Image
             src={service.imageUrl}
-            alt={service.name}
+            alt={service.serviceName}
             width={160}
             height={160}
             className="rounded-full border-4 border-white dark:border-gray-800 shadow-lg mr-0 md:mr-8 mb-4 md:mb-0"
@@ -25,7 +25,7 @@ export default function ServiceHero({ service }: ServiceHeroProps) {
         )}
         <div className="text-center md:text-left">
           <h1 className="text-3xl md:text-4xl font-heading font-bold text-gray-900 dark:text-white">
-            {service.name}
+            {service.serviceName}
           </h1>
           <p className="text-gray-600 dark:text-gray-300 mt-2">by {service.businessName}</p>
           <div className="mt-4 flex justify-center md:justify-start items-center">

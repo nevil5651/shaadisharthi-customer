@@ -16,7 +16,7 @@ export interface ServiceFilters {
 }
 
 // This interface represents the shape of the service object coming directly from the backend API.
-interface BackendService {
+export interface BackendService {
   providerId?: string;
   serviceId: number;
   serviceName: string;

@@ -9,7 +9,7 @@ export interface User {
 export interface Service {
   providerId: string;
   serviceId: number;
-  name: string;
+  serviceName: string;
   description: string;
   price: number;
   rating: number;
