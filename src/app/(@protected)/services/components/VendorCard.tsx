@@ -90,7 +90,7 @@ const VendorCard: React.FC<VendorCardProps> = ({ service }) => {
       <div className="relative h-48 overflow-hidden">
         <Image
           src={imageUrl}
-          alt={service.serviceName  || service.businessName || 'Vendor Image'}
+          alt={service.serviceName || service.businessName || 'Vendor Image'}
           width={300}
           height={200}
           className="object-cover transition-transform duration-500 hover:scale-105"
@@ -108,27 +108,21 @@ const VendorCard: React.FC<VendorCardProps> = ({ service }) => {
       </div>
 
       <div className="p-5 flex flex-col flex-grow">
-        <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-1 line-clamp-1 relative group" title={service.serviceName || service.businessName}>
-          {service.serviceName || service.businessName || 'Service Name'}
-          <span className="absolute hidden group-hover:block bg-gray-800 dark:bg-gray-700 text-white dark:text-gray-200 text-xs rounded py-1 px-2 -top-8 left-1/2 transform -translate-x-1/2 z-10">
-            {service.serviceName || service.businessName}
-          </span>
+        <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-1 line-clamp-2 h-12 overflow-hidden">
+          {service.serviceName || service.businessName || 'Service Name '}
         </h3>
 
-        <div className="flex items-center text-gray-500 dark:text-gray-400 text-sm mb-2 relative group">
-          <MapMarkerIcon className="mr-1 text-xs" />
-          <span className="truncate" title={service.location}>{service.location}</span>
-          <span className="absolute hidden group-hover:block bg-gray-800 dark:bg-gray-700 text-white dark:text-gray-200 text-xs rounded py-1 px-2 -top-8 left-1/2 transform -translate-x-1/2 z-10">
-            {service.location}
-          </span>
+        <div className="flex items-center text-gray-500 dark:text-gray-400 text-sm mb-2 h-6 overflow-hidden">
+          <MapMarkerIcon className="mr-1 text-xs shrink-0" />
+          <span className="truncate">{service.location}</span>
         </div>
 
-        <div className="flex items-center mb-3">
+        <div className="flex items-center mb-3 h-6">
           <RatingStars rating={service.rating} />
           <span className="text-xs text-gray-500 dark:text-gray-400 ml-1">({service.reviewCount})</span>
         </div>
 
-        <div className="mt-auto pt-3 border-t border-gray-100 dark:border-gray-700 flex justify-between items-end">
+        <div className="mt-auto pt-3 border-t border-gray-100 dark:border-gray-700 flex justify-between items-end min-h-[60px]">
           <div className="flex flex-col min-w-0">
             <span className="text-xl font-bold text-primary dark:text-pink-400 truncate" title={fullPrice}>
               ₹{formatPrice(service.price)}

@@ -41,7 +41,11 @@ const ServicePageContent: React.FC = () => {
 
   const [filters, setFilters] = useState(initialFilters);
   const queryClient = useQueryClient();
-  const debouncedFilters = useDebounce(filters, 300);
+  const previousFiltersRef = useRef(filters);
+  const isLinux = typeof window !== 'undefined' && 
+  window.navigator.userAgent.toLowerCase().includes('linux');
+  
+  const debouncedFilters = useDebounce(filters, isLinux ? 500 : 300);
   const { data: categories = [] } = useServiceCategories();
 
   const { data, isLoading, error, fetchNextPage, hasNextPage, isFetchingNextPage } = useServices(debouncedFilters);
@@ -80,19 +84,30 @@ const ServicePageContent: React.FC = () => {
   }, [isLoaderIntersecting, hasNextPage, isFetchingNextPage, fetchNextPage]);
 
   useEffect(() => {
-    // Reset to page 1 when sort or category changes significantly
-    queryClient.setQueryData(
-      ['services', 
-        filters.category, 
-        filters.location, 
-        filters.sortBy,
-        filters.minPrice,
-        filters.maxPrice, 
-        filters.rating
-      ],
-      undefined // Clear cached data
-    );
-  }, [filters.sortBy, filters.category, filters.location, filters.minPrice, filters.maxPrice, filters.rating, queryClient]);
+    const previous = previousFiltersRef.current;
+    const current = filters;
+    
+    // Only reset cache when sort, category, or location changes significantly
+    const shouldResetCache = 
+      previous.sortBy !== current.sortBy ||
+      previous.category !== current.category ||
+      previous.location !== current.location;
+    
+    if (shouldResetCache) {
+      queryClient.removeQueries({
+        queryKey: ['services'],
+        predicate: (query) => {
+          // Only remove old cache entries, keep current
+          const queryFilters = query.queryKey[1] as any;
+          return queryFilters !== current.category || 
+                 queryFilters !== current.location ||
+                 queryFilters !== current.sortBy;
+        }
+      });
+    }
+    
+    previousFiltersRef.current = current;
+  }, [filters, queryClient]);
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-50 dark:bg-gray-900">
@@ -162,7 +177,8 @@ const ServicePageContent: React.FC = () => {
         </div>
 
         {/* Vendors Grid */}
-        {isLoading ? (
+        {isLoading && services.length === 0 ? (
+          // Initial load or major filter change
           <VendorGridSkeleton count={8} />
         ) : error ? (
           <div className="text-center py-12">
@@ -176,11 +192,21 @@ const ServicePageContent: React.FC = () => {
           </div>
         ) : services.length > 0 ? (
           <>
+            {/* Show loading indicator during background updates */}
+            {isLoading && (
+              <div className="mb-4 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                <div className="flex items-center justify-center gap-2">
+                  <div className="animate-spin rounded-full w-4 h-4 border-b-2 border-blue-600"></div>
+                  <span className="text-blue-600 dark:text-blue-400 text-sm">Updating results...</span>
+                </div>
+              </div>
+            )}
+
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               <AnimatePresence>
-                {services.map((vendor) => (
+                {services.map((vendor, index) => (
                   <motion.div
-                    key={`${vendor.serviceId}-${filters.category}-${filters.location}-${filters.sortBy}`}
+                    key={`${vendor.serviceId}-${filters.category}-${filters.location}-${filters.sortBy}                       `}
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0 }}
@@ -191,6 +217,7 @@ const ServicePageContent: React.FC = () => {
                 ))}
               </AnimatePresence>
             </div>
+
 
             {/* Load more indicator */}
             <div

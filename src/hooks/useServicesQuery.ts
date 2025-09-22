@@ -2,6 +2,8 @@ import { useInfiniteQuery, useQuery } from '@tanstack/react-query';
 import api from '@/lib/axios';
 import { Service } from '@/lib/types';
 import { ServiceFilters } from './useServices';
+import { useCancelableRequests } from '@/hooks/useCancelableRequests';
+import { useRef } from 'react';
 
 interface ServicesResponse {
   services: Service[];
@@ -10,18 +12,32 @@ interface ServicesResponse {
 }
 
 export const useServices = (filters: ServiceFilters) => {
+  // Add request ID to track the latest request
+  const requestIdRef = useRef(0);
+  const { createController, cancelAll } = useCancelableRequests();
+  
+  
   return useInfiniteQuery<ServicesResponse>({
-    initialPageParam: 1, // Add initialPageParam
+    initialPageParam: 1,
     queryKey: ['services', 
-  filters.category, 
-  filters.location, 
-  filters.sortBy, // Critical: separate cache by sort
-  filters.minPrice,
-  filters.maxPrice, 
-  filters.rating
-], 
+      filters.category, 
+      filters.location, 
+      filters.sortBy,
+      filters.minPrice,
+      filters.maxPrice, 
+      filters.rating
+    ],
     queryFn: async ({ pageParam = 1 }) => {
-      const query = new URLSearchParams({
+      // Create a unique ID for this request
+      
+      const currentRequestId = ++requestIdRef.current;
+      cancelAll();
+
+      const controller = createController();
+      const signal = controller.signal;
+
+      try {
+        const query = new URLSearchParams({
         page: String(pageParam),
         limit: '12',
         ...(filters.category && { category: filters.category }),
@@ -32,19 +48,31 @@ export const useServices = (filters: ServiceFilters) => {
         ...(filters.sortBy && { sortBy: filters.sortBy }),
       }).toString();
 
-      const response = await api.get(`/Customer/services?${query}`);
-      
-      return {
-        services: response.data.services,
-        hasMore: response.data.hasMore,
-        nextPage: (pageParam as number) + 1,
-      };
+      const response = await api.get(`/Customer/services?${query}`, { signal });
+        
+        if (currentRequestId !== requestIdRef.current) {
+          throw new Error('Request outdated');
+        }
+
+        return {
+          services: response.data.services,
+          hasMore: response.data.hasMore,
+          nextPage: (pageParam as number) + 1,
+        };
+      }
+      catch (error: any) {
+        if (error.name !== 'AbortError') {
+          throw error;
+        }
+
+        return { services: [], hasMore: false, nextPage: 1 };
+        }
     },
+    
     getNextPageParam: (lastPage) => {
       return lastPage.hasMore ? lastPage.nextPage : undefined;
     },
-    // keepPreviousData: true, // This option has been removed in TanStack Query v4/v5. Use `placeholderData` or `select` for similar effects.
-    refetchOnMount: false, // Prevents refetching on component mount
+    refetchOnMount: false,
   });
 };
 
