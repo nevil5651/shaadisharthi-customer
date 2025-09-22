@@ -46,6 +46,22 @@ Customers can explore vendors, filter services, book them, and manage their book
   - Name, location, rating & total reviews.  
   - Starting price (flexible).  
   - **View button** → Detailed service page.  
+- We have used the ReactQuery in this Page Which helps in 
+
+**Scalability**: 
+- Cache grows linearly with user behavior, not exponentially
+- Automatic garbage collection prevents memory bloat
+- Lazy loading ensures only visible content uses resources
+
+**User Experience**:
+- Instant loading when switching between common filters
+- Smooth animations during sort changes
+- Offline capability for recently viewed services
+
+**Performance**:
+- React efficiently updates only changed components
+- Images load only when visible (lazy loading)
+- Debounced filters prevent API spam
 
 #### 🔎 Service Filters  
 - Filter by category, location, price range, and rating.  

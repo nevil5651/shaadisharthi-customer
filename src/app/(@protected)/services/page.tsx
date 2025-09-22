@@ -11,6 +11,7 @@ import { useDebounce } from '@/hooks/useDebounce';
 import { useIntersectionObserver } from '@/hooks/useIntersectionObserver';
 import { ServiceFilters } from '@/hooks/useServicesQuery';
 import { ChevronDownIcon, ChevronUpIcon } from './components/Icons';
+import { useQueryClient } from '@tanstack/react-query';
 
 // Dynamically import heavy components
 const FilterSection = dynamic(() => import('./components/FilterSection'), {
@@ -39,8 +40,8 @@ const ServicePageContent: React.FC = () => {
   };
 
   const [filters, setFilters] = useState(initialFilters);
- // const { services, filters, setFilters, isLoading, error, hasMore, loaderRef, retryFetch, resetFilters } = useServices(initialFilters);
-const debouncedFilters = useDebounce(filters, 300);
+  const queryClient = useQueryClient();
+  const debouncedFilters = useDebounce(filters, 300);
   const { data: categories = [] } = useServiceCategories();
 
   const { data, isLoading, error, fetchNextPage, hasNextPage, isFetchingNextPage } = useServices(debouncedFilters);
@@ -77,6 +78,21 @@ const debouncedFilters = useDebounce(filters, 300);
       fetchNextPage();
     }
   }, [isLoaderIntersecting, hasNextPage, isFetchingNextPage, fetchNextPage]);
+
+  useEffect(() => {
+    // Reset to page 1 when sort or category changes significantly
+    queryClient.setQueryData(
+      ['services', 
+        filters.category, 
+        filters.location, 
+        filters.sortBy,
+        filters.minPrice,
+        filters.maxPrice, 
+        filters.rating
+      ],
+      undefined // Clear cached data
+    );
+  }, [filters.sortBy, filters.category, queryClient]); // Reset on major changes
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-50 dark:bg-gray-900">
@@ -164,7 +180,7 @@ const debouncedFilters = useDebounce(filters, 300);
               <AnimatePresence>
                 {services.map((vendor) => (
                   <motion.div
-                    key={vendor.serviceId}
+                    key={`${vendor.serviceId}-${filters.category}-${filters.location}-${filters.sortBy}`}
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0 }}

@@ -87,16 +87,19 @@ const VendorCard: React.FC<VendorCardProps> = ({ vendor }) => {
 
   return (
     <div className="vendor-card bg-white dark:bg-gray-800 rounded-lg shadow-sm dark:shadow-md overflow-hidden hover:shadow-md dark:hover:shadow-lg transition-all duration-300 hover:-translate-y-1 flex flex-col h-full">
-        <div className="relative h-48 overflow-hidden">
+      <div className="relative h-48 overflow-hidden">
         <Image
           src={imageUrl}
           alt={vendor.name || vendor.businessName || 'Vendor Image'}
-          width={300} 
-          height={200} 
-          style={{ height: '200px', width: '100%' }} // Enforce consistent aspect ratio
+          width={300}
+          height={200}
           className="object-cover transition-transform duration-500 hover:scale-105"
+          loading="lazy" // Critical for performance
           placeholder="blur"
-          blurDataURL="data:image/jpeg;base64,..."
+          blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAAIAAoDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAhEAACAQMDBQAAAAAAAAAAAAABAgMABAUGIWGRkqGx0f/EABUBAQEAAAAAAAAAAAAAAAAAAAMF/8QAGhEAAgIDAAAAAAAAAAAAAAAAAAECEgMRkf/aAAwDAQACEQMRAD8AltJagyeH0AthI5xdrLcNM91BF5pX2HaUMkO0LdajMqLq2obdUyCqgwDW8nK3PkHdMpSN3lRcTl6FVLWnMkKhMpIq6ruE2VLFTBpJpJpJpbXkH//Z"
+          onError={(e) => {
+            e.currentTarget.src = 'https://res.cloudinary.com/jdscloud/image/upload/v1744811259/shaadisharthi/images/1744811255778_IMG_20191101_180029.jpg.jpg';
+          }}
         />
         <span className={`category-tag absolute top-3 right-3 text-white dark:text-gray-200 text-xs px-2 py-1 rounded-full ${categoryInfo.color} flex items-center`}>
           {categoryInfo.icon}
@@ -106,7 +109,7 @@ const VendorCard: React.FC<VendorCardProps> = ({ vendor }) => {
 
       <div className="p-5 flex flex-col flex-grow">
         <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-1 line-clamp-1 relative group" title={vendor.name}>
-          {vendor.name}
+          {vendor.name || vendor.businessName || 'Service Name'}
           <span className="absolute hidden group-hover:block bg-gray-800 dark:bg-gray-700 text-white dark:text-gray-200 text-xs rounded py-1 px-2 -top-8 left-1/2 transform -translate-x-1/2 z-10">
             {vendor.name}
           </span>
@@ -146,16 +149,18 @@ const VendorCard: React.FC<VendorCardProps> = ({ vendor }) => {
 };
 
 const areEqual = (prevProps: VendorCardProps, nextProps: VendorCardProps) => {
+  const prevVendor = prevProps.vendor;
+  const nextVendor = nextProps.vendor;
+
   return (
-    prevProps.vendor.serviceId === nextProps.vendor.serviceId &&
-    prevProps.vendor.name === nextProps.vendor.name &&
-    prevProps.vendor.businessName === nextProps.vendor.businessName &&
-    prevProps.vendor.category === nextProps.vendor.category &&
-    prevProps.vendor.location === nextProps.vendor.location &&
-    prevProps.vendor.rating === nextProps.vendor.rating &&
-    prevProps.vendor.reviewCount === nextProps.vendor.reviewCount &&
-    prevProps.vendor.price === nextProps.vendor.price &&
-    prevProps.vendor.imageUrl === nextProps.vendor.imageUrl
+    prevVendor.serviceId === nextVendor.serviceId &&
+    prevVendor.name === nextVendor.name &&
+    prevVendor.category === nextVendor.category &&
+    prevVendor.location === nextVendor.location &&
+    prevVendor.rating === nextVendor.rating &&
+    prevVendor.reviewCount === nextVendor.reviewCount &&
+    prevVendor.price === nextVendor.price &&
+    prevVendor.imageUrl === nextVendor.imageUrl
   );
 };
 

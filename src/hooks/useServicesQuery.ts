@@ -12,7 +12,14 @@ interface ServicesResponse {
 export const useServices = (filters: ServiceFilters) => {
   return useInfiniteQuery<ServicesResponse>({
     initialPageParam: 1, // Add initialPageParam
-    queryKey: ['services', filters], // Ensure filters are part of the query key
+    queryKey: ['services', 
+  filters.category, 
+  filters.location, 
+  filters.sortBy, // Critical: separate cache by sort
+  filters.minPrice,
+  filters.maxPrice, 
+  filters.rating
+], 
     queryFn: async ({ pageParam = 1 }) => {
       const query = new URLSearchParams({
         page: String(pageParam),

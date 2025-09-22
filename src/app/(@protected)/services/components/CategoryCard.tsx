@@ -63,7 +63,8 @@ const areEqual = (prevProps: CategoryCardProps, nextProps: CategoryCardProps) =>
          prevProps.icon === nextProps.icon &&
          prevProps.colorClass.bg === nextProps.colorClass.bg &&
          prevProps.colorClass.text === nextProps.colorClass.text &&
-         prevProps.isSelected === nextProps.isSelected;
+         prevProps.isSelected === nextProps.isSelected &&
+         prevProps.onClick === nextProps.onClick; // Critical: compare function reference
 };
 
 export default memo(CategoryCard, areEqual);

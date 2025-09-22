@@ -1,6 +1,6 @@
 import React from 'react';
 import { useDebouncedCallback } from 'use-debounce';
-import { ServiceFilters } from '@/hooks/useServices';
+import { ServiceFilters } from '@/hooks/useServicesQuery';
 import { SlidersIcon, TimesIcon } from './Icons';
 
 interface FilterSectionProps {
@@ -11,7 +11,6 @@ interface FilterSectionProps {
 
 const FilterSection: React.FC<FilterSectionProps> = ({ filters, setFilters, onResetFilters }) => {
   const [showFilters, setShowFilters] = React.useState(false);
-  const [localFilters, setLocalFilters] = React.useState(filters);
 
   const categories = [
     "Photography", "Venues", "Sound", "Catering", "Decoration",
@@ -29,26 +28,20 @@ const FilterSection: React.FC<FilterSectionProps> = ({ filters, setFilters, onRe
     { value: "price_high", label: "Price: High to Low" }
   ];
 
-  // Debounce filter updates
+  // Debounce filter updates directly
   const debouncedSetFilters = useDebouncedCallback((newFilters: ServiceFilters) => {
     setFilters(newFilters);
   }, 300);
 
   const handleFilterChange = (e: React.ChangeEvent<HTMLSelectElement | HTMLInputElement>) => {
     const { name, value } = e.target;
-    const newFilters = { ...localFilters, [name]: value };
-    setLocalFilters(newFilters);
+    const newFilters = { ...filters, [name]: value };
     debouncedSetFilters(newFilters);
   };
 
   const toggleFilters = () => {
     setShowFilters(!showFilters);
   };
-
-  // Update local filters when props change
-  React.useEffect(() => {
-    setLocalFilters(filters);
-  }, [filters]);
 
   return (
     <div className="filter-section bg-white dark:bg-gray-800 rounded-lg shadow-sm dark:shadow-md p-6 mb-8">
@@ -78,7 +71,7 @@ const FilterSection: React.FC<FilterSectionProps> = ({ filters, setFilters, onRe
             </label>
             <select
               name="category"
-              value={localFilters.category}
+              value={filters.category}
               onChange={handleFilterChange}
               className="w-full rounded-lg border border-gray-300 dark:border-gray-600 focus:border-primary dark:focus:border-pink-500 focus:outline-none focus:ring-2 focus:ring-primary dark:focus:ring-pink-500 focus:ring-opacity-50 dark:focus:ring-opacity-50 p-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-200"
             >
@@ -98,7 +91,7 @@ const FilterSection: React.FC<FilterSectionProps> = ({ filters, setFilters, onRe
             </label>
             <select
               name="location"
-              value={localFilters.location}
+              value={filters.location}
               onChange={handleFilterChange}
               className="w-full rounded-lg border border-gray-300 dark:border-gray-600 focus:border-primary dark:focus:border-pink-500 focus:outline-none focus:ring-2 focus:ring-primary dark:focus:ring-pink-500 focus:ring-opacity-50 dark:focus:ring-opacity-50 p-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-200"
             >
@@ -121,7 +114,7 @@ const FilterSection: React.FC<FilterSectionProps> = ({ filters, setFilters, onRe
                 type="number"
                 name="minPrice"
                 placeholder="Min"
-                value={localFilters.minPrice || ''}
+                value={filters.minPrice || ''}
                 onChange={handleFilterChange}
                 className="w-1/2 rounded-lg border border-gray-300 dark:border-gray-600 focus:border-primary dark:focus:border-pink-500 focus:outline-none focus:ring-2 focus:ring-primary dark:focus:ring-pink-500 focus:ring-opacity-50 dark:focus:ring-opacity-50 p-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-200"
               />
@@ -130,7 +123,7 @@ const FilterSection: React.FC<FilterSectionProps> = ({ filters, setFilters, onRe
                 type="number"
                 name="maxPrice"
                 placeholder="Max"
-                value={localFilters.maxPrice || ''}
+                value={filters.maxPrice || ''}
                 onChange={handleFilterChange}
                 className="w-1/2 rounded-lg border border-gray-300 dark:border-gray-600 focus:border-primary dark:focus:border-pink-500 focus:outline-none focus:ring-2 focus:ring-primary dark:focus:ring-pink-500 focus:ring-opacity-50 dark:focus:ring-opacity-50 p-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-200"
               />
@@ -144,7 +137,7 @@ const FilterSection: React.FC<FilterSectionProps> = ({ filters, setFilters, onRe
             </label>
             <select
               name="rating"
-              value={localFilters.rating}
+              value={filters.rating}
               onChange={handleFilterChange}
               className="w-full rounded-lg border border-gray-300 dark:border-gray-600 focus:border-primary dark:focus:border-pink-500 focus:outline-none focus:ring-2 focus:ring-primary dark:focus:ring-pink-500 focus:ring-opacity-50 dark:focus:ring-opacity-50 p-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-200"
             >
@@ -165,7 +158,7 @@ const FilterSection: React.FC<FilterSectionProps> = ({ filters, setFilters, onRe
               </label>
               <select
                 name="sortBy"
-                value={localFilters.sortBy}
+                value={filters.sortBy}
                 onChange={handleFilterChange}
                 className="rounded-lg border border-gray-300 dark:border-gray-600 focus:border-primary dark:focus:border-pink-500 focus:outline-none focus:ring-2 focus:ring-primary dark:focus:ring-pink-500 focus:ring-opacity-50 dark:focus:ring-opacity-50 p-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-200"
               >
