@@ -185,19 +185,19 @@ const ServicePageContent: React.FC = () => {
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               <AnimatePresence mode="popLayout">
-                {services.map((vendor, index) => (
-                  <motion.div
-                    key={vendor.serviceId} // Use a stable and unique key for efficient re-renders and animations
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, scale: 0.95 }}
-                    transition={{ duration: 0.3 }}
-                    layout="position"
-                  >
-                    <VendorCard service={vendor} />
-                  </motion.div>
-                ))}
-              </AnimatePresence>
+  {services.map((vendor, index) => (
+    <motion.div
+      key={`${vendor.serviceId}-${filters.sortBy}-${index}`}
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, scale: 0.95 }}
+      transition={{ duration: 0.3 }}
+      layout="position"
+    >
+      <VendorCard service={vendor} />
+    </motion.div>
+  ))}
+</AnimatePresence>
             </div>
 
             {/* Load more indicator */}
