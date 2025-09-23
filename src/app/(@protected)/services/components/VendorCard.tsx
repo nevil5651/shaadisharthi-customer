@@ -1,4 +1,4 @@
-import React, { memo } from 'react';
+import React, { memo, useMemo } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { RatingStars } from './RatingStars';
@@ -56,34 +56,37 @@ const VendorCard: React.FC<VendorCardProps> = ({ service }) => {
     return categoryMap[category as keyof typeof categoryMap] || categoryMap['default'];
   };
 
-  const formatPrice = (price: number) => {
-    if (price >= 10000000) {
-      const crores = (price / 10000000).toFixed(1);
-      return `${crores} Cr`;
-    }
-    if (price >= 100000) {
-      const lakhs = (price / 100000).toFixed(1);
-      return `${lakhs} L`;
-    }
-    return new Intl.NumberFormat('en-IN').format(price);
-  };
+  // Memoize price formatting
+  const { formattedPrice, fullPrice } = useMemo(() => {
+    const formatPrice = (price: number) => {
+      if (price >= 10000000) return `${(price / 10000000).toFixed(1)} Cr`;
+      if (price >= 100000) return `${(price / 100000).toFixed(1)} L`;
+      return new Intl.NumberFormat('en-IN').format(price);
+    };
 
-  const fullPrice = new Intl.NumberFormat('en-IN', {
-    style: 'currency',
-    currency: 'INR',
-    minimumFractionDigits: 0,
-  }).format(service.price);
+    return {
+      formattedPrice: formatPrice(service.price),
+      fullPrice: new Intl.NumberFormat('en-IN', {
+        style: 'currency',
+        currency: 'INR',
+        minimumFractionDigits: 0,
+      }).format(service.price)
+    };
+  }, [service.price]);
 
   const categoryInfo = getCategoryInfo(service.category);
 
   // Normalize image URL to prevent invalid paths
-  let imageUrl = service.imageUrl || '/img/default-vendor.jpg';
-  if (imageUrl === '/img/default-service.jpg' || imageUrl === 'img/default-service.jpg') {
-    imageUrl = 'https://res.cloudinary.com/jdscloud/image/upload/v1744811259/shaadisharthi/images/1744811255778_IMG_20191101_180029.jpg.jpg';
-  }
-  if (!imageUrl.startsWith('http') && !imageUrl.startsWith('/')) {
-    imageUrl = `/${imageUrl}`;
-  }
+  const imageUrl = useMemo(() => {
+    let url = service.imageUrl || '/img/default-vendor.jpg';
+    if (url === '/img/default-service.jpg' || url === 'img/default-service.jpg') {
+      url = 'https://res.cloudinary.com/jdscloud/image/upload/v1744811259/shaadisharthi/images/1744811255778_IMG_20191101_180029.jpg.jpg';
+    }
+    if (!url.startsWith('http') && !url.startsWith('/')) {
+      url = `/${url}`;
+    }
+    return url;
+  }, [service.imageUrl]);
 
   return (
     <div className="vendor-card bg-white dark:bg-gray-800 rounded-lg shadow-sm dark:shadow-md overflow-hidden hover:shadow-md dark:hover:shadow-lg transition-all duration-300 hover:-translate-y-1 flex flex-col h-full">
@@ -94,7 +97,7 @@ const VendorCard: React.FC<VendorCardProps> = ({ service }) => {
           width={300}
           height={200}
           className="object-cover transition-transform duration-500 hover:scale-105"
-          loading="lazy" // Critical for performance
+          loading="lazy"
           placeholder="blur"
           blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAAIAAoDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAhEAACAQMDBQAAAAAAAAAAAAABAgMABAUGIWGRkqGx0f/EABUBAQEAAAAAAAAAAAAAAAAAAAMF/8QAGhEAAgIDAAAAAAAAAAAAAAAAAAECEgMRkf/aAAwDAQACEQMRAD8AltJagyeH0AthI5xdrLcNM91BF5pX2HaUMkO0LdajMqLq2obdUyCqgwDW8nK3PkHdMpSN3lRcTl6FVLWnMkKhMpIq6ruE2VLFTBpJpJpJpbXkH//Z"
           onError={(e) => {
@@ -108,8 +111,8 @@ const VendorCard: React.FC<VendorCardProps> = ({ service }) => {
       </div>
 
       <div className="p-5 flex flex-col flex-grow">
-        <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-1 line-clamp-2 h-12 overflow-hidden">
-          {service.serviceName || service.businessName || 'Service Name '}
+       <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-1 line-clamp-2 h-12 overflow-hidden">
+          {service.serviceName || service.businessName || 'Service Name'}
         </h3>
 
         <div className="flex items-center text-gray-500 dark:text-gray-400 text-sm mb-2 h-6 overflow-hidden">
@@ -125,7 +128,7 @@ const VendorCard: React.FC<VendorCardProps> = ({ service }) => {
         <div className="mt-auto pt-3 border-t border-gray-100 dark:border-gray-700 flex justify-between items-end min-h-[60px]">
           <div className="flex flex-col min-w-0">
             <span className="text-xl font-bold text-primary dark:text-pink-400 truncate" title={fullPrice}>
-              ₹{formatPrice(service.price)}
+              ₹{formattedPrice}
             </span>
             <span className="text-xs text-gray-500 dark:text-gray-400 whitespace-nowrap">starting price</span>
           </div>
@@ -133,6 +136,7 @@ const VendorCard: React.FC<VendorCardProps> = ({ service }) => {
           <Link
             href={`/service-detail/${service.serviceId}`}
             className="text-primary dark:text-pink-400 hover:text-opacity-80 dark:hover:text-opacity-80 font-medium text-sm whitespace-nowrap px-3 py-2 rounded-md hover:bg-primary dark:hover:bg-pink-900 hover:bg-opacity-10 dark:hover:bg-opacity-20 transition-colors flex items-center shrink-0"
+            prefetch={false} // Improve performance
           >
             View <ArrowRightIcon className="ml-1.5 text-xs" />
           </Link>

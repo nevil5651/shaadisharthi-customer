@@ -3,7 +3,7 @@ import api from '@/lib/axios';
 import { Service } from '@/lib/types';
 import { ServiceFilters } from './useServices';
 import { useCancelableRequests } from '@/hooks/useCancelableRequests';
-import { useRef } from 'react';
+import { useCallback, useRef } from 'react';
 
 interface ServicesResponse {
   services: Service[];
@@ -16,28 +16,17 @@ export const useServices = (filters: ServiceFilters) => {
   const requestIdRef = useRef(0);
   const { createController, cancelAll } = useCancelableRequests();
   
-  
-  return useInfiniteQuery<ServicesResponse>({
-    initialPageParam: 1,
-    queryKey: ['services', 
-      filters.category, 
-      filters.location, 
-      filters.sortBy,
-      filters.minPrice,
-      filters.maxPrice, 
-      filters.rating
-    ],
-    queryFn: async ({ pageParam = 1 }) => {
-      // Create a unique ID for this request
-      
-      const currentRequestId = ++requestIdRef.current;
-      cancelAll();
+   const fetchServices = useCallback(async ({ pageParam = 1, signal }: { pageParam?: number; signal?: AbortSignal }) => {
+    const currentRequestId = ++requestIdRef.current;
+    
+    // Cancel previous requests
+    cancelAll();
 
-      const controller = createController();
-      const signal = controller.signal;
+    const controller = createController();
+    const abortSignal = signal || controller.signal;
 
-      try {
-        const query = new URLSearchParams({
+    try {
+      const query = new URLSearchParams({
         page: String(pageParam),
         limit: '12',
         ...(filters.category && { category: filters.category }),
@@ -48,31 +37,54 @@ export const useServices = (filters: ServiceFilters) => {
         ...(filters.sortBy && { sortBy: filters.sortBy }),
       }).toString();
 
-      const response = await api.get(`/Customer/services?${query}`, { signal });
-        
-        if (currentRequestId !== requestIdRef.current) {
-          throw new Error('Request outdated');
-        }
-
-        return {
-          services: response.data.services,
-          hasMore: response.data.hasMore,
-          nextPage: (pageParam as number) + 1,
-        };
+      const response = await api.get(`/Customer/services?${query}`, { 
+        signal: abortSignal,
+        timeout: 15000 
+      });
+      
+      if (abortSignal.aborted) {
+        throw new Error('Request aborted');
       }
-      catch (error: unknown) {
-        if (!(error instanceof Error && error.name === 'AbortError')) {
-          throw error;
-        }
 
-        return { services: [], hasMore: false, nextPage: 1 };
-        }
-    },
-    
+      // Verify this is still the latest request
+      if (currentRequestId !== requestIdRef.current) {
+        throw new Error('Request outdated');
+      }
+
+      return {
+        services: response.data.services,
+        hasMore: response.data.hasMore,
+        nextPage: (pageParam as number) + 1,
+      };
+    } catch (error: any) {
+      if (error.name === 'AbortError' || error.message === 'Request aborted') {
+        throw new Error('Aborted');
+      }
+      throw error;
+    }
+  }, [filters, createController, cancelAll]);
+  
+ return useInfiniteQuery<ServicesResponse>({
+    initialPageParam: 1,
+    queryKey: ['services', 
+      filters.category, 
+      filters.location, 
+      filters.sortBy,
+      filters.minPrice,
+      filters.maxPrice, 
+      filters.rating
+    ],
+    queryFn: ({ pageParam, signal }) => fetchServices({ pageParam: pageParam as number, signal }),
     getNextPageParam: (lastPage) => {
       return lastPage.hasMore ? lastPage.nextPage : undefined;
     },
-    refetchOnMount: false,
+    staleTime: 2 * 60 * 1000, // 2 minutes
+    gcTime: 5 * 60 * 1000, // 5 minutes
+    refetchOnWindowFocus: false,
+    retry: (failureCount, error: any) => {
+      if (error.message === 'Aborted') return false;
+      return failureCount < 2;
+    },
   });
 };
 

@@ -47,10 +47,15 @@ const ServicePageContent: React.FC = () => {
 
   const mainRef = useRef<HTMLElement>(null);
 
-  // Flatten all pages of services
+  // Flatten all pages of services with memoization
   const services = useMemo(() => {
     return data?.pages.flatMap(page => page.services) || [];
   }, [data]);
+
+  // Generate unique key for each vendor card based on current filters
+  const getVendorKey = (vendor: any) => {
+    return `${vendor.serviceId}-${filters.sortBy}-${filters.category}-${filters.location}`;
+  };
 
   // Reset filters function
   const resetFilters = () => {
@@ -78,14 +83,19 @@ const ServicePageContent: React.FC = () => {
     }
   }, [isLoaderIntersecting, hasNextPage, isFetchingNextPage, fetchNextPage]);
 
-  // When debounced filters change, it signifies a new search.
-  // React Query automatically handles refetching and pagination reset because
-  // the query key for `useServices` depends on `debouncedFilters`.
-  // We add a UX improvement to scroll to the top of the results.
+  // Scroll to top when filters change significantly
   useEffect(() => {
-    // Check if the filters have actually changed to avoid scrolling on initial mount
     if (previousDebouncedFiltersRef.current !== debouncedFilters) {
-      mainRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
+      // Only scroll on major filter changes, not price/rating
+      const prev = previousDebouncedFiltersRef.current;
+      const isMajorChange = 
+        prev.sortBy !== debouncedFilters.sortBy ||
+        prev.category !== debouncedFilters.category || 
+        prev.location !== debouncedFilters.location;
+      
+      if (isMajorChange) {
+        mainRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
+      }
     }
     previousDebouncedFiltersRef.current = debouncedFilters;
   }, [debouncedFilters]);
@@ -155,11 +165,16 @@ const ServicePageContent: React.FC = () => {
               ({services.length} results)
             </span>
           </h2>
+          {/* Sort indicator */}
+          {filters.sortBy && (
+            <span className="text-sm text-gray-500 dark:text-gray-400">
+              Sorted by: {filters.sortBy.replace('_', ' ')}
+            </span>
+          )}
         </div>
 
         {/* Vendors Grid */}
         {isLoading && services.length === 0 ? (
-          // Initial load or major filter change
           <VendorGridSkeleton count={8} />
         ) : error ? (
           <div className="text-center py-12">
@@ -178,26 +193,30 @@ const ServicePageContent: React.FC = () => {
               <div className="mb-4 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
                 <div className="flex items-center justify-center gap-2">
                   <div className="animate-spin rounded-full w-4 h-4 border-b-2 border-blue-600"></div>
-                  <span className="text-blue-600 dark:text-blue-400 text-sm">Updating results...</span>
+                  <span className="text-blue-600 dark:text-blue-400 text-sm">
+                    {filters.sortBy !== previousDebouncedFiltersRef.current?.sortBy 
+                      ? 'Applying new sorting...' 
+                      : 'Updating results...'}
+                  </span>
                 </div>
               </div>
             )}
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               <AnimatePresence mode="popLayout">
-  {services.map((vendor, index) => (
-    <motion.div
-      key={`${vendor.serviceId}-${filters.sortBy}-${index}`}
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, scale: 0.95 }}
-      transition={{ duration: 0.3 }}
-      layout="position"
-    >
-      <VendorCard service={vendor} />
-    </motion.div>
-  ))}
-</AnimatePresence>
+                {services.map((vendor, index) => (
+                  <motion.div
+                    key={getVendorKey(vendor)} // Critical fix: unique key per filter state
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, scale: 0.95 }}
+                    transition={{ duration: 0.3, delay: index * 0.02 }}
+                    layout="position"
+                  >
+                    <VendorCard service={vendor} />
+                  </motion.div>
+                ))}
+              </AnimatePresence>
             </div>
 
             {/* Load more indicator */}
