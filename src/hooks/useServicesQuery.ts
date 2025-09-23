@@ -12,11 +12,6 @@ interface ServicesResponse {
 }
 
 export const useServices = (filters: ServiceFilters) => {
-  // Add request ID to track the latest request
-  const requestIdRef = useRef(0);
-  const { createController, cancelAll } = useCancelableRequests();
-  
-  
   return useInfiniteQuery<ServicesResponse>({
     initialPageParam: 1,
     queryKey: ['services', 
@@ -28,16 +23,7 @@ export const useServices = (filters: ServiceFilters) => {
       filters.rating
     ],
     queryFn: async ({ pageParam = 1 }) => {
-      // Create a unique ID for this request
-      
-      const currentRequestId = ++requestIdRef.current;
-      cancelAll();
-
-      const controller = createController();
-      const signal = controller.signal;
-
-      try {
-        const query = new URLSearchParams({
+      const query = new URLSearchParams({
         page: String(pageParam),
         limit: '12',
         ...(filters.category && { category: filters.category }),
@@ -48,31 +34,22 @@ export const useServices = (filters: ServiceFilters) => {
         ...(filters.sortBy && { sortBy: filters.sortBy }),
       }).toString();
 
-      const response = await api.get(`/Customer/services?${query}`, { signal });
-        
-        if (currentRequestId !== requestIdRef.current) {
-          throw new Error('Request outdated');
-        }
-
-        return {
-          services: response.data.services,
-          hasMore: response.data.hasMore,
-          nextPage: (pageParam as number) + 1,
-        };
-      }
-      catch (error: unknown) {
-        if (!(error instanceof Error && error.name === 'AbortError')) {
-          throw error;
-        }
-
-        return { services: [], hasMore: false, nextPage: 1 };
-        }
+      const response = await api.get(`/Customer/services?${query}`);
+      
+      return {
+        services: response.data.services,
+        hasMore: response.data.hasMore,
+        nextPage: (pageParam as number) + 1,
+      };
     },
-    
     getNextPageParam: (lastPage) => {
       return lastPage.hasMore ? lastPage.nextPage : undefined;
     },
-    refetchOnMount: false,
+    // CRITICAL FIX: Optimize cache behavior for filters
+    staleTime: 10 * 1000, // 10 seconds for filter queries
+    gcTime: 1 * 60 * 1000, // 1 minute garbage collection
+    refetchOnMount: true, // Always refetch when component mounts with new filters
+    refetchOnReconnect: false,
   });
 };
 
