@@ -83,30 +83,38 @@ const ServicePageContent: React.FC = () => {
     }
   }, [isLoaderIntersecting, hasNextPage, isFetchingNextPage, fetchNextPage]);
 
-  useEffect(() => {
-    const previous = previousFiltersRef.current;
-    const current = filters;
-    
-    // Only reset cache when sort, category, or location changes significantly
-    const shouldResetCache = 
-      previous.sortBy !== current.sortBy ||
-      previous.category !== current.category ||
-      previous.location !== current.location;
-    
-    if (shouldResetCache) {
-      queryClient.removeQueries({
-        queryKey: ['services'],
-        predicate: (query) => {
-          // Only remove old cache entries, keep current
-          const queryFilters = query.queryKey[1] as any;
-          return queryFilters !== current.category || 
-                 queryFilters !== current.location ||
-                 queryFilters !== current.sortBy;
-        }
+
+   useEffect(() => {
+
+    const prev = previousFiltersRef.current;
+
+    const isMajorChange = 
+      prev.category !== filters.category || 
+      prev.location !== filters.location || 
+      prev.sortBy !== filters.sortBy;
+
+
+  if (isMajorChange) {
+      // COMPLETELY clear the services cache
+      queryClient.removeQueries({ 
+        queryKey: ['services'] 
       });
+      
+      // Force immediate refetch by resetting page state
+      queryClient.setQueryData(
+        ['services', 
+          filters.category, 
+          filters.location, 
+          filters.sortBy,
+          filters.minPrice,
+          filters.maxPrice, 
+          filters.rating
+        ],
+        undefined
+      );
     }
     
-    previousFiltersRef.current = current;
+    previousFiltersRef.current = filters;
   }, [filters, queryClient]);
 
   return (
@@ -206,7 +214,7 @@ const ServicePageContent: React.FC = () => {
               <AnimatePresence>
                 {services.map((vendor, index) => (
                   <motion.div
-                    key={`${vendor.serviceId}-${filters.category}-${filters.location}-${filters.sortBy}                       `}
+                    key={`${vendor.serviceId}-${filters.category}-${filters.location}-${filters.sortBy}-${index}`}
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0 }}

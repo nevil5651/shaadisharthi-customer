@@ -60,8 +60,8 @@ export const useServices = (filters: ServiceFilters) => {
           nextPage: (pageParam as number) + 1,
         };
       }
-      catch (error: any) {
-        if (error.name !== 'AbortError') {
+      catch (error: unknown) {
+        if (!(error instanceof Error && error.name === 'AbortError')) {
           throw error;
         }
 
