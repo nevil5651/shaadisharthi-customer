@@ -9,9 +9,9 @@ import EmptyState from './components/EmptyState';
 import { useServices, useServiceCategories } from '@/hooks/useServicesQuery';
 import { useDebounce } from '@/hooks/useDebounce';
 import { useIntersectionObserver } from '@/hooks/useIntersectionObserver';
-import { ServiceFilters } from '@/hooks/useServicesQuery';
+import { type ServiceFilters } from '@/hooks/useServicesQuery';
+import type { Service } from '@/lib/types';
 import { ChevronDownIcon, ChevronUpIcon } from './components/Icons';
-import { useQueryClient } from '@tanstack/react-query';
 
 // Dynamically import heavy components
 const FilterSection = dynamic(() => import('./components/FilterSection'), {
@@ -53,7 +53,7 @@ const ServicePageContent: React.FC = () => {
   }, [data]);
 
   // Generate unique key for each vendor card based on current filters
-  const getVendorKey = (vendor: any) => {
+  const getVendorKey = (vendor: Service) => {
     return `${vendor.serviceId}-${filters.sortBy}-${filters.category}-${filters.location}`;
   };
 

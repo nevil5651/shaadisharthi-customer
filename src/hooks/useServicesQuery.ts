@@ -4,6 +4,7 @@ import { Service } from '@/lib/types';
 import { ServiceFilters } from './useServices';
 import { useCancelableRequests } from '@/hooks/useCancelableRequests';
 import { useCallback, useRef } from 'react';
+import { isAxiosError } from 'axios';
 
 interface ServicesResponse {
   services: Service[];
@@ -48,7 +49,8 @@ export const useServices = (filters: ServiceFilters) => {
 
       // Verify this is still the latest request
       if (currentRequestId !== requestIdRef.current) {
-        throw new Error('Request outdated');
+        // This request is no longer the latest, so we should treat it as aborted.
+        throw new Error('Aborted');
       }
 
       return {
@@ -56,8 +58,11 @@ export const useServices = (filters: ServiceFilters) => {
         hasMore: response.data.hasMore,
         nextPage: (pageParam as number) + 1,
       };
-    } catch (error: any) {
-      if (error.name === 'AbortError' || error.message === 'Request aborted') {
+    } catch (error: unknown) {
+      if (isAxiosError(error) && error.code === 'ERR_CANCELED') {
+        throw new Error('Aborted');
+      }
+      if (error instanceof Error && (error.name === 'AbortError' || error.message === 'Request aborted')) {
         throw new Error('Aborted');
       }
       throw error;
@@ -81,7 +86,7 @@ export const useServices = (filters: ServiceFilters) => {
     staleTime: 2 * 60 * 1000, // 2 minutes
     gcTime: 5 * 60 * 1000, // 5 minutes
     refetchOnWindowFocus: false,
-    retry: (failureCount, error: any) => {
+    retry: (failureCount, error: Error) => {
       if (error.message === 'Aborted') return false;
       return failureCount < 2;
     },
