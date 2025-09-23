@@ -29,7 +29,6 @@ const VendorCard = dynamic(() => import('./components/VendorCard'), {
 
 const ServicePageContent: React.FC = () => {
   const [showAllCategories, setShowAllCategories] = useState(false);
-  //const debouncedFilters = useDebounce(filters, 300);
   const initialFilters: ServiceFilters = {
     category: '',
     location: '',
@@ -40,12 +39,8 @@ const ServicePageContent: React.FC = () => {
   };
 
   const [filters, setFilters] = useState(initialFilters);
-  const queryClient = useQueryClient();
-  const previousFiltersRef = useRef(filters);
-  const isLinux = typeof window !== 'undefined' && 
-  window.navigator.userAgent.toLowerCase().includes('linux');
-  
-  const debouncedFilters = useDebounce(filters, isLinux ? 500 : 300);
+  const debouncedFilters = useDebounce(filters, 300);
+  const previousDebouncedFiltersRef = useRef(debouncedFilters);
   const { data: categories = [] } = useServiceCategories();
 
   const { data, isLoading, error, fetchNextPage, hasNextPage, isFetchingNextPage } = useServices(debouncedFilters);
@@ -62,7 +57,7 @@ const ServicePageContent: React.FC = () => {
     setFilters(initialFilters);
   };
 
-  const handleCategoryClick = (category: string) => { // Fix: Ensure prev has all properties of ServiceFilters
+  const handleCategoryClick = (category: string) => {
     setFilters((prev: ServiceFilters) => ({
       ...prev,
       category: prev.category === category ? '' : category,
@@ -83,39 +78,17 @@ const ServicePageContent: React.FC = () => {
     }
   }, [isLoaderIntersecting, hasNextPage, isFetchingNextPage, fetchNextPage]);
 
-
-   useEffect(() => {
-
-    const prev = previousFiltersRef.current;
-
-    const isMajorChange = 
-      prev.category !== filters.category || 
-      prev.location !== filters.location || 
-      prev.sortBy !== filters.sortBy;
-
-
-  if (isMajorChange) {
-      // COMPLETELY clear the services cache
-      queryClient.removeQueries({ 
-        queryKey: ['services'] 
-      });
-      
-      // Force immediate refetch by resetting page state
-      queryClient.setQueryData(
-        ['services', 
-          filters.category, 
-          filters.location, 
-          filters.sortBy,
-          filters.minPrice,
-          filters.maxPrice, 
-          filters.rating
-        ],
-        undefined
-      );
+  // When debounced filters change, it signifies a new search.
+  // React Query automatically handles refetching and pagination reset because
+  // the query key for `useServices` depends on `debouncedFilters`.
+  // We add a UX improvement to scroll to the top of the results.
+  useEffect(() => {
+    // Check if the filters have actually changed to avoid scrolling on initial mount
+    if (previousDebouncedFiltersRef.current !== debouncedFilters) {
+      mainRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
     }
-    
-    previousFiltersRef.current = filters;
-  }, [filters, queryClient]);
+    previousDebouncedFiltersRef.current = debouncedFilters;
+  }, [debouncedFilters]);
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-50 dark:bg-gray-900">
@@ -211,21 +184,21 @@ const ServicePageContent: React.FC = () => {
             )}
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              <AnimatePresence>
+              <AnimatePresence mode="popLayout">
                 {services.map((vendor, index) => (
                   <motion.div
-                    key={`${vendor.serviceId}-${filters.category}-${filters.location}-${filters.sortBy}-${index}`}
+                    key={vendor.serviceId} // Use a stable and unique key for efficient re-renders and animations
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0 }}
+                    exit={{ opacity: 0, scale: 0.95 }}
                     transition={{ duration: 0.3 }}
+                    layout="position"
                   >
                     <VendorCard service={vendor} />
                   </motion.div>
                 ))}
               </AnimatePresence>
             </div>
-
 
             {/* Load more indicator */}
             <div
