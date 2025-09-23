@@ -39,14 +39,12 @@ const ServicePageContent: React.FC = () => {
     sortBy: 'popular',
   };
 
-  const [isTransitioning, setIsTransitioning] = useState(false);
-
   const [filters, setFilters] = useState(initialFilters);
   const queryClient = useQueryClient();
   const previousFiltersRef = useRef(filters);
-  const isLinux = typeof window !== 'undefined' &&
-    window.navigator.userAgent.toLowerCase().includes('linux');
-
+  const isLinux = typeof window !== 'undefined' && 
+  window.navigator.userAgent.toLowerCase().includes('linux');
+  
   const debouncedFilters = useDebounce(filters, isLinux ? 500 : 300);
   const { data: categories = [] } = useServiceCategories();
 
@@ -86,35 +84,38 @@ const ServicePageContent: React.FC = () => {
   }, [isLoaderIntersecting, hasNextPage, isFetchingNextPage, fetchNextPage]);
 
 
-  useEffect(() => {
+   useEffect(() => {
+
     const prev = previousFiltersRef.current;
-    const current = filters;
 
-    // Check if this is a meaningful filter change
-    const isMajorChange =
-      prev.category !== current.category ||
-      prev.location !== current.location ||
-      prev.sortBy !== current.sortBy;
+    const isMajorChange = 
+      prev.category !== filters.category || 
+      prev.location !== filters.location || 
+      prev.sortBy !== filters.sortBy;
 
-    if (isMajorChange) {
-      setIsTransitioning(true);
 
-      // Short delay to show loading state (improves UX)
-      const timer = setTimeout(() => {
-        setIsTransitioning(false);
-      }, 300);
-
-      return () => clearTimeout(timer);
+  if (isMajorChange) {
+      // COMPLETELY clear the services cache
+      queryClient.removeQueries({ 
+        queryKey: ['services'] 
+      });
+      
+      // Force immediate refetch by resetting page state
+      queryClient.setQueryData(
+        ['services', 
+          filters.category, 
+          filters.location, 
+          filters.sortBy,
+          filters.minPrice,
+          filters.maxPrice, 
+          filters.rating
+        ],
+        undefined
+      );
     }
-
-    previousFiltersRef.current = current;
-  }, [filters]);
-
-  // Smart loading logic
-  const showLoading = isLoading || isTransitioning;
-  const showSkeleton = showLoading && services.length === 0;
-  const showContent = !showLoading && services.length > 0;
-  const showEmpty = !showLoading && services.length === 0;
+    
+    previousFiltersRef.current = filters;
+  }, [filters, queryClient]);
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-50 dark:bg-gray-900">
@@ -184,7 +185,8 @@ const ServicePageContent: React.FC = () => {
         </div>
 
         {/* Vendors Grid */}
-        {showSkeleton ? (
+        {isLoading && services.length === 0 ? (
+          // Initial load or major filter change
           <VendorGridSkeleton count={8} />
         ) : error ? (
           <div className="text-center py-12">
@@ -196,26 +198,27 @@ const ServicePageContent: React.FC = () => {
               Try Again
             </button>
           </div>
-        ) : showContent ? (
+        ) : services.length > 0 ? (
           <>
-            {/* Show updating indicator during background refresh */}
+            {/* Show loading indicator during background updates */}
             {isLoading && (
-              <div className="mb-4 p-2 bg-blue-50 dark:bg-blue-900/20 rounded-lg text-center">
-                <span className="text-blue-600 dark:text-blue-400 text-sm">
-                  🔄 Updating results...
-                </span>
+              <div className="mb-4 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                <div className="flex items-center justify-center gap-2">
+                  <div className="animate-spin rounded-full w-4 h-4 border-b-2 border-blue-600"></div>
+                  <span className="text-blue-600 dark:text-blue-400 text-sm">Updating results...</span>
+                </div>
               </div>
             )}
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              <AnimatePresence mode="wait"> {/* Changed to wait mode */}
-                {services.map((vendor) => (
+              <AnimatePresence>
+                {services.map((vendor, index) => (
                   <motion.div
-                    key={`${vendor.serviceId}-${filters.sortBy}`}
+                    key={`${vendor.serviceId}-${filters.category}-${filters.location}-${filters.sortBy}-${index}`}
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -20 }}
-                    transition={{ duration: 0.2 }} // Faster transition
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.3 }}
                   >
                     <VendorCard service={vendor} />
                   </motion.div>
@@ -223,8 +226,12 @@ const ServicePageContent: React.FC = () => {
               </AnimatePresence>
             </div>
 
+
             {/* Load more indicator */}
-            <div ref={observedLoaderRef} className="text-center py-8 min-h-[50px]">
+            <div
+              ref={observedLoaderRef}
+              className="text-center py-8 min-h-[50px]"
+            >
               {isFetchingNextPage ? (
                 <div className="flex items-center justify-center gap-2">
                   <div className="animate-spin rounded-full w-6 h-6 border-b-2 border-pink-600"></div>
@@ -237,9 +244,9 @@ const ServicePageContent: React.FC = () => {
               ) : null}
             </div>
           </>
-        ) : showEmpty ? (
+        ) : (
           <EmptyState onReset={resetFilters} />
-        ) : null}
+        )}
       </main>
     </div>
   );
