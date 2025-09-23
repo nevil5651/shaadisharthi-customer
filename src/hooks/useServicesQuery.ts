@@ -2,9 +2,6 @@ import { useInfiniteQuery, useQuery } from '@tanstack/react-query';
 import api from '@/lib/axios';
 import { Service } from '@/lib/types';
 import { ServiceFilters } from './useServices';
-import { useCancelableRequests } from '@/hooks/useCancelableRequests';
-import { useCallback, useRef } from 'react';
-import { isAxiosError } from 'axios';
 
 interface ServicesResponse {
   services: Service[];
@@ -13,20 +10,17 @@ interface ServicesResponse {
 }
 
 export const useServices = (filters: ServiceFilters) => {
-  // Add request ID to track the latest request
-  const requestIdRef = useRef(0);
-  const { createController, cancelAll } = useCancelableRequests();
-  
-   const fetchServices = useCallback(async ({ pageParam = 1, signal }: { pageParam?: number; signal?: AbortSignal }) => {
-    const currentRequestId = ++requestIdRef.current;
-    
-    // Cancel previous requests
-    cancelAll();
-
-    const controller = createController();
-    const abortSignal = signal || controller.signal;
-
-    try {
+  return useInfiniteQuery<ServicesResponse>({
+    initialPageParam: 1,
+    queryKey: ['services', 
+      filters.category, 
+      filters.location, 
+      filters.sortBy,
+      filters.minPrice,
+      filters.maxPrice, 
+      filters.rating
+    ],
+    queryFn: async ({ pageParam }) => {
       const query = new URLSearchParams({
         page: String(pageParam),
         limit: '12',
@@ -38,60 +32,23 @@ export const useServices = (filters: ServiceFilters) => {
         ...(filters.sortBy && { sortBy: filters.sortBy }),
       }).toString();
 
-      const response = await api.get(`/Customer/services?${query}`, { 
-        signal: abortSignal,
-        timeout: 15000 
-      });
+      const response = await api.get(`/Customer/services?${query}`);
       
-      if (abortSignal.aborted) {
-        throw new Error('Request aborted');
-      }
-
-      // Verify this is still the latest request
-      if (currentRequestId !== requestIdRef.current) {
-        // This request is no longer the latest, so we should treat it as aborted.
-        throw new Error('Aborted');
-      }
-
       return {
         services: response.data.services,
         hasMore: response.data.hasMore,
         nextPage: (pageParam as number) + 1,
       };
-    } catch (error: unknown) {
-      if (isAxiosError(error) && error.code === 'ERR_CANCELED') {
-        throw new Error('Aborted');
-      }
-      if (error instanceof Error && (error.name === 'AbortError' || error.message === 'Request aborted')) {
-        throw new Error('Aborted');
-      }
-      throw error;
-    }
-  }, [filters, createController, cancelAll]);
-  
- return useInfiniteQuery<ServicesResponse>({
-    initialPageParam: 1,
-    queryKey: ['services', 
-      filters.category, 
-      filters.location, 
-      filters.sortBy,
-      filters.minPrice,
-      filters.maxPrice, 
-      filters.rating
-    ],
-    queryFn: ({ pageParam, signal }) => fetchServices({ pageParam: pageParam as number, signal }),
+    },
     getNextPageParam: (lastPage) => {
       return lastPage.hasMore ? lastPage.nextPage : undefined;
     },
-    staleTime: 2 * 60 * 1000, // 2 minutes
-    gcTime: 5 * 60 * 1000, // 5 minutes
+    staleTime: 2 * 60 * 1000, // Data is fresh for 2 minutes
+    gcTime: 10 * 60 * 1000, // Cache persists for 10 minutes
     refetchOnWindowFocus: false,
-    retry: (failureCount, error: Error) => {
-      if (error.message === 'Aborted') return false;
-      return failureCount < 2;
-    },
   });
 };
+
 
 export const useServiceCategories = () => {
   return useQuery({

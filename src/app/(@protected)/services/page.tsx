@@ -9,8 +9,7 @@ import EmptyState from './components/EmptyState';
 import { useServices, useServiceCategories } from '@/hooks/useServicesQuery';
 import { useDebounce } from '@/hooks/useDebounce';
 import { useIntersectionObserver } from '@/hooks/useIntersectionObserver';
-import { type ServiceFilters } from '@/hooks/useServicesQuery';
-import type { Service } from '@/lib/types';
+import { ServiceFilters } from '@/hooks/useServicesQuery';
 import { ChevronDownIcon, ChevronUpIcon } from './components/Icons';
 
 // Dynamically import heavy components
@@ -43,19 +42,15 @@ const ServicePageContent: React.FC = () => {
   const previousDebouncedFiltersRef = useRef(debouncedFilters);
   const { data: categories = [] } = useServiceCategories();
 
+  // React Query automatically handles caching based on query key
   const { data, isLoading, error, fetchNextPage, hasNextPage, isFetchingNextPage } = useServices(debouncedFilters);
 
   const mainRef = useRef<HTMLElement>(null);
 
-  // Flatten all pages of services with memoization
+  // Flatten all pages of services
   const services = useMemo(() => {
     return data?.pages.flatMap(page => page.services) || [];
   }, [data]);
-
-  // Generate unique key for each vendor card based on current filters
-  const getVendorKey = (vendor: Service) => {
-    return `${vendor.serviceId}-${filters.sortBy}-${filters.category}-${filters.location}`;
-  };
 
   // Reset filters function
   const resetFilters = () => {
@@ -83,10 +78,9 @@ const ServicePageContent: React.FC = () => {
     }
   }, [isLoaderIntersecting, hasNextPage, isFetchingNextPage, fetchNextPage]);
 
-  // Scroll to top when filters change significantly
+  // Scroll to top only on major filter changes
   useEffect(() => {
     if (previousDebouncedFiltersRef.current !== debouncedFilters) {
-      // Only scroll on major filter changes, not price/rating
       const prev = previousDebouncedFiltersRef.current;
       const isMajorChange = 
         prev.sortBy !== debouncedFilters.sortBy ||
@@ -165,12 +159,6 @@ const ServicePageContent: React.FC = () => {
               ({services.length} results)
             </span>
           </h2>
-          {/* Sort indicator */}
-          {filters.sortBy && (
-            <span className="text-sm text-gray-500 dark:text-gray-400">
-              Sorted by: {filters.sortBy.replace('_', ' ')}
-            </span>
-          )}
         </div>
 
         {/* Vendors Grid */}
@@ -188,16 +176,12 @@ const ServicePageContent: React.FC = () => {
           </div>
         ) : services.length > 0 ? (
           <>
-            {/* Show loading indicator during background updates */}
+            {/* Show background loading indicator */}
             {isLoading && (
               <div className="mb-4 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
                 <div className="flex items-center justify-center gap-2">
                   <div className="animate-spin rounded-full w-4 h-4 border-b-2 border-blue-600"></div>
-                  <span className="text-blue-600 dark:text-blue-400 text-sm">
-                    {filters.sortBy !== previousDebouncedFiltersRef.current?.sortBy 
-                      ? 'Applying new sorting...' 
-                      : 'Updating results...'}
-                  </span>
+                  <span className="text-blue-600 dark:text-blue-400 text-sm">Updating results...</span>
                 </div>
               </div>
             )}
@@ -206,11 +190,11 @@ const ServicePageContent: React.FC = () => {
               <AnimatePresence mode="popLayout">
                 {services.map((vendor, index) => (
                   <motion.div
-                    key={getVendorKey(vendor)} // Critical fix: unique key per filter state
+                    key={`${vendor.serviceId}-${filters.sortBy}-${index}`}
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, scale: 0.95 }}
-                    transition={{ duration: 0.3, delay: index * 0.02 }}
+                    transition={{ duration: 0.3 }}
                     layout="position"
                   >
                     <VendorCard service={vendor} />
