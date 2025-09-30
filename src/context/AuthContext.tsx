@@ -91,11 +91,13 @@ const logout = useCallback(async () => {
     if (typeof window !== 'undefined') {
       sessionStorage.setItem('logout_status', 'success')
     }
-    toast.update(toastId, { render: 'Logged out successfully', type: 'success', isLoading: false, autoClose: 3000 })
+    
     setUser(null)
     clearCachedUser()
     // window.location.assign('login')
     router.push('/login')
+    toast.update(toastId, { render: 'Logged out successfully', type: 'success', isLoading: false, autoClose: 3000 })
+    setIsLoggingOut(false)
     
   } catch (error) {
     console.error('Logout error:', error)

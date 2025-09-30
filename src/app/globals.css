@@ -586,8 +586,6 @@ body {
 }
 
 .dark p,
-.dark span,
-.dark li,
 .dark label {
   color: var(--dark-text-secondary, #e5e7eb);
 }

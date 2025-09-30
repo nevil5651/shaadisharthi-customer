@@ -11,10 +11,10 @@ export default function BookingCard({ booking }: {
   }
 }) {
   const statusColors = {
-    pending: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200', // Fixed color name
+    pending: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-black-200', 
     confirmed: 'bg-green-200 text-green-800 dark:bg-green-900 dark:text-green-100',
-    cancelled: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200', // Fixed color name
-    completed: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200' // Fixed color name
+    cancelled: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-500', 
+    completed: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-500' 
   };
 
   // Convert backend status to lowercase for consistency

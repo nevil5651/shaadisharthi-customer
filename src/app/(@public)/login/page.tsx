@@ -28,7 +28,7 @@ type LoginFormInputs = z.infer<typeof loginSchema>;
 // Simple fallback components
 const IconFallback = () => <span className="inline-block w-4 h-4 bg-gray-200 dark:bg-gray-600 animate-pulse rounded"></span>;
 const AuthCardFallback = () => (
-  <div className="bg-white dark:bg-gray-800 rounded-xl shadow-xl p-6 sm:p-8 m-4 sm:m-7 max-w-md w-full">
+  <div className="bg-white dark:bg-gray-800 rounded-xl shadow-xl p-4 sm:p-6 md:p-8 mx-auto max-w-md w-full">
     <div className="text-center mb-6">
       <div className="flex items-center justify-center mb-4">
         <div className="w-10 h-10 bg-gray-200 dark:bg-gray-600 animate-pulse rounded-full mr-2"></div>
@@ -70,7 +70,7 @@ export default function Login() {
   };
 
   return (
-    <div className="auth-page min-h-screen flex items-center justify-center bg-gradient-to-br from-pink-50 to-purple-50 dark:from-gray-900 dark:to-gray-800 py-8 px-4">
+    <div className="auth-page min-h-screen flex items-center justify-center bg-gradient-to-br from-pink-50 to-purple-50 dark:from-gray-900 dark:to-gray-800 py-4 sm:py-8 px-2 sm:px-4">
       <Suspense fallback={<AuthCardFallback />}>
         <AuthCard
           title="Welcome Back"
@@ -84,39 +84,39 @@ export default function Login() {
             )}
             <div>
               <div className="relative">
-                <div className="input-icon">
+                <div className="input-icon text-gray-400 dark:text-pink-400 ">
                   <Suspense fallback={<IconFallback />}>
-                    <FaUser className='dark:text-pink-400 '/>
+                    <FaUser />
                   </Suspense>
                 </div>
                 <input
                   type="email"
                   {...register('email')}
                   placeholder="Enter your email"
-                  className="form-input w-full pl-10 pr-3 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:placeholder-gray-400"
+                  className="form-input w-full pl-14 pr-3 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:placeholder-gray-400 text-sm sm:text-base"
                   disabled={isLoading}
                 />
               </div>
-              {errors.email && <p className="text-red-500 dark:text-red-400 text-sm mt-1">{errors.email.message}</p>}
+              {errors.email && <p className="text-red-500 dark:text-red-400 text-xs sm:text-sm mt-1">{errors.email.message}</p>}
             </div>
             
             <div>
               <div className="relative">
-                <div className="input-icon">
+                <div className="input-icon text-gray-400 dark:text-pink-400">
                   <Suspense fallback={<IconFallback />}>
-                    <FaLock  />
+                    <FaLock />
                   </Suspense>
                 </div>
                 <input
                   type={showPassword ? "text" : "password"}
                   {...register('password')}
                   placeholder="Enter your password"
-                  className="form-input w-full pl-10 pr-10 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:placeholder-gray-400"
+                  className="form-input w-full pl-14 pr-10 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:placeholder-gray-400 text-sm sm:text-base"
                   disabled={isLoading}
                 />
                 <button 
                   type="button" 
-                  className="password-toggle absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                  className="password-toggle absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 text-sm sm:text-base"
                   onClick={() => setShowPassword(!showPassword)}
                 >
                   <Suspense fallback={<IconFallback />}>
@@ -124,10 +124,10 @@ export default function Login() {
                   </Suspense>
                 </button>
               </div>
-              {errors.password && <p className="text-red-500 dark:text-red-400 text-sm mt-1">{errors.password.message}</p>}
+              {errors.password && <p className="text-red-500 dark:text-red-400 text-xs sm:text-sm mt-1">{errors.password.message}</p>}
             </div>
 
-            <div className="flex justify-between items-center mb-6">
+            <div className="flex flex-col sm:flex-row sm:justify-between items-center mb-4 sm:mb-6 space-y-3 sm:space-y-0">
               <label className="flex items-center">
                 <input 
                   type="checkbox" 
@@ -135,21 +135,21 @@ export default function Login() {
                   className="form-checkbox h-4 w-4 text-pink-600 transition duration-150 ease-in-out dark:bg-gray-700 dark:border-gray-600" 
                   disabled={isLoading} 
                 />
-                <span className="ml-2 text-gray-700 dark:text-gray-300">Remember me</span>
+                <span className="ml-2 text-gray-700 dark:text-gray-300 text-xs sm:text-sm">Remember me</span>
               </label>
-              <Link href="/forgot-password" className="text-pink-500 hover:text-pink-700 dark:text-pink-400 dark:hover:text-pink-300 text-sm">
+              <Link href="/forgot-password" className="text-pink-500 hover:text-pink-700 dark:text-pink-400 dark:hover:text-pink-300 text-xs sm:text-sm">
                 Forgot password?
               </Link>
             </div>
 
             <button 
               type="submit" 
-              className="gradient-btn w-full bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 text-white font-bold py-2 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-500 transition duration-150 ease-in-out disabled:opacity-50 dark:focus:ring-offset-gray-800" 
+              className="gradient-btn w-full bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 text-white font-bold py-2 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-500 transition duration-150 ease-in-out disabled:opacity-50 dark:focus:ring-offset-gray-800 text-sm sm:text-base" 
               disabled={isLoading || isSubmitting}
             >
               {isLoading ? (
                 <div className="flex items-center justify-center">
-                  <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <svg className="animate-spin -ml-1 mr-3 h-4 sm:h-5 w-4 sm:w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                     <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                     <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                   </svg>
@@ -158,13 +158,13 @@ export default function Login() {
               ) : 'Sign In'}
             </button>
 
-            <div className="flex items-center my-6">
+            <div className="flex items-center my-4 sm:my-6">
               <div className="border-t border-gray-300 flex-grow dark:border-gray-600"></div>
-              <span className="mx-4 text-gray-500 dark:text-gray-400 text-sm">or continue with</span>
+              <span className="mx-4 text-gray-500 dark:text-gray-400 text-xs sm:text-sm">or continue with</span>
               <div className="border-t border-gray-300 flex-grow dark:border-gray-600"></div>
             </div>
 
-            <div className="flex justify-center space-x-4 mb-6">
+            <div className="flex justify-center space-x-4 mb-4 sm:mb-6">
               <button type="button" className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center text-blue-600 hover:bg-gray-200 transition duration-150 ease-in-out dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-blue-400">
                 <Suspense fallback={<IconFallback />}>
                   <FaFacebookF />
@@ -182,7 +182,7 @@ export default function Login() {
               </button>
             </div>
 
-            <div className="text-center text-gray-700 dark:text-gray-300 text-sm">
+            <div className="text-center text-gray-700 dark:text-gray-300 text-xs sm:text-sm">
               Don&apos;t have an account?{' '}
               <Link href="/verify-email" className="text-pink-500 font-medium hover:underline dark:text-pink-400">
                 Register now

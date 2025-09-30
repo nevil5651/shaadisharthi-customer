@@ -35,6 +35,12 @@ const UserDropdown = memo(({
       <Link href="/account" className="block px-4 py-2 text-gray-700 dark:text-white dark:hover:bg-gray-600 hover:bg-gray-100">
         My Profile
       </Link>
+      <Link href="/dashboard" className="block px-4 py-2 text-gray-700 dark:text-white dark:hover:bg-gray-600 hover:bg-gray-100">
+        Dashboard
+      </Link>
+      <Link href="/services" className="block px-4 py-2 text-gray-700 dark:text-white dark:hover:bg-gray-600 hover:bg-gray-100">
+        Vendors
+      </Link>
       <Link href="/bookings" className="block px-4 py-2 text-gray-700 dark:text-white dark:hover:bg-gray-600 hover:bg-gray-100">
         My Bookings
       </Link>
