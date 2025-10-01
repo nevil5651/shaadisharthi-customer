@@ -22,31 +22,36 @@ NotificationDropdown.displayName = 'NotificationDropdown';
 const UserDropdown = memo(({ 
   userMenuOpen, 
   logout, 
-  isLoggingOut 
+  isLoggingOut,
+  onClose
 }: { 
   userMenuOpen: boolean; 
   logout: () => void;
   isLoggingOut: boolean;
+  onClose: () => void;
 }) => {
   if (!userMenuOpen) return null;
   
   return (
     <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-700 dark:text-white rounded-md shadow-lg py-2 z-50">
-      <Link href="/account" className="block px-4 py-2 text-gray-700 dark:text-white dark:hover:bg-gray-600 hover:bg-gray-100">
+      <Link href="/account" onClick={onClose} className="block px-4 py-2 text-gray-700 dark:text-white dark:hover:bg-gray-600 hover:bg-gray-100">
         My Profile
       </Link>
-      <Link href="/dashboard" className="block px-4 py-2 text-gray-700 dark:text-white dark:hover:bg-gray-600 hover:bg-gray-100">
+      <Link href="/dashboard" onClick={onClose} className="block px-4 py-2 text-gray-700 dark:text-white dark:hover:bg-gray-600 hover:bg-gray-100">
         Dashboard
       </Link>
-      <Link href="/services" className="block px-4 py-2 text-gray-700 dark:text-white dark:hover:bg-gray-600 hover:bg-gray-100">
+      <Link href="/services" onClick={onClose} className="block px-4 py-2 text-gray-700 dark:text-white dark:hover:bg-gray-600 hover:bg-gray-100">
         Vendors
       </Link>
-      <Link href="/bookings" className="block px-4 py-2 text-gray-700 dark:text-white dark:hover:bg-gray-600 hover:bg-gray-100">
+      <Link href="/bookings" onClick={onClose} className="block px-4 py-2 text-gray-700 dark:text-white dark:hover:bg-gray-600 hover:bg-gray-100">
         My Bookings
       </Link>
       <div className="border-t border-gray-200 my-1"></div>
       <button
-        onClick={logout}
+        onClick={() => {
+          logout();
+          onClose();
+        }}
         disabled={isLoggingOut}
         className="block w-full text-left px-4 py-2 text-gray-700 dark:text-white dark:hover:bg-gray-600 hover:bg-gray-100">
         {isLoggingOut ? 'Logging out...' : 'Logout'}
@@ -63,6 +68,7 @@ function Header() {
 
   // Memoize click handlers to prevent unnecessary re-renders
   const toggleUserMenu = useCallback(() => setUserMenuOpen(prev => !prev), []);
+  const closeUserMenu = useCallback(() => setUserMenuOpen(false), []);
 
   return (
     <header className="dashboard-header sticky top-0 z-50 bg-white shadow-sm dark:bg-gray-900 dark:text-white dark:shadow-gray-800">
@@ -131,7 +137,8 @@ function Header() {
               <UserDropdown 
                 userMenuOpen={userMenuOpen} 
                 logout={logout} 
-                isLoggingOut={isLoggingOut} 
+                isLoggingOut={isLoggingOut}
+                onClose={closeUserMenu}
               />
             </div>
           </div>
