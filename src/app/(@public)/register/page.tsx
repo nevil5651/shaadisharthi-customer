@@ -171,7 +171,7 @@ function RegisterForm() {
 
       // Redirect after a short delay to allow the user to see the toast.
       setTimeout(() => {
-        router.push('/login');
+        router.push('login');
       }, 2000);
 
     } catch (err) {

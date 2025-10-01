@@ -14,15 +14,11 @@ const api = axios.create({
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (axios.isAxiosError(error) && error.response?.status === 401) {
-      if (typeof window !== 'undefined') {
-        // The client cannot delete an httpOnly cookie. The server should have
-        // invalidated it. We just need to redirect the user to the login page.
-        // You might want to call a '/api/logout' endpoint here before redirecting.
-        // Redirect to login and clear history
-        window.location.replace('/login');
-      }
-    }
+    // The 401 error is now handled globally in the AuthContext.
+    // This interceptor's job is just to pass the error along so that
+    // the AuthContext or other calling functions can handle it appropriately.
+    // By removing the redirect here, we prevent base path issues and
+    // ensure a single, consistent way of handling session expiry.
     return Promise.reject(error);
   }
 );

@@ -32,7 +32,7 @@ const Nav: React.FC = () => {
           {/* Desktop Buttons - Hidden on tablet and mobile */}
           <div className="hidden lg:flex items-center space-x-4">
             <button
-              onClick={() => router.push('/login')}
+              onClick={() => router.push('login')}
               className="bg-transparent hover:shadow-lg text-primary dark:text-pink-400 py-2 px-4 border border-primary dark:border-pink-400 rounded-full transition duration-300"
             >
               Login
@@ -68,7 +68,7 @@ const Nav: React.FC = () => {
           <div className="border-t border-gray-200 dark:border-gray-700 my-2 pt-2">
             <button
               onClick={() => {
-                router.push('/login');
+                router.push('login');
                 setMobileMenuOpen(false);
               }}
               className="block w-full text-left py-2 text-gray-700 dark:text-gray-300 hover:text-primary dark:hover:text-pink-400 transition duration-300"

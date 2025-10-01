@@ -27,7 +27,7 @@ export default async function ProtectedLayout({ children }: LayoutProps) {
   if (!session) {
     // This should theoretically not be hit if middleware is correct,
     // but it's a good failsafe.
-    redirect('/login');
+    redirect('login');
   }
 
 //  const account = await getAccountDetails(session.customerId);
