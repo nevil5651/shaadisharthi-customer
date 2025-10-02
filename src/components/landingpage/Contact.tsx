@@ -4,7 +4,7 @@
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
-import axios from 'axios';
+import api from '../../lib/axios';
 import toast from 'react-hot-toast';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPaperPlane, faMapMarkerAlt, faPhone, faEnvelope, faClock } from '@fortawesome/free-solid-svg-icons';
@@ -15,8 +15,8 @@ import { Toaster } from 'react-hot-toast';
 const schema = z.object({
   name: z.string().min(1, 'Full Name is required'),
   email: z.string().email('Invalid email address'),
-  subject: z.string().min(1, 'Subject is required'),
-  message: z.string().min(1, 'Message is required'),
+  subject: z.string().min(1, 'Subject is required').max(40, 'Subject cannot exceed 40 characters'),
+  message: z.string().min(1, 'Message is required').max(400, 'Message cannot exceed 400 characters'),
 });
 
 type FormData = z.infer<typeof schema>;
@@ -28,8 +28,8 @@ const Contact = () => {
 
   const onSubmit = async (data: FormData) => {
     try {
-      await axios.post('/api/contact', data, { timeout: 5000 });
-      toast.success('Message sent successfully!');
+      await api.post('/Customer/AddGuestQuery', data, { timeout: 5000 });
+      toast.success('Message sent successfully! You will be Notified via email soon.');
       reset();
     } catch  {
       toast.error('Failed to send message. Please try again.');
@@ -57,12 +57,12 @@ const Contact = () => {
               </div>
               <div className="mb-4">
                 <label htmlFor="subject" className="block text-gray-700 dark:text-gray-300 mb-2 font-medium">Subject</label>
-                <input id="subject" {...register('subject')} className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary dark:focus:ring-pink-400 focus:border-transparent bg-white dark:bg-gray-700 text-gray-800 dark:text-white" />
+                <input id="subject" {...register('subject')} maxLength={100} className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary dark:focus:ring-pink-400 focus:border-transparent bg-white dark:bg-gray-700 text-gray-800 dark:text-white" />
                 {errors.subject && <p className="text-red-500 dark:text-red-400 text-sm mt-1">{errors.subject.message}</p>}
               </div>
               <div className="mb-4">
                 <label htmlFor="message" className="block text-gray-700 dark:text-gray-300 mb-2 font-medium">Message</label>
-                <textarea id="message" rows={5} {...register('message')} className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary dark:focus:ring-pink-400 focus:border-transparent bg-white dark:bg-gray-700 text-gray-800 dark:text-white" />
+                <textarea id="message" rows={5} {...register('message')} maxLength={1000} className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary dark:focus:ring-pink-400 focus:border-transparent bg-white dark:bg-gray-700 text-gray-800 dark:text-white" />
                 {errors.message && <p className="text-red-500 dark:text-red-400 text-sm mt-1">{errors.message.message}</p>}
               </div>
               <button type="submit" disabled={isSubmitting} className="w-full bg-gradient-to-r from-pink-600 to-orange-500 dark:from-pink-500 dark:to-orange-400 text-white py-3 rounded-lg transition duration-300 hover:from-pink-700 hover:to-orange-600 dark:hover:from-pink-600 dark:hover:to-orange-500 disabled:opacity-50">
