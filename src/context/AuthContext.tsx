@@ -95,7 +95,7 @@ const logout = useCallback(async () => {
     setUser(null)
     clearCachedUser()
     // window.location.assign('login')
-    router.push('login')
+    router.push('/login')
     toast.update(toastId, { render: 'Logged out successfully', type: 'success', isLoading: false, autoClose: 3000 })
     setIsLoggingOut(false)
     
@@ -145,16 +145,9 @@ const logout = useCallback(async () => {
       
       
       if (res.status === 401 && !isRegisterWithToken && !isResetPasswordWithToken) {
-        // If a manual logout is already in progress, do nothing.
-        if (isLoggingOut) return;
-
-        // If unauthorized, clear local state and redirect with a session expiry message.
-        // This avoids calling the full logout() function and showing the wrong toast.
-        setUser(null);
-        clearCachedUser();
-        router.push('login');
-        toast.info('Your session has expired. Please log in again.');
-        return;
+        await logout()
+        router.push('/login')
+        return
       }
 
       if (!res.ok) throw new Error('Failed to fetch profile')
@@ -180,7 +173,7 @@ const logout = useCallback(async () => {
       setIsLoading(false)
       fetchInProgress.current = false
     }
-  }, [pathname, router, isLoggingOut]);
+  }, [pathname, router, logout]);
 
   useEffect(() => {
     // Initial load - check if user is logged in

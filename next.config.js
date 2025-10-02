@@ -17,7 +17,7 @@ const nextConfig = {
       },
     ],
   },
-  // basePath: '/customer',
+   basePath: '/customer',
   /* other config options here */
 };
 
