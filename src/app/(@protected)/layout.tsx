@@ -22,15 +22,11 @@ export const metadata: Metadata = {
 
 
 export default async function ProtectedLayout({ children }: LayoutProps) {
-  const session = await getSession();
+  // const session = await getSession();
 
-  if (!session) {
-    // This should theoretically not be hit if middleware is correct,
-    // but it's a good failsafe.
-    redirect('login');
-  }
-
-//  const account = await getAccountDetails(session.customerId);
+  // if (!session) {
+  //   redirect('/login');
+  // }
 
   return (
     <>

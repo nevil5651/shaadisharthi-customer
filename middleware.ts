@@ -4,7 +4,7 @@ import { publicRoutes } from "@/lib/auth-routes";
 
 
 // 1. Specify protected and public routes
-const protectedRoutes = ['/dashboard','service-detail'];
+const protectedRoutes = ['/dashboard','service-detail','services','bookings','account','service-booking'];
 // const publicRoutes = ['/login', '/signup','/verify-email', '/register', '/cstmr-verify-email', '/forgot-password', '/reset-password'];
 
 export default async function middleware(req: NextRequest) {

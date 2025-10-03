@@ -214,7 +214,75 @@ export default function ServiceDetailPage({ params }: PageProps) {
           <ServiceHero service={service} />
         )}
         
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">
+        {/* Mobile Layout - Single Column */}
+        <div className="block lg:hidden space-y-8 mb-12">
+          {/* Description */}
+          <section className="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6">
+            <h2 className="text-2xl font-heading font-bold text-gray-900 dark:text-white mb-4">
+              About This Service
+            </h2>
+            {!service || serviceLoading ? (
+              <>
+                <div className="h-4 bg-gray-300 dark:bg-gray-700 rounded w-full mb-2 animate-pulse"></div>
+                <div className="h-4 bg-gray-300 dark:bg-gray-700 rounded w-full mb-2 animate-pulse"></div>
+                <div className="h-4 bg-gray-300 dark:bg-gray-700 rounded w-3/4 animate-pulse"></div>
+              </>
+            ) : (
+              <p className="text-gray-700 dark:text-gray-300">{service.description}</p>
+            )}
+          </section>
+          
+          {/* Pricing Card */}
+          {!service || serviceLoading ? (
+            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6 animate-pulse">
+              <div className="h-6 bg-gray-300 dark:bg-gray-700 rounded w-1/3 mb-4"></div>
+              <div className="h-8 bg-gray-300 dark:bg-gray-700 rounded w-1/2 mb-4"></div>
+              <div className="h-4 bg-gray-300 dark:bg-gray-700 rounded w-full mb-2"></div>
+              <div className="h-4 bg-gray-300 dark:bg-gray-700 rounded w-full mb-4"></div>
+              <div className="h-10 bg-gray-300 dark:bg-gray-700 rounded w-full"></div>
+            </div>
+          ) : (
+            <PricingCard service={service} />
+          )}
+          
+          {/* Media Gallery */}
+          {service && service.media && service.media.length > 0 && (
+            <MediaGallery media={service.media} />
+          )}
+          
+          {/* Review Form */}
+          {service && (
+            <ReviewForm
+              serviceId={service.serviceId}
+              onSubmitSuccess={handleReviewSubmitted}
+              onServerUpdate={handleServerReviews}
+            />
+          )}
+          
+          {/* Review List */}
+          {reviewsError ? (
+            <div className="text-red-600 dark:text-red-400 text-center py-4">{reviewsError}</div>
+          ) : (
+            <ReviewsList reviews={reviews} />
+          )}
+          
+          {hasMore && (
+            <div ref={loaderRef} className="text-center py-4">
+              {reviewsLoading ? (
+                <>
+                  <ReviewSkeleton />
+                  <ReviewSkeleton />
+                  <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-primary mx-auto mt-4"></div>
+                </>
+              ) : (
+                <span className="text-gray-500 dark:text-gray-400">Scroll to load more reviews...</span>
+              )}
+            </div>
+          )}
+        </div>
+
+        {/* Desktop Layout - Grid Columns (Unchanged) */}
+        <div className="hidden lg:grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">
           <div className="lg:col-span-2 space-y-8">
             <section className="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6">
               <h2 className="text-2xl font-heading font-bold text-gray-900 dark:text-white mb-4">
