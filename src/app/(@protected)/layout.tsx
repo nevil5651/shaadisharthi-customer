@@ -22,11 +22,11 @@ export const metadata: Metadata = {
 
 
 export default async function ProtectedLayout({ children }: LayoutProps) {
-  // const session = await getSession();
+  const session = await getSession();
 
-  // if (!session) {
-  //   redirect('/login');
-  // }
+  if (!session) {
+    redirect('/login');
+  }
 
   return (
     <>
