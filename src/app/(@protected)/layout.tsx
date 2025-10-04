@@ -1,4 +1,3 @@
-// app/(protected)/layout.tsx
 import { getSession } from '@/lib/session';
 import "../globals.css";
 import '@fortawesome/fontawesome-free/css/all.min.css';

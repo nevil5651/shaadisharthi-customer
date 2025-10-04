@@ -101,6 +101,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       
       // Redirect to login
       router.push('/login')
+      toast.success('Logged out successfully')
       
     } catch (error) {
       console.error('Logout error:', error)
@@ -108,6 +109,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       setUser(null)
       clearCachedUser()
       router.push('/login')
+      toast.error('Logout out successful')
     } finally {
       setIsLoggingOut(false)
     }
