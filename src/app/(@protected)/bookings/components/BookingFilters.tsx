@@ -1,3 +1,4 @@
+import { useRef, useState } from 'react';
 import { FaSearch, FaTimes, FaFilter } from 'react-icons/fa';
 import { FiChevronDown } from 'react-icons/fi';
 
@@ -22,6 +23,26 @@ export const BookingFilters = ({
     { value: 'Cancelled', label: 'Cancelled' },
     { value: 'Completed', label: 'Completed' }
   ];
+
+  const [focusedInput, setFocusedInput] = useState<string | null>(null); 
+  const dateFromRef = useRef<HTMLInputElement>(null);
+  const dateToRef = useRef<HTMLInputElement>(null);
+
+  // Handle reset to also clear focus states
+  const handleReset = () => {
+    setFocusedInput(null);
+    onReset();
+  };
+
+  // Handle date input changes with validation
+  const handleDateChange = (name: 'dateFrom' | 'dateTo', value: string) => {
+    onFilterChange(name, value);
+    
+    // If user clears the date, also remove focus state
+    if (!value && focusedInput === name) {
+      setFocusedInput(null);
+    }
+  };
 
   return (
     <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 mb-8 border border-gray-100 dark:border-gray-700">
@@ -75,24 +96,40 @@ export const BookingFilters = ({
           <div className="relative">
             <input
               type="date"
+              ref={dateFromRef}
               value={filters.dateFrom}
-              onChange={(e) => onFilterChange('dateFrom', e.target.value)}
+              onChange={(e) => handleDateChange('dateFrom', e.target.value)}
+              onFocus={() => setFocusedInput('dateFrom')}
+              onBlur={() => {
+                // Only remove focus if no date is selected
+                if (!filters.dateFrom) {
+                  setFocusedInput(null);
+                }
+              }}
               max={filters.dateTo || undefined}
               className="block w-full pl-3 pr-3 py-2.5 border border-gray-200 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-300 focus:border-pink-500 bg-gray-50 dark:bg-gray-700 dark:text-white transition-all"
             />
-            {filters.dateFrom && (
+            {(filters.dateFrom || focusedInput === 'dateFrom') && (
               <span className="absolute -top-2 left-2 px-1 text-xs bg-white dark:bg-gray-800 text-pink-600 dark:text-pink-400">From</span>
             )}
           </div>
           <div className="relative">
             <input
               type="date"
+              ref={dateToRef}
               value={filters.dateTo}
-              onChange={(e) => onFilterChange('dateTo', e.target.value)}
+              onChange={(e) => handleDateChange('dateTo', e.target.value)}
+              onFocus={() => setFocusedInput('dateTo')}
+              onBlur={() => {
+                // Only remove focus if no date is selected
+                if (!filters.dateTo) {
+                  setFocusedInput(null);
+                }
+              }}
               min={filters.dateFrom || undefined}
               className="block w-full pl-3 pr-3 focus:outline-none py-2.5 border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-pink-300 focus:border-pink-500 bg-gray-50 dark:bg-gray-700 dark:text-white transition-all"
             />
-            {filters.dateTo && (
+            {(filters.dateTo || focusedInput === 'dateTo') && (
               <span className="absolute -top-2 left-2 px-1 text-xs bg-white dark:bg-gray-800 text-pink-600 dark:text-pink-400">To</span>
             )}
           </div>
@@ -100,7 +137,7 @@ export const BookingFilters = ({
 
         {/* Reset Button */}
         <button
-          onClick={onReset}
+          onClick={handleReset}
           className="px-4 py-2.5 border border-pink-200 dark:border-pink-700 rounded-lg bg-pink-50 dark:bg-pink-900/30 text-pink-600 dark:text-pink-300 hover:bg-pink-100 dark:hover:bg-pink-900/50 transition-all flex items-center gap-2 whitespace-nowrap"
         >
           <FaFilter className="text-pink-500 dark:text-pink-400" />
