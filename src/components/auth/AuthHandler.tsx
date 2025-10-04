@@ -1,84 +1,85 @@
-'use client'
+'use client';
 
-import { useEffect, useCallback } from 'react'
-import { useAuth } from '@/context/useAuth'
-import { usePathname } from 'next/navigation'
+import { useEffect, useRef } from 'react';
+import { useAuth } from '@/context/AuthContext';
+import { usePathname } from 'next/navigation';
 
-// Constants for better maintainability and clarity
-const ACCOUNT_RELATED_PATHS = [
-  '/dashboard',
-  '/account'
-]
-const USER_CACHE_KEY = 'user_profile_cache'
-const CACHE_EXPIRATION_MS = 60 * 1000 // 1 minute
+const SESSION_CHECK_INTERVAL = 60000; // 1 minute
+const INACTIVITY_TIMEOUT = 30 * 60 * 1000; // 30 minutes
 
 export default function AuthHandler() {
-  const { user, fetchProfile } = useAuth()
-  const pathname = usePathname()
+  const { isAuthenticated, logout, fetchProfile } = useAuth();
+  const pathname = usePathname();
+  const inactivityTimer = useRef<NodeJS.Timeout | undefined>(undefined);
+  const sessionCheckInterval = useRef<NodeJS.Timeout | undefined>(undefined);
 
-  const refreshProfile = useCallback(async () => {
-    try {
-      console.log('AuthHandler: Refreshing user profile...');
-      await fetchProfile(true) // Force refresh
-      // Update cache timestamp after successful fetch
-      if (typeof window !== 'undefined') {
-        const cacheData = { timestamp: Date.now() }
-        localStorage.setItem(USER_CACHE_KEY, JSON.stringify(cacheData))
-      }
-    } catch (error) {
-      console.error('Failed to refresh user profile:', error)
+  const resetInactivityTimer = () => {
+    if (inactivityTimer.current) {
+      clearTimeout(inactivityTimer.current);
     }
-  }, [fetchProfile])
+    
+    inactivityTimer.current = setTimeout(() => {
+      console.log('Auto logout due to inactivity');
+      logout();
+    }, INACTIVITY_TIMEOUT);
+  };
 
+  const checkSessionValidity = async () => {
+    if (!isAuthenticated) return;
+
+    try {
+      await fetchProfile(true);
+    } catch (error) {
+      console.error('Session validation failed, logging out:', error);
+      logout();
+    }
+  };
+
+  // Set up activity listeners for inactivity timeout
   useEffect(() => {
-    // This component is only concerned with refreshing the user profile on navigation.
-    // It should only run if a user is logged in.
-    if (!user) {
-      return
-    }
+    if (!isAuthenticated) return;
 
-    const isAccountPage = ACCOUNT_RELATED_PATHS.some(path =>
-      pathname.startsWith(path)
-    )
+    const events = ['mousedown', 'mousemove', 'keypress', 'scroll', 'touchstart', 'click'];
+    
+    const handleActivity = () => {
+      resetInactivityTimer();
+    };
 
-    if (!isAccountPage) {
-      return
-    }
+    events.forEach(event => {
+      document.addEventListener(event, handleActivity);
+    });
 
-    if (typeof window === 'undefined') {
-      return // Don't run on server side
-    }
+    resetInactivityTimer();
 
-    const cachedItem = localStorage.getItem(USER_CACHE_KEY)
-    if (!cachedItem) {
-      // No cache, fetch immediately
-      //console.log('AuthHandler: No user profile cache found. Fetching profile.');
-      refreshProfile()
-      return
-    }
-
-    try {
-      const parsedCache = JSON.parse(cachedItem)
-      const timestamp = parsedCache?.timestamp
-
-      if (typeof timestamp !== 'number') {
-        // Invalid cache format, fetch again
-        // console.warn('AuthHandler: Invalid user profile cache format. Refreshing profile.', parsedCache);
-        refreshProfile()
-        return
+    return () => {
+      events.forEach(event => {
+        document.removeEventListener(event, handleActivity);
+      });
+      if (inactivityTimer.current) {
+        clearTimeout(inactivityTimer.current);
       }
+    };
+  }, [isAuthenticated, logout]);
 
-      // Refresh if cache is older than the defined expiration time
-      if (Date.now() - timestamp > CACHE_EXPIRATION_MS) {
-       // console.log(`AuthHandler: User profile cache is stale (older than ${CACHE_EXPIRATION_MS / 1000}s). Refreshing.`);
-        refreshProfile()
+  // Set up periodic session checks
+  useEffect(() => {
+    if (!isAuthenticated) return;
+
+    sessionCheckInterval.current = setInterval(checkSessionValidity, SESSION_CHECK_INTERVAL);
+
+    return () => {
+      if (sessionCheckInterval.current) {
+        clearInterval(sessionCheckInterval.current);
       }
-    } catch (error) {
-      // Error parsing cache, likely invalid format. Refresh to be safe.
-      console.error('Failed to parse user cache:', error)
-      refreshProfile()
-    }
-  }, [pathname, user, refreshProfile])
+    };
+  }, [isAuthenticated]);
 
-  return null
+  // Check session on route changes
+  useEffect(() => {
+    if (isAuthenticated) {
+      checkSessionValidity();
+    }
+  }, [pathname]);
+
+  return null;
 }

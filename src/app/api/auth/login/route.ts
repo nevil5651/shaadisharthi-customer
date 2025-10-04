@@ -1,21 +1,32 @@
+import { NextRequest, NextResponse } from 'next/server';
 import { createSession } from '@/lib/session';
-import { NextResponse } from 'next/server';
 
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
   try {
-    const body = await request.json();
-    const { token } = body;
+    const { token } = await request.json();
 
     if (!token) {
-      return NextResponse.json({ error: 'Token is required' }, { status: 400 });
+      return NextResponse.json(
+        { error: 'Token is required' },
+        { status: 400 }
+      );
     }
 
-    // Create the session by setting the secure, httpOnly cookie.
-    await createSession(token);
+    const sessionCreated = await createSession(token);
 
-    return NextResponse.json({ success: true }, { status: 200 });
+    if (!sessionCreated) {
+      return NextResponse.json(
+        { error: 'Failed to create session' },
+        { status: 500 }
+      );
+    }
+
+    return NextResponse.json({ success: true });
   } catch (error) {
-    console.error(error);
-    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
+    console.error('Login API error:', error);
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    );
   }
 }

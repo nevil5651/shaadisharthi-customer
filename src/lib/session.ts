@@ -1,91 +1,114 @@
+// lib/session.ts
 import 'server-only';
 import { decodeJwt } from 'jose';
 import { cookies } from 'next/headers';
 
-
 interface SessionPayload {
-  sub: string; //  customerId
-  iat: number; // Issued at (in seconds)
-  exp: number; // Expiration time (in seconds since epoch)
+  sub: string;
+  iat: number;
+  exp: number;
 }
 
-/**
- * Decodes the JWT and checks if it's expired.
- * Does NOT verify the signature, as that's the backend's responsibility.
- * @param token The JWT string from the cookie.
- * @returns The decoded payload if the token is valid and not expired, otherwise null.
- */
-function getPayloadFromToken(token: string | undefined): SessionPayload | null {
-  if (!token) {
-    return null;
+// Simple in-memory cache for session validation (resets on server restart)
+const sessionCache = new Map();
+const CACHE_TTL = 30000; // 30 seconds
+
+export async function validateSession(): Promise<{ isValid: boolean; payload: SessionPayload | null }> {
+  const cookieStore = await cookies();
+  const sessionCookie = cookieStore.get('session');
+  
+  if (!sessionCookie?.value) {
+    return { isValid: false, payload: null };
   }
+
+  // Check cache first
+  const cached = sessionCache.get(sessionCookie.value);
+  if (cached && Date.now() - cached.timestamp < CACHE_TTL) {
+    return { isValid: true, payload: cached.payload };
+  }
+
+  try {
+    const payload = decodeJwt<SessionPayload>(sessionCookie.value);
+    const nowInSeconds = Math.floor(Date.now() / 1000);
+
+    // Validate token expiration
+    if (!payload.exp || payload.exp < nowInSeconds) {
+      await deleteSession();
+      return { isValid: false, payload: null };
+    }
+
+    // Cache valid session
+    sessionCache.set(sessionCookie.value, {
+      payload,
+      timestamp: Date.now()
+    });
+
+    return { isValid: true, payload };
+  } catch (error) {
+    console.error('Session validation error:', error);
+    await deleteSession();
+    return { isValid: false, payload: null };
+  }
+}
+
+export async function createSession(token: string): Promise<boolean> {
   try {
     const payload = decodeJwt<SessionPayload>(token);
     const nowInSeconds = Math.floor(Date.now() / 1000);
 
-    // Check if the token is expired
-    if (payload.exp < nowInSeconds) {
-      console.log('Token expired');
-      return null;
+    if (!payload.exp || payload.exp < nowInSeconds) {
+      console.error('Token expired or invalid expiration');
+      return false;
     }
 
-    return payload;
+    const expiresAt = new Date(payload.exp * 1000);
+    const cookieStore = await cookies();
+
+    cookieStore.set('session', token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      expires: expiresAt,
+      sameSite: 'lax',
+      path: '/',
+    });
+
+    // Cache the new session
+    sessionCache.set(token, {
+      payload,
+      timestamp: Date.now()
+    });
+
+    return true;
   } catch (error) {
-    // This can be because the token is malformed
-    console.error('Failed to decode token:', error);
-    return null;
+    console.error('Session creation error:', error);
+    return false;
   }
 }
 
-/**
- * Sets the session cookie after a successful login.
- * @param token The JWT received from the Java backend.
- */
-export async function createSession(token: string) {
-  const payload = getPayloadFromToken(token);
-
-  if (!payload || !payload.exp) {
-    // Don't set a cookie if the token is invalid or has no expiration
-    console.error('Cannot create session: Invalid token or no expiration time.');
-    return;
+export async function deleteSession(): Promise<void> {
+  try {
+    const cookieStore = await cookies();
+    const sessionCookie = cookieStore.get('session');
+    
+    if (sessionCookie?.value) {
+      sessionCache.delete(sessionCookie.value);
+    }
+    
+    cookieStore.delete('session');
+  } catch (error) {
+    console.error('Session deletion error:', error);
   }
-
-  // The 'exp' claim is in seconds, but cookies().set wants a Date object for 'expires'.
-  const expiresAt = new Date(payload.exp * 1000);
-
-  (await cookies()).set('session', token, {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    expires: expiresAt,
-    sameSite: 'lax',
-    path: '/',
-  });
 }
 
-/**
- * Deletes the session cookie upon logout.
- */
-export async function deleteSession() {
-  (await cookies()).delete('session');
-}
-
-/**
- * Gets the current session from the cookie.
- * Returns the payload if the session is valid and not expired.
- * @returns A simplified session object or null.
- */
 export async function getSession() {
-  const cookie = (await cookies()).get('session')?.value;
-  const payload = getPayloadFromToken(cookie);
-
-  if (!payload) {
+  const { isValid, payload } = await validateSession();
+  
+  if (!isValid || !payload) {
     return null;
   }
 
-  // We return a simplified object for the rest of the app to use.
   return {
-    customerId: payload.sub, // Assuming 'sub' (subject) is the customer ID
+    customerId: payload.sub,
+    expiresAt: payload.exp,
   };
 }
-
-

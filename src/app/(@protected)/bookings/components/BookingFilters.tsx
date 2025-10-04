@@ -106,6 +106,7 @@ export const BookingFilters = ({
                   setFocusedInput(null);
                 }
               }}
+              placeholder="mm/dd/yyyy"
               max={filters.dateTo || undefined}
               className="block w-full pl-3 pr-3 py-2.5 border border-gray-200 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-300 focus:border-pink-500 bg-gray-50 dark:bg-gray-700 dark:text-white transition-all"
             />
@@ -126,6 +127,7 @@ export const BookingFilters = ({
                   setFocusedInput(null);
                 }
               }}
+              placeholder="mm/dd/yyyy"
               min={filters.dateFrom || undefined}
               className="block w-full pl-3 pr-3 focus:outline-none py-2.5 border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-pink-300 focus:border-pink-500 bg-gray-50 dark:bg-gray-700 dark:text-white transition-all"
             />

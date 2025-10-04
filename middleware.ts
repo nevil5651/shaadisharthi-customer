@@ -1,45 +1,61 @@
+// middleware.ts
 import { NextRequest, NextResponse } from 'next/server';
-import { getSession } from '@/lib/session';
-import { publicRoutes } from "@/lib/auth-routes";
+import { validateSession } from '@/lib/session';
 
+// Security headers for all responses
+const securityHeaders = {
+  'X-Frame-Options': 'DENY',
+  'X-Content-Type-Options': 'nosniff',
+  'Referrer-Policy': 'strict-origin-when-cross-origin',
+  'X-XSS-Protection': '1; mode=block',
+};
 
-// 1. Specify protected and public routes
-const protectedRoutes = ['/dashboard','service-detail','services','bookings','account','service-booking'];
-// const publicRoutes = ['/login', '/signup','/verify-email', '/register', '/cstmr-verify-email', '/forgot-password', '/reset-password'];
+const protectedRoutes = ['/dashboard', '/service-detail', '/services', '/bookings', '/account', '/service-booking'];
+const publicRoutes = ['/login', '/signup', '/verify-email', '/register', '/cstmr-verify-email', '/forgot-password', '/reset-password'];
 
 export default async function middleware(req: NextRequest) {
   const path = req.nextUrl.pathname;
-  const session = await getSession();
+  const searchParams = req.nextUrl.searchParams;
 
-  // Check if this is a register page with valid token
-  const isRegisterWithToken = path === '/register' && req.nextUrl.searchParams.has('token');
-  const isResetPasswordWithToken = path === '/reset-password' && req.nextUrl.searchParams.has('token');
+  // Apply security headers to all responses
+  const response = NextResponse.next();
+  Object.entries(securityHeaders).forEach(([key, value]) => {
+    response.headers.set(key, value);
+  });
 
-  const isProtectedRoute = protectedRoutes.some((prefix) => path.startsWith(prefix));
-  const isPublicRoute = publicRoutes.includes(path) || isRegisterWithToken || isResetPasswordWithToken;
- 
+  // Check for token-secured routes (register/reset-password with token)
+  const isRegisterWithToken = path === '/register' && searchParams.has('token');
+  const isResetPasswordWithToken = path === '/reset-password' && searchParams.has('token');
+  const isTokenSecuredRoute = isRegisterWithToken || isResetPasswordWithToken;
 
-  // Allow register with token even without session
-  if (isRegisterWithToken && !session) {
-    return NextResponse.next();
-  }
-  // Allow reset password with token even without session
-  if (isResetPasswordWithToken && !session) {
-    return NextResponse.next();
-  }
-
-  if (isProtectedRoute && !session) {
-    return NextResponse.redirect(new URL('/login', req.nextUrl));
+  // Allow token-secured routes without session validation
+  if (isTokenSecuredRoute) {
+    return response;
   }
 
-  if (isPublicRoute && session && !isRegisterWithToken && !isResetPasswordWithToken) {
+  // Validate session for other routes
+  const { isValid: hasValidSession } = await validateSession();
+  
+  const isProtectedRoute = protectedRoutes.some(prefix => path.startsWith(prefix));
+  const isPublicRoute = publicRoutes.includes(path);
+
+  // Redirect to login if accessing protected route without valid session
+  if (isProtectedRoute && !hasValidSession) {
+    const loginUrl = new URL('/login', req.nextUrl);
+    loginUrl.searchParams.set('returnUrl', path);
+    return NextResponse.redirect(loginUrl);
+  }
+
+  // Redirect to dashboard if accessing public route with valid session
+  if (isPublicRoute && hasValidSession) {
     return NextResponse.redirect(new URL('/dashboard', req.nextUrl));
   }
 
-  return NextResponse.next();
+  return response;
 }
 
-// Routes Middleware should not run on
 export const config = {
-  matcher: ['/((?!api|_next/static|_next/image|.*\\.png$).*)'],
+  matcher: [
+    '/((?!api|_next/static|_next/image|.*\\.(?:png|jpg|jpeg|gif|webp|svg|ico)$).*)',
+  ],
 };

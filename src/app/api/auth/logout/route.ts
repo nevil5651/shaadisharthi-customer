@@ -1,21 +1,15 @@
-import { NextResponse } from 'next/server'
-import { cookies } from 'next/headers'
+// app/api/auth/logout/route.ts
+import { NextResponse } from 'next/server';
+import { deleteSession } from '@/lib/session';
 
 export async function POST() {
   try {
-    // Clear the session cookie
-    const cookieStore = await cookies()
-    cookieStore.delete('session')
+    await deleteSession();
     
-    // Also call your backend logout if needed
-    // await fetch(`${process.env.NEXT_PUBLIC_API_URL}/Customer/logout`, {
-    //   method: 'POST',
-    //   credentials: 'include'
-    // })
-    
-    return NextResponse.json({ success: true }, { status: 200 })
+    return NextResponse.json({ success: true });
   } catch (error) {
-    console.error(error)
-    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 })
+    console.error('Logout API error:', error);
+    // Still return success as client will clear state anyway
+    return NextResponse.json({ success: true });
   }
 }
