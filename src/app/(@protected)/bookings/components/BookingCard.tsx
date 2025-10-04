@@ -1,6 +1,5 @@
 'use client'
 import { Booking } from '@/lib/bookings';
-import Image from 'next/image'; // Retained for compatibility, though unused
 import { FaUserTie, FaCalendarAlt, FaClock, FaRupeeSign, FaTimes, FaCheck } from 'react-icons/fa';
 import { normalizeBookingStatus, isCancellable, showPaymentButton } from '../bookingUtils';
 

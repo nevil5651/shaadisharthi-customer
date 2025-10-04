@@ -1,4 +1,3 @@
-import { FaCalendarAlt, FaUserTie, FaClock } from 'react-icons/fa';
 
 export default function BookingCard({ booking }: {
   booking: {
