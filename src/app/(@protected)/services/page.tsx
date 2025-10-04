@@ -140,14 +140,14 @@ const ServicePageContent: React.FC = () => {
               ))}
             </div>
             <button
-              onClick={() => setShowAllCategories(!showAllCategories)}
-              className="absolute bottom-0 right-0 bg-white dark:bg-gray-800 px-3 py-1 text-primary dark:text-pink-400 font-medium rounded-md shadow-sm"
-              aria-expanded={showAllCategories}
-              aria-label={showAllCategories ? 'Show fewer categories' : 'Show all categories'}
-            >
-              {showAllCategories ? 'See Less' : 'See More'}
-              {showAllCategories ? <ChevronUpIcon className="ml-1" /> : <ChevronDownIcon className="ml-1" />}
-            </button>
+  onClick={() => setShowAllCategories(!showAllCategories)}
+  className="absolute bottom-0 inset-x-0 mx-auto w-fit bg-white dark:bg-gray-800 px-3 py-1 text-primary dark:text-pink-400 font-medium rounded-md shadow-sm sm:right-0 sm:left-auto sm:mx-0"
+  aria-expanded={showAllCategories}
+  aria-label={showAllCategories ? 'Show fewer categories' : 'Show all categories'}
+>
+  {showAllCategories ? 'See Less' : 'See More'}
+  {showAllCategories ? <ChevronUpIcon className="ml-1" /> : <ChevronDownIcon className="ml-1" />}
+</button>
           </div>
         </div>
 

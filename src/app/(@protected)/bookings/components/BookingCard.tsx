@@ -53,7 +53,7 @@ export const BookingCard = ({
           <div className="flex items-center text-gray-900 dark:text-white sm:justify-end order-first sm:order-none">
             <FaRupeeSign className="text-pink-600 dark:text-pink-400 mr-2 text-xl font-bold flex-shrink-0 w-6 h-6" />
             <span className="font-extrabold text-2xl">
-              ₹{booking.amount.toLocaleString()}
+              {booking.amount.toLocaleString()}
             </span>
           </div>
           <div className="flex items-center text-gray-700 dark:text-gray-300">
