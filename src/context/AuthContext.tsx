@@ -1,4 +1,3 @@
-// context/AuthContext.tsx
 'use client'
 
 import React, { createContext, useState, useEffect, useRef, useCallback, useContext } from 'react'
@@ -78,7 +77,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
     try {
       // Call logout API but don't wait too long
-      const logoutPromise = fetch('api/auth/logout', {
+      const logoutPromise = fetch('/customer/api/auth/logout', {
         method: 'POST',
         credentials: 'include'
       });
