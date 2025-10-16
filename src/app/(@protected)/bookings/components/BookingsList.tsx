@@ -26,6 +26,7 @@ export const BookingsList = ({
   onPageChange,
 }: BookingsListProps) => {
 
+  // Show loading skeleton while data is being fetched
   if (loading) {
     return (
       <div className="space-y-6">
@@ -36,6 +37,7 @@ export const BookingsList = ({
     );
   }
 
+  // Show error message if API request fails
   if (error) {
     return (
       <div className="bg-red-50 dark:bg-red-900/20 border-l-4 border-red-500 p-4 mb-6 rounded-lg">
@@ -53,6 +55,7 @@ export const BookingsList = ({
     );
   }
 
+  // Show empty state when no bookings are found
   if (!loading && !error && bookings.length === 0) {
     return (
       <div className="text-center py-12">
@@ -67,6 +70,7 @@ export const BookingsList = ({
 
   return (
     <div className="space-y-6">
+      {/* Bookings List */}
       <div className="space-y-6">
         {bookings.map(booking => (
             <BookingCard 
@@ -78,10 +82,11 @@ export const BookingsList = ({
         ))}
       </div>
       
-      {/* Pagination */}
+      {/* Pagination Controls - Only show if there are multiple pages */}
       {totalPages > 1 && (
         <div className="flex justify-center mt-6">
           <div className="flex items-center gap-2">
+            {/* Previous Page Button */}
             <button 
               onClick={() => onPageChange(currentPage - 1)}
               disabled={currentPage === 1 || loading}
@@ -90,10 +95,12 @@ export const BookingsList = ({
               <FiChevronLeft />
             </button>
             
+            {/* Current Page Indicator */}
             <span className="px-4 py-2 text-gray-700 dark:text-gray-300">
               Page {currentPage} of {totalPages}
             </span>
             
+            {/* Next Page Button */}
             <button 
               onClick={() => onPageChange(currentPage + 1)}
               disabled={currentPage === totalPages || loading}

@@ -14,12 +14,13 @@ import { normalizeBookingStatus, formatDateForAPI } from './bookingUtils';
 
 import { Booking } from '@/lib/bookings';
 
+// Configure React Query client with caching options
 const queryClient = new QueryClient({
     defaultOptions: {
         queries: {
-            staleTime: 5 * 60 * 1000,
-            gcTime: 10 * 60 * 1000,
-            refetchOnWindowFocus: false
+            staleTime: 5 * 60 * 1000, // Data stays fresh for 5 minutes
+            gcTime: 10 * 60 * 1000, // Cache time 10 minutes
+            refetchOnWindowFocus: false // Don't refetch when window gains focus
         }
     }
 });
@@ -35,35 +36,37 @@ export default function BookingsPage() {
 }
 
 function BookingsContent() {
+    // Get URL search parameters for deep linking
     const searchParams = useSearchParams();
     const { filters, updateFilters, resetFilters } = useBookingContext();
     const [currentPage, setCurrentPage] = useState(1);
 
+    // Fetch bookings data with React Query
     const { data, isLoading, error, refetch } = useQuery<{ bookings: Booking[], totalPages: number }, Error>({
-        queryKey: ['bookings', filters, currentPage],
+        queryKey: ['bookings', filters, currentPage], // Unique key for caching
         queryFn: () => {
-            // Prepare API parameters
+            // Prepare API parameters from filters
             const params = {
                 status: filters.status === 'all' ? undefined : filters.status,
                 search: filters.search,
                 dateFrom: formatDateForAPI(filters.dateFrom),
                 dateTo: formatDateForAPI(filters.dateTo),
                 page: currentPage,
-                limit: 10
+                limit: 10 // 10 items per page
             };
             
-            // Log request parameters
+            // Log request parameters for debugging
             console.log('[API Request] Fetching bookings with params:', params);
             
             return api.get('/Customer/cstmr-bookings', { params })
                 .then(res => {
-                    // Log successful response
+                    // Log successful response for debugging
                     console.log('[API Response] Bookings data:', {
                         status: res.status,
                         data: res.data
                     });
                     
-                    // Normalize statuses in API response
+                    // Normalize statuses in API response for frontend consistency
                     const normalizedData = {
                         ...res.data,
                         bookings: (res.data.bookings || []).map((booking: Booking) => ({
@@ -75,7 +78,7 @@ function BookingsContent() {
                     return normalizedData;
                 })
                 .catch(err => {
-                    // Log error response
+                    // Log error response for debugging
                     console.error('[API Error] Failed to fetch bookings:', {
                         status: err.response?.status,
                         message: err.message,
@@ -84,9 +87,10 @@ function BookingsContent() {
                     throw err;
                 });
         },
-        enabled: !!filters,
+        enabled: !!filters, // Only run query when filters are available
     });
 
+    // Debounce filter updates to prevent excessive API calls
     const debouncedUpdateFilters = useMemo(() => debounce(updateFilters, 300), [updateFilters]);
 
     const handleFilterChange = (name: string, value: string) => {
@@ -96,7 +100,7 @@ function BookingsContent() {
         setCurrentPage(1);
     }
     
-    // Prevent end date before start date
+    // Prevent end date before start date by adjusting dates accordingly
     const newFilters = {...filters, [name]: value};
     if (name === 'dateFrom' && newFilters.dateTo && value > newFilters.dateTo) {
         newFilters.dateTo = value;
@@ -112,6 +116,7 @@ function BookingsContent() {
         setCurrentPage(page);
     };
 
+    // Handle booking cancellation with reason prompt
     const onCancel: ComponentProps<typeof BookingsList>['onCancel'] = async (id) => {
         const reason = window.prompt('Please provide a reason for cancellation:');
         if (reason === null) { // User clicked "Cancel" on the prompt
@@ -133,7 +138,7 @@ function BookingsContent() {
                 autoClose: 3000,
             });
 
-            refetch(); // Refresh the bookings list
+            refetch(); // Refresh the bookings list after cancellation
         } catch (err) {
             console.error('Cancellation failed:', err);
             let errorMessage = 'An unknown error occurred';
@@ -152,6 +157,7 @@ function BookingsContent() {
         }
     };
 
+    // Handle payment action - currently shows info message as payment is not implemented
     const handlePayNow = () => {
   toast.info(
     "We apologize, but online payment is not yet available. Please arrange payment directly with the service provider.",
@@ -162,6 +168,7 @@ function BookingsContent() {
   );
 };
 
+    // Refetch bookings when navigating from booking creation
     useEffect(() => {
         if (searchParams.get('fromBooking')) {
             refetch();
@@ -170,12 +177,14 @@ function BookingsContent() {
 
     return (
         <div className="container mx-auto px-4 py-8 bg-gray-50 dark:bg-gray-900 min-h-screen">
+            {/* Filter Component */}
             <BookingFilters 
                 filters={filters}
                 onFilterChange={handleFilterChange} 
                 onReset={resetFilters} 
             />
             
+            {/* Bookings List Component */}
             <BookingsList 
                 bookings={data?.bookings || []}
                 loading={isLoading}
