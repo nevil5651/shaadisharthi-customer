@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useCallback } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { usePathname } from 'next/navigation';
 
@@ -13,18 +13,18 @@ export default function AuthHandler() {
   const inactivityTimer = useRef<NodeJS.Timeout | undefined>(undefined);
   const sessionCheckInterval = useRef<NodeJS.Timeout | undefined>(undefined);
 
-  const resetInactivityTimer = () => {
+  const resetInactivityTimer = useCallback(() => {
     if (inactivityTimer.current) {
       clearTimeout(inactivityTimer.current);
     }
-    
+
     inactivityTimer.current = setTimeout(() => {
       console.log('Auto logout due to inactivity');
       logout();
     }, INACTIVITY_TIMEOUT);
-  };
+  }, [logout]);
 
-  const checkSessionValidity = async () => {
+  const checkSessionValidity = useCallback(async () => {
     if (!isAuthenticated) return;
 
     try {
@@ -33,11 +33,11 @@ export default function AuthHandler() {
       console.error('Session validation failed, logging out:', error);
       logout();
     }
-  };
+  }, [isAuthenticated, fetchProfile, logout]);
 
   // Set up activity listeners for inactivity timeout
   useEffect(() => {
-    if (!isAuthenticated) return;
+    if (!isAuthenticated || typeof document === 'undefined') return;
 
     const events = ['mousedown', 'mousemove', 'keypress', 'scroll', 'touchstart', 'click'];
     
@@ -59,27 +59,28 @@ export default function AuthHandler() {
         clearTimeout(inactivityTimer.current);
       }
     };
-  }, [isAuthenticated, logout]);
+  }, [isAuthenticated, resetInactivityTimer]);
 
   // Set up periodic session checks
   useEffect(() => {
     if (!isAuthenticated) return;
 
-    sessionCheckInterval.current = setInterval(checkSessionValidity, SESSION_CHECK_INTERVAL);
+    sessionCheckInterval.current = setInterval(
+      checkSessionValidity,
+      SESSION_CHECK_INTERVAL,
+    );
 
     return () => {
       if (sessionCheckInterval.current) {
         clearInterval(sessionCheckInterval.current);
       }
     };
-  }, [isAuthenticated]);
+  }, [isAuthenticated, checkSessionValidity]);
 
   // Check session on route changes
   useEffect(() => {
-    if (isAuthenticated) {
-      checkSessionValidity();
-    }
-  }, [pathname]);
+    checkSessionValidity();
+  }, [pathname, checkSessionValidity]);
 
   return null;
 }

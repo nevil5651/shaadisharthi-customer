@@ -101,18 +101,18 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       // Redirect to login
       router.push('/login')
       toast.success('Logged out successfully')
-      
     } catch (error) {
       console.error('Logout error:', error)
       // Even on error, clear client state and redirect
       setUser(null)
       clearCachedUser()
       router.push('/login')
-      toast.error('Logout out successful')
+      //toast.error('Logout out successful')
+      toast.success('Logged out successfully.');
     } finally {
       setIsLoggingOut(false)
     }
-  }, [isLoggingOut]);
+  }, [isLoggingOut, router]);
 
   const fetchProfile = useCallback(async (forceRefresh = false) => {
     if (fetchInProgress.current) return
@@ -251,7 +251,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const updateAccountDetails = useCallback(async (updatedData: Partial<User>) => {
     try {
       setIsLoading(true)
-      
+
       // Remove email if present (shouldn't be editable)
       const { email, ...updatePayload } = updatedData
       
@@ -265,7 +265,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
       if (!response.ok) {
         const errorData = await response.json()
-        throw new Error(errorData.error || 'Failed to update account')
+        // Use a more specific error message if available from the API
+        const message = errorData.message || errorData.error || 'Failed to update account';
+        throw new Error(message);
       }
 
       const responseData = await response.json()
