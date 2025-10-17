@@ -16,41 +16,46 @@ interface PageProps {
   params: Promise<{ id: string }>;
 }
 
-// Request cache to prevent duplicate requests
+// Cache to prevent duplicate API requests - stores data for 30 seconds
 const requestCache = new Map();
 
 export default function ServiceDetailPage({ params }: PageProps) {
+  // Extract service ID from URL parameters
   const resolvedParams = React.use(params);
   const serviceId = resolvedParams.id;
 
+  // State for service data, reviews, and loading status
   const [service, setService] = useState<Service | null>(null);
   const [reviews, setReviews] = useState<Review[]>([]);
-  const [hasMore, setHasMore] = useState(true);
-  const pageRef = useRef(1);
+  const [hasMore, setHasMore] = useState(true); // Track if more reviews are available
   const [serviceLoading, setServiceLoading] = useState(false);
   const [reviewsLoading, setReviewsLoading] = useState(false);
   const [serviceError, setServiceError] = useState<string | null>(null);
   const [reviewsError, setReviewsError] = useState<string | null>(null);
-  
-  // Separate refs for mobile and desktop layouts
+
+  // Refs for tracking pagination and loading state
+  const pageRef = useRef(1); // Current page number for reviews
+  const isFetchingRef = useRef(false); // Prevent duplicate API calls
+  const lastPageRef = useRef(0); // Track last fetched page to avoid duplicates
+
+  // Separate refs for mobile and desktop loader elements
+  // This fixes the issue where layout changes break the IntersectionObserver
   const mobileLoaderRef = useRef<HTMLDivElement>(null);
   const desktopLoaderRef = useRef<HTMLDivElement>(null);
-  
-  const observerRef = useRef<IntersectionObserver | null>(null);
-  const isFetchingRef = useRef(false);
-  const lastPageRef = useRef(0);
+  const observerRef = useRef<IntersectionObserver | null>(null); // Observer for infinite scroll
 
-  // Memoized data fetching functions
+  // Load service details from API
   const loadService = useCallback(async () => {
     if (!serviceId || serviceId === 'undefined') {
       setServiceError('Invalid service ID');
       return;
     }
 
-    // Check cache first
+    // Check cache first to avoid unnecessary API calls
     const cacheKey = `service-${serviceId}`;
     if (requestCache.has(cacheKey)) {
       const cachedData = requestCache.get(cacheKey);
+      // Use cached data if it's less than 30 seconds old
       if (cachedData.timestamp > Date.now() - 30000) {
         setService(cachedData.data);
         return;
@@ -64,6 +69,7 @@ export default function ServiceDetailPage({ params }: PageProps) {
         throw new Error('Service ID missing in response');
       }
       
+      // Cache the successful response
       requestCache.set(cacheKey, {
         data: serviceData,
         timestamp: Date.now()
@@ -79,7 +85,9 @@ export default function ServiceDetailPage({ params }: PageProps) {
     }
   }, [serviceId]);
 
+  // Load reviews with pagination support
   const loadReviews = useCallback(async (reset: boolean = false) => {
+    // Prevent multiple simultaneous requests
     if (!serviceId || serviceId === 'undefined' || isFetchingRef.current) {
       return;
     }
@@ -93,7 +101,7 @@ export default function ServiceDetailPage({ params }: PageProps) {
     
     const cacheKey = `reviews-${serviceId}-${targetPage}`;
 
-    // Check cache first
+    // Check cache for reviews data
     if (requestCache.has(cacheKey) && !reset) {
       const cachedData = requestCache.get(cacheKey);
       if (cachedData.timestamp > Date.now() - 30000) {
@@ -108,14 +116,15 @@ export default function ServiceDetailPage({ params }: PageProps) {
     isFetchingRef.current = true;
     setReviewsLoading(true);
     try {
-      console.log(`Fetching reviews page ${targetPage} for service ${serviceId}`);
       const reviewsData = await fetchReviews(serviceId, targetPage);
       
+      // Cache the reviews response
       requestCache.set(cacheKey, {
         data: reviewsData,
         timestamp: Date.now()
       });
       
+      // Add new reviews to existing list or replace for reset
       setReviews(prev => reset ? reviewsData.reviews : [...prev, ...reviewsData.reviews]);
       setHasMore(reviewsData.hasMore);
       pageRef.current = targetPage + 1;
@@ -125,6 +134,7 @@ export default function ServiceDetailPage({ params }: PageProps) {
       console.error('Error loading reviews:', err);
       setReviewsError(err instanceof Error ? err.message : 'Failed to load reviews');
       
+      // Stop loading more if we hit rate limits
       if (err instanceof Error && err.message.includes('429')) {
         setHasMore(false);
       }
@@ -134,7 +144,7 @@ export default function ServiceDetailPage({ params }: PageProps) {
     }
   }, [serviceId]);
 
-  // Initial data loading
+  // Load initial data when service ID changes
   useEffect(() => {
     setReviews([]);
     pageRef.current = 1;
@@ -144,20 +154,21 @@ export default function ServiceDetailPage({ params }: PageProps) {
     loadReviews(true);
   }, [serviceId, loadService, loadReviews]);
 
-  // Improved infinite scroll setup that handles both layouts
+  // Setup infinite scroll observer
   useEffect(() => {
-    // Disconnect previous observer
+    // Clean up previous observer
     if (observerRef.current) {
       observerRef.current.disconnect();
       observerRef.current = null;
     }
 
-    // Get the currently visible loader based on layout
+    // Determine which loader element is currently visible based on screen size
     const getCurrentLoader = () => {
-      // Check which loader is currently in the DOM and visible
+      // Mobile layout (width < 1024px) uses mobileLoaderRef
       if (mobileLoaderRef.current && window.innerWidth < 1024) {
         return mobileLoaderRef.current;
       }
+      // Desktop layout uses desktopLoaderRef
       if (desktopLoaderRef.current && window.innerWidth >= 1024) {
         return desktopLoaderRef.current;
       }
@@ -166,21 +177,19 @@ export default function ServiceDetailPage({ params }: PageProps) {
 
     const currentLoader = getCurrentLoader();
 
-    // Only set up observer if we have more reviews to load and loader exists
+    // Set up new observer if conditions are met
     if (hasMore && !reviewsLoading && currentLoader) {
-      console.log('Setting up IntersectionObserver for current layout');
-      
       const observer = new IntersectionObserver(
         (entries) => {
           const [entry] = entries;
+          // Load more reviews when loader comes into view
           if (entry.isIntersecting && hasMore && !reviewsLoading && !isFetchingRef.current) {
-            console.log('Loading more reviews, current page:', pageRef.current);
             loadReviews();
           }
         },
         { 
-          threshold: 0.1,
-          rootMargin: '50px 0px 50px 0px'
+          threshold: 0.1, // Trigger when 10% of loader is visible
+          rootMargin: '50px 0px 50px 0px' // Start loading 50px before reaching loader
         }
       );
 
@@ -188,6 +197,7 @@ export default function ServiceDetailPage({ params }: PageProps) {
       observerRef.current = observer;
     }
 
+    // Cleanup function - disconnect observer on unmount
     return () => {
       if (observerRef.current) {
         observerRef.current.disconnect();
@@ -196,15 +206,15 @@ export default function ServiceDetailPage({ params }: PageProps) {
     };
   }, [hasMore, reviewsLoading, loadReviews, serviceId]);
 
-  // Reconnect observer when layout changes (window resize)
+  // Reconnect observer when screen size changes (mobile/desktop switch)
   useEffect(() => {
     const handleResize = () => {
-      // Re-setup the observer when window is resized (layout change)
+      // Only reconnect if we have an active observer
       if (observerRef.current) {
         observerRef.current.disconnect();
         observerRef.current = null;
         
-        // Small timeout to allow DOM to update after resize
+        // Small delay to allow DOM to update after resize
         setTimeout(() => {
           const getCurrentLoader = () => {
             if (mobileLoaderRef.current && window.innerWidth < 1024) {
@@ -218,12 +228,12 @@ export default function ServiceDetailPage({ params }: PageProps) {
 
           const currentLoader = getCurrentLoader();
           
+          // Recreate observer for the currently visible loader
           if (hasMore && !reviewsLoading && currentLoader && observerRef.current === null) {
             const observer = new IntersectionObserver(
               (entries) => {
                 const [entry] = entries;
                 if (entry.isIntersecting && hasMore && !reviewsLoading && !isFetchingRef.current) {
-                  console.log('Loading more reviews after resize, page:', pageRef.current);
                   loadReviews();
                 }
               },
@@ -240,36 +250,46 @@ export default function ServiceDetailPage({ params }: PageProps) {
       }
     };
 
+    // Listen for window resize events
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, [hasMore, reviewsLoading, loadReviews]);
 
+  // Helper to identify temporary reviews (optimistic updates)
   const isTemp = (r: Review) => typeof r.reviewId === 'string' && r.reviewId.startsWith('temp-');
 
+  // Handle new review submission (optimistic update)
   const handleReviewSubmitted = useCallback((newReview: Review | null) => {
     if (newReview) {
+      // Add new review and remove any temporary ones
       setReviews((prev) => [newReview, ...prev.filter(r => !isTemp(r))]);
     } else {
+      // Remove temporary reviews on error
       setReviews((prev) => prev.filter(r => !isTemp(r)));
     }
   }, []);
 
+  // Handle server response after review submission
   const handleServerReviews = useCallback((serverList: Review[]) => {
+    // Replace local reviews with server authoritative list
     setReviews(serverList);
-    pageRef.current = 2;
+    pageRef.current = 2; // Reset to page 2 since we now have fresh page 1
     setHasMore(true);
     lastPageRef.current = 1;
     
+    // Update service rating and review count
     setService((prev) => prev ? {
       ...prev,
       reviewCount: prev.reviewCount + 1,
       rating: calcNewAverage(prev.rating, prev.reviewCount, serverList[0]?.rating ?? 0)
     } : prev);
     
+    // Clear review cache to ensure fresh data
     const cacheKeys = Array.from(requestCache.keys()).filter(key => key.startsWith(`reviews-${serviceId}-`));
     cacheKeys.forEach(key => requestCache.delete(key));
   }, [serviceId]);
 
+  // Show error page if service fails to load
   if (serviceError) {
     return (
       <div className="container mx-auto px-4 py-8 text-red-600 dark:text-red-400">
@@ -281,20 +301,22 @@ export default function ServiceDetailPage({ params }: PageProps) {
   return (
     <ErrorBoundary>
       <main className="container bg-gray-50 dark:bg-gray-900 font-['Poppins'] mx-auto px-4 py-8">
+        {/* Service Hero Section */}
         {!service || serviceLoading ? (
           <ServiceHeroSkeleton />
         ) : (
           <ServiceHero service={service} />
         )}
         
-        {/* Mobile Layout - Single Column */}
+        {/* Mobile Layout - Single Column Stack */}
         <div className="block lg:hidden space-y-8 mb-12">
-          {/* Description */}
+          {/* Service Description */}
           <section className="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6">
             <h2 className="text-2xl font-heading font-bold text-gray-900 dark:text-white mb-4">
               About This Service
             </h2>
             {!service || serviceLoading ? (
+              // Skeleton loader for description
               <>
                 <div className="h-4 bg-gray-300 dark:bg-gray-700 rounded w-full mb-2 animate-pulse"></div>
                 <div className="h-4 bg-gray-300 dark:bg-gray-700 rounded w-full mb-2 animate-pulse"></div>
@@ -332,16 +354,18 @@ export default function ServiceDetailPage({ params }: PageProps) {
             />
           )}
           
-          {/* Review List */}
+          {/* Reviews List */}
           {reviewsError ? (
             <div className="text-red-600 dark:text-red-400 text-center py-4">{reviewsError}</div>
           ) : (
             <ReviewsList reviews={reviews} />
           )}
           
+          {/* Infinite Scroll Loader for Mobile */}
           {hasMore && (
             <div ref={mobileLoaderRef} className="text-center py-4">
               {reviewsLoading ? (
+                // Show loading skeletons when fetching
                 <>
                   <ReviewSkeleton />
                   <ReviewSkeleton />
@@ -354,14 +378,17 @@ export default function ServiceDetailPage({ params }: PageProps) {
           )}
         </div>
 
-        {/* Desktop Layout - Grid Columns */}
+        {/* Desktop Layout - 3 Column Grid */}
         <div className="hidden lg:grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">
+          {/* Left Column - 2/3 width */}
           <div className="lg:col-span-2 space-y-8">
+            {/* Service Description */}
             <section className="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6">
               <h2 className="text-2xl font-heading font-bold text-gray-900 dark:text-white mb-4">
                 About This Service
               </h2>
               {!service || serviceLoading ? (
+                // Skeleton loader for description
                 <>
                   <div className="h-4 bg-gray-300 dark:bg-gray-700 rounded w-full mb-2 animate-pulse"></div>
                   <div className="h-4 bg-gray-300 dark:bg-gray-700 rounded w-full mb-2 animate-pulse"></div>
@@ -372,19 +399,23 @@ export default function ServiceDetailPage({ params }: PageProps) {
               )}
             </section>
             
+            {/* Media Gallery */}
             {service && service.media && service.media.length > 0 && (
               <MediaGallery media={service.media} />
             )}
             
+            {/* Reviews List */}
             {reviewsError ? (
               <div className="text-red-600 dark:text-red-400 text-center py-4">{reviewsError}</div>
             ) : (
               <ReviewsList reviews={reviews} />
             )}
             
+            {/* Infinite Scroll Loader for Desktop */}
             {hasMore && (
               <div ref={desktopLoaderRef} className="text-center py-4">
                 {reviewsLoading ? (
+                  // Show loading skeletons when fetching
                   <>
                     <ReviewSkeleton />
                     <ReviewSkeleton />
@@ -397,7 +428,9 @@ export default function ServiceDetailPage({ params }: PageProps) {
             )}
           </div>
           
+          {/* Right Column - 1/3 width */}
           <div className="lg:col-span-1 space-y-6">
+            {/* Pricing Card */}
             {!service || serviceLoading ? (
               <div className="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6 animate-pulse">
                 <div className="h-6 bg-gray-300 dark:bg-gray-700 rounded w-1/3 mb-4"></div>
@@ -410,6 +443,7 @@ export default function ServiceDetailPage({ params }: PageProps) {
               <PricingCard service={service} />
             )}
             
+            {/* Review Form */}
             {service && (
               <ReviewForm
                 serviceId={service.serviceId}
@@ -424,6 +458,7 @@ export default function ServiceDetailPage({ params }: PageProps) {
   );
 }
 
+// Helper function to calculate new average rating after review
 function calcNewAverage(oldAvg: number, oldCount: number, newRating: number) {
   if (oldCount === 0) return newRating;
   return ((oldAvg * oldCount) + newRating) / (oldCount + 1);
