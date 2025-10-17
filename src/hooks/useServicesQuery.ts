@@ -3,15 +3,18 @@ import api from '@/lib/axios';
 import { Service } from '@/lib/types';
 import { ServiceFilters } from './useServices';
 
+// Interface for the services API response
 interface ServicesResponse {
-  services: Service[];
-  hasMore: boolean;
-  nextPage: number;
+  services: Service[];  // Array of services
+  hasMore: boolean;     // Whether there are more pages to load
+  nextPage: number;     // Next page number
 }
 
+// Custom hook to fetch services with infinite scrolling and filtering
 export const useServices = (filters: ServiceFilters) => {
   return useInfiniteQuery<ServicesResponse>({
-    initialPageParam: 1,
+    initialPageParam: 1,  // Start from page 1
+    // Query key includes all filters for proper caching
     queryKey: ['services', 
       filters.category, 
       filters.location, 
@@ -20,10 +23,12 @@ export const useServices = (filters: ServiceFilters) => {
       filters.maxPrice, 
       filters.rating
     ],
+    // Query function to fetch services from API
     queryFn: async ({ pageParam }) => {
+      // Build query parameters from filters
       const query = new URLSearchParams({
         page: String(pageParam),
-        limit: '12',
+        limit: '12',  // 12 items per page
         ...(filters.category && { category: filters.category }),
         ...(filters.location && { location: filters.location }),
         ...(filters.minPrice && { minPrice: filters.minPrice }),
@@ -32,6 +37,7 @@ export const useServices = (filters: ServiceFilters) => {
         ...(filters.sortBy && { sortBy: filters.sortBy }),
       }).toString();
 
+      // API call to fetch services
       const response = await api.get(`/Customer/services?${query}`);
       
       return {
@@ -40,20 +46,22 @@ export const useServices = (filters: ServiceFilters) => {
         nextPage: (pageParam as number) + 1,
       };
     },
+    // Determine if there's a next page to fetch
     getNextPageParam: (lastPage) => {
       return lastPage.hasMore ? lastPage.nextPage : undefined;
     },
     staleTime: 2 * 60 * 1000, // Data is fresh for 2 minutes
-    gcTime: 10 * 60 * 1000, // Cache persists for 10 minutes
-    refetchOnWindowFocus: false,
+    gcTime: 10 * 60 * 1000, // Cache persists for 10 minutes (formerly cacheTime)
+    refetchOnWindowFocus: false, // Don't refetch when window gains focus
   });
 };
 
-
+// Custom hook to fetch service categories
 export const useServiceCategories = () => {
   return useQuery({
-    queryKey: ['categories'],
+    queryKey: ['categories'],  // Unique key for categories cache
     queryFn: async () => {
+      // Return static categories data (in real app, this would be an API call)
       return [
         { name: 'Photography', icon: 'fa-camera', color: { bg: 'bg-indigo-100 dark:bg-indigo-900', text: 'text-indigo-600 dark:text-indigo-300' } },
         { name: 'Venues', icon: 'fa-building', color: { bg: 'bg-purple-100 dark:bg-purple-900', text: 'text-purple-600 dark:text-purple-300' } },
@@ -74,7 +82,7 @@ export const useServiceCategories = () => {
         { name: 'Entertainment', icon: 'fa-star', color: { bg: 'bg-yellow-100 dark:bg-yellow-900', text: 'text-yellow-600 dark:text-yellow-300' } },
       ];
     },
-    staleTime: Infinity,
+    staleTime: Infinity,  // Categories data never becomes stale
   });
 };
 
