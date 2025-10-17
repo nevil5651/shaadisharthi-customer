@@ -3,15 +3,19 @@ import { useDebouncedCallback } from 'use-debounce';
 import { ServiceFilters } from '@/hooks/useServicesQuery';
 import { SlidersIcon, TimesIcon } from './Icons';
 
+// Props interface for FilterSection component
 interface FilterSectionProps {
-  filters: ServiceFilters;
-  setFilters: (filters: ServiceFilters) => void;
-  onResetFilters: () => void;
+  filters: ServiceFilters;                    // Current filter values
+  setFilters: (filters: ServiceFilters) => void;  // Function to update filters
+  onResetFilters: () => void;                // Function to reset all filters
 }
 
+// FilterSection component that provides filtering options for services
 const FilterSection: React.FC<FilterSectionProps> = ({ filters, setFilters, onResetFilters }) => {
+  // State to control visibility of advanced filters
   const [showFilters, setShowFilters] = React.useState(false);
 
+  // Static data for filter options
   const categories = [
     "Photography", "Venues", "Sound", "Catering", "Decoration",
     "Bridal Wear", "Jewellery", "Favors", "Planners", "Bridal Makeup",
@@ -28,43 +32,47 @@ const FilterSection: React.FC<FilterSectionProps> = ({ filters, setFilters, onRe
     { value: "price_high", label: "Price: High to Low" }
   ];
 
-  // Debounce filter updates directly
+  // Debounce filter updates to prevent excessive API calls
   const debouncedSetFilters = useDebouncedCallback((newFilters: ServiceFilters) => {
     setFilters(newFilters);
   }, 300);
 
+  // Handle changes to filter inputs
   const handleFilterChange = (e: React.ChangeEvent<HTMLSelectElement | HTMLInputElement>) => {
     const { name, value } = e.target;
     const newFilters = { ...filters, [name]: value };
     debouncedSetFilters(newFilters);
   };
 
+  // Toggle visibility of advanced filters
   const toggleFilters = () => {
     setShowFilters(!showFilters);
   };
 
   return (
     <div className="filter-section bg-white dark:bg-gray-800 rounded-lg shadow-sm dark:shadow-md p-6 mb-8">
+      {/* Filter header with toggle button */}
       <div className="flex justify-between items-center">
         <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-200">Filters</h2>
         <button
           id="filterToggle"
           className="filter-toggle flex items-center text-secondary dark:text-pink-400 font-medium hover:text-opacity-80 dark:hover:text-opacity-80"
           onClick={toggleFilters}
-          aria-expanded={showFilters}
+          aria-expanded={showFilters}  // Accessibility attribute
         >
           {showFilters ? <TimesIcon className="mr-2" /> : <SlidersIcon className="mr-2" />}
           <span>Advanced Filters</span>
         </button>
       </div>
 
+      {/* Filter form - conditionally rendered based on showFilters state */}
       <form
         id="filterForm"
         className={`filter-content ${showFilters ? 'block' : 'hidden'} mt-4 transition-all duration-300`}
-        onSubmit={(e) => e.preventDefault()}
+        onSubmit={(e) => e.preventDefault()}  // Prevent form submission
       >
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-          {/* Category Filter */}
+          {/* Category Filter Dropdown */}
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
               Category
@@ -84,7 +92,7 @@ const FilterSection: React.FC<FilterSectionProps> = ({ filters, setFilters, onRe
             </select>
           </div>
 
-          {/* Location Filter */}
+          {/* Location Filter Dropdown */}
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
               Location
@@ -104,7 +112,7 @@ const FilterSection: React.FC<FilterSectionProps> = ({ filters, setFilters, onRe
             </select>
           </div>
 
-          {/* Price Range */}
+          {/* Price Range Inputs */}
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
               Price Range
@@ -130,7 +138,7 @@ const FilterSection: React.FC<FilterSectionProps> = ({ filters, setFilters, onRe
             </div>
           </div>
 
-          {/* Rating Filter */}
+          {/* Rating Filter Dropdown */}
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
               Minimum Rating
@@ -150,7 +158,7 @@ const FilterSection: React.FC<FilterSectionProps> = ({ filters, setFilters, onRe
             </select>
           </div>
 
-          {/* Sort By */}
+          {/* Sort and Reset Controls */}
           <div className="md:col-span-4 flex justify-between items-center">
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
@@ -170,6 +178,7 @@ const FilterSection: React.FC<FilterSectionProps> = ({ filters, setFilters, onRe
               </select>
             </div>
             <div className="flex space-x-2">
+              {/* Reset Filters Button */}
               <button
                 type="button"
                 onClick={onResetFilters}

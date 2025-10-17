@@ -1,8 +1,12 @@
 import React from 'react';
 
+// Props interface for all icon components
 interface IconProps {
-  className?: string;
+  className?: string;  // Optional CSS classes to apply to the icon
 }
+
+// Collection of icon components that render Font Awesome icons
+// Each icon component accepts optional className prop for styling
 
 export const CameraIcon: React.FC<IconProps> = ({ className = "" }) => (
   <i className={`fas fa-camera ${className}`} />
