@@ -31,10 +31,14 @@ export default function ServiceDetailPage({ params }: PageProps) {
   const [reviewsLoading, setReviewsLoading] = useState(false);
   const [serviceError, setServiceError] = useState<string | null>(null);
   const [reviewsError, setReviewsError] = useState<string | null>(null);
-  const loaderRef = useRef<HTMLDivElement>(null);
+  
+  // Separate refs for mobile and desktop layouts
+  const mobileLoaderRef = useRef<HTMLDivElement>(null);
+  const desktopLoaderRef = useRef<HTMLDivElement>(null);
+  
   const observerRef = useRef<IntersectionObserver | null>(null);
-  const isFetchingRef = useRef(false); // Ref to track if we're currently fetching
-  const lastPageRef = useRef(0); // Track the last page we fetched
+  const isFetchingRef = useRef(false);
+  const lastPageRef = useRef(0);
 
   // Memoized data fetching functions
   const loadService = useCallback(async () => {
@@ -47,7 +51,7 @@ export default function ServiceDetailPage({ params }: PageProps) {
     const cacheKey = `service-${serviceId}`;
     if (requestCache.has(cacheKey)) {
       const cachedData = requestCache.get(cacheKey);
-      if (cachedData.timestamp > Date.now() - 30000) { // 30 second cache
+      if (cachedData.timestamp > Date.now() - 30000) {
         setService(cachedData.data);
         return;
       }
@@ -60,7 +64,6 @@ export default function ServiceDetailPage({ params }: PageProps) {
         throw new Error('Service ID missing in response');
       }
       
-      // Cache the response
       requestCache.set(cacheKey, {
         data: serviceData,
         timestamp: Date.now()
@@ -93,7 +96,7 @@ export default function ServiceDetailPage({ params }: PageProps) {
     // Check cache first
     if (requestCache.has(cacheKey) && !reset) {
       const cachedData = requestCache.get(cacheKey);
-      if (cachedData.timestamp > Date.now() - 30000) { // 30 second cache
+      if (cachedData.timestamp > Date.now() - 30000) {
         setReviews(prev => reset ? cachedData.data.reviews : [...prev, ...cachedData.data.reviews]);
         setHasMore(cachedData.data.hasMore);
         pageRef.current = targetPage + 1;
@@ -105,9 +108,9 @@ export default function ServiceDetailPage({ params }: PageProps) {
     isFetchingRef.current = true;
     setReviewsLoading(true);
     try {
+      console.log(`Fetching reviews page ${targetPage} for service ${serviceId}`);
       const reviewsData = await fetchReviews(serviceId, targetPage);
       
-      // Cache the response
       requestCache.set(cacheKey, {
         data: reviewsData,
         timestamp: Date.now()
@@ -122,7 +125,6 @@ export default function ServiceDetailPage({ params }: PageProps) {
       console.error('Error loading reviews:', err);
       setReviewsError(err instanceof Error ? err.message : 'Failed to load reviews');
       
-      // If we get a 429 error, stop loading more reviews
       if (err instanceof Error && err.message.includes('429')) {
         setHasMore(false);
       }
@@ -142,32 +144,104 @@ export default function ServiceDetailPage({ params }: PageProps) {
     loadReviews(true);
   }, [serviceId, loadService, loadReviews]);
 
-  // Infinite scroll setup with cleanup - SIMPLIFIED
+  // Improved infinite scroll setup that handles both layouts
   useEffect(() => {
-    // Disconnect previous observer if it exists
+    // Disconnect previous observer
     if (observerRef.current) {
       observerRef.current.disconnect();
+      observerRef.current = null;
     }
 
-    // Only set up observer if we have more reviews to load and not currently loading
-    if (hasMore && !reviewsLoading && loaderRef.current) {
-      observerRef.current = new IntersectionObserver(
+    // Get the currently visible loader based on layout
+    const getCurrentLoader = () => {
+      // Check which loader is currently in the DOM and visible
+      if (mobileLoaderRef.current && window.innerWidth < 1024) {
+        return mobileLoaderRef.current;
+      }
+      if (desktopLoaderRef.current && window.innerWidth >= 1024) {
+        return desktopLoaderRef.current;
+      }
+      return null;
+    };
+
+    const currentLoader = getCurrentLoader();
+
+    // Only set up observer if we have more reviews to load and loader exists
+    if (hasMore && !reviewsLoading && currentLoader) {
+      console.log('Setting up IntersectionObserver for current layout');
+      
+      const observer = new IntersectionObserver(
         (entries) => {
-          if (entries[0].isIntersecting && hasMore && !reviewsLoading && !isFetchingRef.current) {
+          const [entry] = entries;
+          if (entry.isIntersecting && hasMore && !reviewsLoading && !isFetchingRef.current) {
+            console.log('Loading more reviews, current page:', pageRef.current);
             loadReviews();
           }
         },
-        { threshold: 0.5 }
+        { 
+          threshold: 0.1,
+          rootMargin: '50px 0px 50px 0px'
+        }
       );
 
-      observerRef.current.observe(loaderRef.current);
+      observer.observe(currentLoader);
+      observerRef.current = observer;
     }
 
     return () => {
       if (observerRef.current) {
         observerRef.current.disconnect();
+        observerRef.current = null;
       }
     };
+  }, [hasMore, reviewsLoading, loadReviews, serviceId]);
+
+  // Reconnect observer when layout changes (window resize)
+  useEffect(() => {
+    const handleResize = () => {
+      // Re-setup the observer when window is resized (layout change)
+      if (observerRef.current) {
+        observerRef.current.disconnect();
+        observerRef.current = null;
+        
+        // Small timeout to allow DOM to update after resize
+        setTimeout(() => {
+          const getCurrentLoader = () => {
+            if (mobileLoaderRef.current && window.innerWidth < 1024) {
+              return mobileLoaderRef.current;
+            }
+            if (desktopLoaderRef.current && window.innerWidth >= 1024) {
+              return desktopLoaderRef.current;
+            }
+            return null;
+          };
+
+          const currentLoader = getCurrentLoader();
+          
+          if (hasMore && !reviewsLoading && currentLoader && observerRef.current === null) {
+            const observer = new IntersectionObserver(
+              (entries) => {
+                const [entry] = entries;
+                if (entry.isIntersecting && hasMore && !reviewsLoading && !isFetchingRef.current) {
+                  console.log('Loading more reviews after resize, page:', pageRef.current);
+                  loadReviews();
+                }
+              },
+              { 
+                threshold: 0.1,
+                rootMargin: '50px 0px 50px 0px'
+              }
+            );
+
+            observer.observe(currentLoader);
+            observerRef.current = observer;
+          }
+        }, 100);
+      }
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
   }, [hasMore, reviewsLoading, loadReviews]);
 
   const isTemp = (r: Review) => typeof r.reviewId === 'string' && r.reviewId.startsWith('temp-');
@@ -192,7 +266,6 @@ export default function ServiceDetailPage({ params }: PageProps) {
       rating: calcNewAverage(prev.rating, prev.reviewCount, serverList[0]?.rating ?? 0)
     } : prev);
     
-    // Clear cache for reviews to ensure fresh data on next load
     const cacheKeys = Array.from(requestCache.keys()).filter(key => key.startsWith(`reviews-${serviceId}-`));
     cacheKeys.forEach(key => requestCache.delete(key));
   }, [serviceId]);
@@ -267,7 +340,7 @@ export default function ServiceDetailPage({ params }: PageProps) {
           )}
           
           {hasMore && (
-            <div ref={loaderRef} className="text-center py-4">
+            <div ref={mobileLoaderRef} className="text-center py-4">
               {reviewsLoading ? (
                 <>
                   <ReviewSkeleton />
@@ -281,7 +354,7 @@ export default function ServiceDetailPage({ params }: PageProps) {
           )}
         </div>
 
-        {/* Desktop Layout - Grid Columns (Unchanged) */}
+        {/* Desktop Layout - Grid Columns */}
         <div className="hidden lg:grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">
           <div className="lg:col-span-2 space-y-8">
             <section className="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6">
@@ -310,7 +383,7 @@ export default function ServiceDetailPage({ params }: PageProps) {
             )}
             
             {hasMore && (
-              <div ref={loaderRef} className="text-center py-4">
+              <div ref={desktopLoaderRef} className="text-center py-4">
                 {reviewsLoading ? (
                   <>
                     <ReviewSkeleton />
