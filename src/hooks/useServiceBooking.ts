@@ -41,9 +41,15 @@ export const useServiceBooking = (serviceId: string, preloadedServiceData: strin
       const response = await api.post('/Customer/process-bookings', dataToSend);
       return { success: true, data: response.data };
     } catch (err) {
-      const errorMessage = axios.isAxiosError(err) 
-        ? err.response?.data?.message || err.message 
-        : 'Booking submission failed';
+      let errorMessage = 'Booking submission failed. Please try again.';
+      if (axios.isAxiosError(err) && err.response) {
+        // Prioritize the message from the backend if it's sent as a plain string.
+        if (typeof err.response.data === 'string' && err.response.data) {
+          errorMessage = err.response.data;
+        } else {
+          errorMessage =  err.response.data.error || 'An unknown error occurred on the server.';
+        }
+      }
       return { success: false, error: errorMessage };
     }
   };

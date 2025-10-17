@@ -9,7 +9,8 @@ import { isAxiosError } from 'axios';
 import { BookingCardSkeleton } from './components/BookingCardSkeleton';
 import ServiceCardSkeleton from './components/ServiceCardSkeleton';
 import { useRecommendedServices } from '@/hooks/useRecommendedServices';
-import Link from 'next/link'; // Added import
+import { useAuth } from '@/context/useAuth'
+import Link from 'next/link';
 
 // Interface defining the structure of a booking object
 interface Booking {
@@ -47,6 +48,9 @@ const StatsCard = ({ title, value, icon, color }: {
 
 // Main Dashboard Component: Primary dashboard page for wedding planning
 export default function Dashboard() {
+
+  const { user } = useAuth()
+
   // State for dashboard statistics cards
   const [stats, setStats] = useState([
     { title: 'Upcoming', value: 0, icon: <FaCalendarCheck />, color: 'from-teal-500 to-cyan-600' },
@@ -118,13 +122,13 @@ export default function Dashboard() {
         {/* Welcome Section: User greeting and statistics overview */}
         <section className="mb-12">
           <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 md:p-8">
-            <h2 className="text-2xl font-serif font-bold text-gray-800 dark:text-white mb-4">Welcome Back!</h2>
+            <h2 className="text-2xl font-serif font-bold text-gray-800 dark:text-white mb-4">Welcome {user?.name || 'Guest'}!</h2>
             <p className="text-gray-600 dark:text-gray-300 mb-6">
-              You have {upcomingBookings.length} upcoming booking{upcomingBookings.length !== 1 ? 's' : ''}. Let&apos;s make your wedding planning journey smooth and memorable.
+              You have {stats[0].value} upcoming booking{upcomingBookings.length !== 1 ? 's' : ''}. Let&apos;s make your wedding planning journey smooth and memorable.
             </p>
 
             {/* Statistics Grid: Upcoming, Saved, Messages counters */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1  md:grid-cols-3 gap-6">
               {stats.map((stat, index) => (
                 <StatsCard
                   key={index}
