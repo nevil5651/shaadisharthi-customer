@@ -1,7 +1,7 @@
 'use client'
 
-import { useForm } from 'react-hook-form';
-import { useEffect, Suspense, useCallback, useMemo } from 'react';
+import { useForm, UseFormRegister, FieldErrors } from 'react-hook-form';
+import { useEffect, Suspense, useCallback } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useServiceBooking } from '@/hooks/useServiceBooking';
 import { BookingFormData } from '@/lib/serviceBooking';
@@ -113,8 +113,8 @@ const FormField = ({ label, error, children }: FormFieldProps) => (
 // =============================================================================
 
 interface CustomerInfoSectionProps {
-  register: any;
-  errors: any;
+  register: UseFormRegister<BookingFormData>;
+  errors: FieldErrors<BookingFormData>;
 }
 
 /**
@@ -159,8 +159,8 @@ const CustomerInfoSection = ({ register, errors }: CustomerInfoSectionProps) => 
 // =============================================================================
 
 interface EventDetailsSectionProps {
-  register: any;
-  errors: any;
+  register: UseFormRegister<BookingFormData>;
+  errors: FieldErrors<BookingFormData>;
 }
 
 /**
@@ -259,7 +259,7 @@ const ServiceBookingForm = () => {
   const serviceId = searchParams.get('serviceId') || '';
   
   // Custom hook for service booking logic
-  const { service, loading, error, submitBooking } = useServiceBooking(serviceId);
+  const { service, loading, submitBooking } = useServiceBooking(serviceId);
 
   // React Hook Form initialization
   const {
@@ -329,10 +329,7 @@ const ServiceBookingForm = () => {
   // ===========================================================================
 
   // Show loading state while fetching service data
-  if (loading) return <LoadingState />;
-  
-  // Show error state if service fetch failed
-  if (error) return <div className="text-center py-8 text-red-500 dark:text-red-400">{error}</div>;
+  if (loading) return <LoadingState />;  
   
   // Show not found state if no service data
   if (!service) return <div className="text-center py-8 text-gray-800 dark:text-gray-200">Service not found</div>;
