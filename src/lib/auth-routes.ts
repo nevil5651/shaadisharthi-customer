@@ -1,10 +1,11 @@
-// lib/auth-routes.ts
+// List of all routes that don't require authentication
+// Users can access these even when not logged in
 export const publicRoutes = [
-  '/login', 
-  '/signup', 
-  '/verify-email', 
-  '/register', 
-  '/cstmr-verify-email', 
-  '/forgot-password', 
-  '/reset-password'
+  '/login',           // Login page
+  '/signup',          // Sign up page  
+  '/verify-email',    // Email verification
+  '/register',        // Registration (usually with token)
+  '/cstmr-verify-email', // Customer email verification
+  '/forgot-password', // Password reset request
+  '/reset-password'   // Actual password reset (with token)
 ];
