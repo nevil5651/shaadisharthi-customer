@@ -11,6 +11,8 @@ import AuthCard from '@/components/cards/AuthCard';
 import { FaUser, FaEnvelope, FaPhone, FaPhoneAlt, FaLock, FaEye, FaEyeSlash } from 'react-icons/fa';
 import dynamic from 'next/dynamic';
 
+// Loading component for Suspense fallback
+// Shows loading state during token verification
 function Loading() {
   return (
     <div className="auth-page min-h-screen flex items-center justify-center bg-gradient-to-br from-pink-50 to-purple-50 dark:from-gray-900 dark:to-gray-800 py-8 px-4">
@@ -27,12 +29,15 @@ function Loading() {
 }
 
 // Dynamically import SocialLogin to reduce initial bundle size
+// Code splitting for better performance
 const SocialLogin = dynamic(() => import('@/components/ui/SocialLogin'), {
   ssr: false,
   loading: () => <div className="h-16 flex items-center justify-center text-gray-600 dark:text-gray-400">Loading social login options...</div>
 });
 
-// Updated validation schema with token (optional for now)
+// Comprehensive validation schema for registration form
+// Includes password confirmation matching and terms acceptance
+// Token is optional in Zod but required by backend for verification
 const registerSchema = z.object({
   name: z.string().min(1, { message: 'Full name is required.' }),
   email: z.string().min(1, { message: 'Email is required.' }).email({ message: 'Invalid email address.' }),
@@ -47,8 +52,10 @@ const registerSchema = z.object({
   path: ['confirmPassword'],
 });
 
+// Type inference for type-safe form handling
 export type RegisterFormInputs = z.infer<typeof registerSchema>;
 
+// Props interface for reusable form input component
 interface FormInputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   icon?: React.ElementType;
   type: string;
@@ -61,6 +68,7 @@ interface FormInputProps extends React.InputHTMLAttributes<HTMLInputElement> {
 }
 
 // Memoized form inputs to prevent unnecessary re-renders
+// Optimized component for better performance in forms
 const FormInput: React.FC<FormInputProps> = ({
   icon,
   type,
@@ -72,6 +80,7 @@ const FormInput: React.FC<FormInputProps> = ({
   onTogglePassword,
   ...registerProps
 }) => {
+  // Memoize icon component to prevent unnecessary re-renders
   const InputIcon = useMemo(() => icon, [icon]);
   
   return (
@@ -85,6 +94,7 @@ const FormInput: React.FC<FormInputProps> = ({
           disabled={disabled} 
           {...registerProps} 
         />
+        {/* Password visibility toggle for password fields */}
         {showPasswordToggle && (
           <button 
             type="button" 
@@ -101,24 +111,33 @@ const FormInput: React.FC<FormInputProps> = ({
   );
 };
 
+// Main registration form component with token verification flow
 function RegisterForm() {
+  // State management for password visibility, loading, and errors
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [apiError, setApiError] = useState<string | null>(null);
+  
+  // Router and search params for token handling
   const router = useRouter();
   const searchParams = useSearchParams();
-  const token = searchParams.get('token');
-  const [isVerified, setIsVerified] = useState(false);
+  const token = searchParams.get('token'); // Get verification token from URL
+  const [isVerified, setIsVerified] = useState(false); // Track email verification status
 
+  // React Hook Form setup with Zod validation
+  // Uses onChange validation mode for real-time feedback
   const { register, handleSubmit, formState: { errors, isSubmitting }, setValue } = useForm<RegisterFormInputs>({
     resolver: zodResolver(registerSchema),
     mode: 'onChange' // Validate on change for better UX
   });
 
-  // Memoize the token verification function
+  // Token verification function
+  // Verifies the email verification token from URL parameters
+  // Memoized to prevent unnecessary re-renders
   const verifyToken = useCallback(async () => {
     if (!token) {
+      // Redirect to email verification if no token present
       router.push('/verify-email');
       return;
     }
@@ -127,8 +146,10 @@ function RegisterForm() {
     setApiError(null);
     try {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+      // API call to verify token and get associated email
       const response = await axios.get(`${apiUrl}/Customer/cstmr-email-verification?token=${token}`);
       if (response.data.email) {
+        // Pre-fill email field and set token if verification successful
         setValue('email', response.data.email);
         setValue('token', token);
         setIsVerified(true);
@@ -136,6 +157,7 @@ function RegisterForm() {
         throw new Error('Invalid response');
       }
     } catch {
+      // Handle invalid or expired tokens
       setApiError('Invalid or expired verification token. Redirecting...');
       setTimeout(() => router.push('/verify-email'), 3000);
     } finally {
@@ -143,10 +165,14 @@ function RegisterForm() {
     }
   }, [token, router, setValue]);
 
+  // Effect to verify token on component mount
   useEffect(() => {
     verifyToken();
   }, [verifyToken]);
 
+  // Form submission handler
+  // Creates user account after successful email verification
+  // Memoized to prevent unnecessary re-renders
   const onSubmit = useCallback(async (data: RegisterFormInputs) => {
     setIsLoading(true);
     setApiError(null);
@@ -157,11 +183,15 @@ function RegisterForm() {
       if (!apiUrl) {
         throw new Error("API URL is not configured.");
       }
+      
+      // Prepare payload - remove confirmPassword and termsAccepted as they're not needed by API
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { confirmPassword, termsAccepted, ...payload } = data;
 
+      // API call to register user
       await axios.post(`${apiUrl}/Customer/cstmr-rgt`, payload);
 
+      // Success notification
       toast.update(toastId, {
         render: 'Registration successful! Redirecting to login...',
         type: 'success',
@@ -169,7 +199,7 @@ function RegisterForm() {
         autoClose: 2000,
       });
 
-      // Redirect after a short delay to allow the user to see the toast.
+      // Redirect to login after successful registration
       setTimeout(() => {
         router.push('/login');
       }, 2000);
@@ -177,11 +207,14 @@ function RegisterForm() {
     } catch (err) {
       console.error('Registration failed:', err);
       let errorMessage = 'An unexpected error occurred.';
+      
+      // Handle different error types
       if (axios.isAxiosError(err) && err.response) {
         errorMessage = err.response.data.error || 'Registration failed. Please try again.';
       } else if (err instanceof Error) {
         errorMessage = err.message;
       }
+      
       setApiError(errorMessage);
       toast.update(toastId, { render: errorMessage, type: 'error', isLoading: false, autoClose: 5000 });
       // Only re-enable the form on failure
@@ -189,6 +222,8 @@ function RegisterForm() {
     }
   }, [router]);
 
+  // Password visibility toggle handlers
+  // Memoized to prevent unnecessary re-renders
   const togglePassword = useCallback(() => {
     setShowPassword(prev => !prev);
   }, []);
@@ -197,6 +232,7 @@ function RegisterForm() {
     setShowConfirmPassword(prev => !prev);
   }, []);
 
+  // Show loading state during token verification
   if (!isVerified && token) {
     return (
       <div className="auth-page min-h-screen flex items-center justify-center bg-gradient-to-br from-pink-50 to-purple-50 dark:from-gray-900 dark:to-gray-800 py-8 px-4">
@@ -211,13 +247,14 @@ function RegisterForm() {
     <div className="auth-page min-h-screen flex items-center justify-center bg-gradient-to-br from-pink-50 to-purple-50 dark:from-gray-900 dark:to-gray-800 py-8 px-4">
       <AuthCard title="Create Your Account" subtitle="Join us to begin your journey">
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+          {/* API error display */}
           {apiError && (
             <div className="p-3 mb-4 text-sm text-red-700 bg-red-100 rounded-lg dark:bg-red-900 dark:bg-opacity-20 dark:text-red-300" role="alert">
               {apiError}
             </div>
           )}
 
-          {/* Hidden Token Field */}
+          {/* Hidden Token Field - populated during token verification */}
           <input type="hidden" {...register('token')} />
 
           {/* Name Field */}
@@ -231,6 +268,7 @@ function RegisterForm() {
           />
 
           {/* Email Field (prefilled and disabled if verified) */}
+          {/* Prevents email modification after verification */}
           <FormInput
             icon={FaEnvelope}
             type="email"
@@ -250,7 +288,7 @@ function RegisterForm() {
             {...register('phone')}
           />
 
-          {/* Alternate Phone Field */}
+          {/* Alternate Phone Field (Optional) */}
           <FormInput
             icon={FaPhoneAlt}
             type="tel"
@@ -260,7 +298,7 @@ function RegisterForm() {
             {...register('altPhone')}
           />
 
-          {/* Password Field */}
+          {/* Password Field with visibility toggle */}
           <FormInput
             icon={FaLock}
             type={showPassword ? "text" : "password"}
@@ -273,7 +311,7 @@ function RegisterForm() {
             {...register('password')}
           />
 
-          {/* Confirm Password Field */}
+          {/* Confirm Password Field with visibility toggle */}
           <FormInput
             icon={FaLock}
             type={showConfirmPassword ? "text" : "password"}
@@ -286,7 +324,7 @@ function RegisterForm() {
             {...register('confirmPassword')}
           />
 
-          {/* Terms and Conditions */}
+          {/* Terms and Conditions acceptance */}
           <div className="flex items-start mb-6">
             <div className="flex items-center h-5">
               <input
@@ -312,7 +350,7 @@ function RegisterForm() {
           </div>
           {errors.termsAccepted && <p className="text-red-500 dark:text-red-400 text-sm -mt-4 mb-4">{errors.termsAccepted.message}</p>}
 
-          {/* Submit Button */}
+          {/* Submit Button with loading state */}
           <button type="submit" className="gradient-btn w-full bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 text-white font-bold py-2 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-500 transition duration-150 ease-in-out disabled:opacity-50 dark:focus:ring-offset-gray-800" disabled={isLoading || isSubmitting}>
             {isLoading ? (
               <div className="flex items-center justify-center">
@@ -325,8 +363,10 @@ function RegisterForm() {
             ) : 'Register Now'}
           </button>
 
+          {/* Social login options */}
           <SocialLogin />
           
+          {/* Login redirect */}
           <div className="text-center text-gray-700 dark:text-gray-300">
             <p>
               Already have an account?{' '}
@@ -341,6 +381,8 @@ function RegisterForm() {
   );
 };
 
+// Main page component with Suspense boundary
+// Wraps the form component for proper loading states
 export default function RegisterPage() {
   return (
     <Suspense fallback={<Loading />}>

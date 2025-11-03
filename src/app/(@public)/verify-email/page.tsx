@@ -8,21 +8,30 @@ import AuthCard from '@/components/cards/AuthCard';
 import { FaEnvelope } from 'react-icons/fa';
 import Link from 'next/link';
 
+// Validation schema for email verification form
+// Simple email validation for initial registration step
 const verifyEmailSchema = z.object({
   email: z.string().min(1, { message: 'Email is required.' }).email({ message: 'Invalid email address.' }),
 });
 
+// Type inference for type-safe form handling
 type VerifyEmailFormInputs = z.infer<typeof verifyEmailSchema>;
 
+// Email verification component - initial step in registration flow
+// Sends verification email to user before allowing account creation
 export default function VerifyEmail() {
+  // State management for loading, errors, and success state
   const [isLoading, setIsLoading] = useState(false);
   const [apiError, setApiError] = useState<string | null>(null);
-  const [isSent, setIsSent] = useState(false);
+  const [isSent, setIsSent] = useState(false); // Track if verification email was sent
 
+  // React Hook Form setup with Zod validation
   const { register, handleSubmit, formState: { errors } } = useForm<VerifyEmailFormInputs>({
     resolver: zodResolver(verifyEmailSchema),
   });
 
+  // Form submission handler
+  // Initiates email verification process
   const onSubmit = async (data: VerifyEmailFormInputs) => {
     setIsLoading(true);
     setApiError(null);
@@ -32,18 +41,24 @@ export default function VerifyEmail() {
         throw new Error("API URL is not configured.");
       }
 
+      // API call to send verification email
       await axios.post(`${apiUrl}/Customer/cstmr-verify-email`, data);
-      setIsSent(true);
+      setIsSent(true); // Mark as sent to show success state
     } catch (err) {
+      // Comprehensive error handling for different API response scenarios
       if (axios.isAxiosError(err) && err.response) {
         if (err.response.status === 409) {
+          // Handle email already registered scenario
           setApiError('Email already in use. Please log in or use a different email.');
         } else if (err.response.status === 429) {
+          // Handle rate limiting
           setApiError('Too many requests. Please try again later.');
         } else {
+          // Generic API error
           setApiError(err.response.data.error || 'Failed to send verification email. Please try again.');
         }
       } else {
+        // Network or unexpected errors
         setApiError('An unexpected error occurred.');
       }
     } finally {
@@ -51,13 +66,16 @@ export default function VerifyEmail() {
     }
   };
 
+  // Success state - shown after verification email is sent
   if (isSent) {
     return (
       <div className="auth-page">
         <AuthCard title="Verification Sent" subtitle="Check your inbox">
+          {/* Success message with instructions */}
           <p className="text-center text-gray-700 mb-4">
             A verification link has been sent to your email. Please click the link to complete registration.
           </p>
+          {/* Login redirect for existing users */}
           <p className="text-center text-gray-700">
             Already have an account?{' '}
             <Link href="/login" className="text-pink-600 font-medium hover:underline">
@@ -69,10 +87,12 @@ export default function VerifyEmail() {
     );
   }
 
+  // Main form state - email input for verification
   return (
     <div className="auth-page">
       <AuthCard title="Verify Your Email" subtitle="Enter your email to get started">
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+          {/* API error display */}
           {apiError && (
             <div className="p-3 mb-4 text-sm text-red-700 bg-red-100 rounded-lg" role="alert">
               {apiError}
@@ -85,10 +105,11 @@ export default function VerifyEmail() {
               <div className="input-icon"><FaEnvelope /></div>
               <input type="email" {...register('email')} placeholder="Email Address" className="form-input" disabled={isLoading} />
             </div>
+            {/* Email validation errors */}
             {errors.email && <p className="text-red-500 text-sm mt-1">{errors.email.message}</p>}
           </div>
 
-          {/* Submit Button */}
+          {/* Submit Button with loading state */}
           <button type="submit" className="gradient-btn" disabled={isLoading}>
             {isLoading ? (
               <div className="flex items-center justify-center">
@@ -101,6 +122,7 @@ export default function VerifyEmail() {
             ) : 'Send Verification Link'}
           </button>
 
+          {/* Login redirect for existing users */}
           <div className="text-center text-gray-700">
             <p>
               Already have an account?{' '}
