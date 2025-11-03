@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
@@ -11,6 +10,7 @@ import { toast } from 'react-toastify';
 import api from '@/lib/axios';
 import { isAxiosError } from 'axios';
 
+// Review form validation schema using Zod
 const reviewSchema = z.object({
     rating: z.number().min(1, "Please select a rating").max(5, "Rating cannot exceed 5"),
     reviewText: z.string().min(10, "Review must be at least 10 characters").max(500, "Review cannot exceed 500 characters"),
@@ -32,7 +32,8 @@ interface ServerReview {
     createdAt: string;
 }
 
-
+// ReviewForm component handles review submission with validation,
+// optimistic updates, and error handling
 export function ReviewForm({ serviceId, onSubmitSuccess, onServerUpdate }: ReviewFormProps) {
    const {
         register,
@@ -46,6 +47,7 @@ export function ReviewForm({ serviceId, onSubmitSuccess, onServerUpdate }: Revie
         defaultValues: { rating: 0, reviewText: '' },
     });
 
+    // Disable form if service ID is invalid
     const [isFormDisabled, setIsFormDisabled] = useState(!serviceId);
 
     useEffect(() => {
@@ -57,12 +59,15 @@ export function ReviewForm({ serviceId, onSubmitSuccess, onServerUpdate }: Revie
         }
     }, [serviceId]);
 
+    // Watch form values for real-time validation feedback
     const reviewText = watch('reviewText');
     const currentRating = watch('rating');
     const maxCharacters = 500;
     const remainingCharacters = maxCharacters - (reviewText?.length || 0);
 
+    // Handle form submission with optimistic updates
     const onSubmit = useCallback(async (data: ReviewFormData) => {
+        // Create optimistic review for immediate UI update
         const optimisticReview: Review = {
             reviewId: `temp-${Date.now()}`,
             customerName: 'You', // Replace with actual user name from auth context
@@ -71,16 +76,17 @@ export function ReviewForm({ serviceId, onSubmitSuccess, onServerUpdate }: Revie
             createdAt: new Date().toISOString(),
         };
 
-        // optimistic UI (optional)
+        // Update UI optimistically (optional)
         onSubmitSuccess?.(optimisticReview);
 
         try {
+            // Submit review to server
             const res = await api.post(`/Customer/reviews/${serviceId}`, {
                 reviewText: data.reviewText,
                 rating: data.rating
             });
 
-            // Server returns updated page-1 array
+            // Server returns updated page-1 array of reviews
             const serverData: ServerReview[] = res.data;
             const serverReviews: Review[] = serverData.map((r) => ({
                 reviewId: String(r.reviewId),
@@ -90,11 +96,11 @@ export function ReviewForm({ serviceId, onSubmitSuccess, onServerUpdate }: Revie
                 createdAt: new Date(r.createdAt).toISOString(),
             }));
 
-            // notify parent with server authoritative list
+            // Notify parent with server authoritative list to replace optimistic data
             onServerUpdate?.(serverReviews);
 
             toast.success('Review submitted successfully!');
-            reset();
+            reset(); // Reset form after successful submission
         } catch (error) {
             let errorMessage = 'Failed to submit review. Please try again.';
             if (isAxiosError(error)) {
@@ -104,7 +110,7 @@ export function ReviewForm({ serviceId, onSubmitSuccess, onServerUpdate }: Revie
             }
             toast.error(errorMessage);
             console.error('Error submitting review:', error);
-            // remove optimistic item
+            // Remove optimistic item on error
             onSubmitSuccess?.(null);
         }
     }, [serviceId, reset, onSubmitSuccess, onServerUpdate]);

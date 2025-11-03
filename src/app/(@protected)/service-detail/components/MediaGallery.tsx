@@ -1,4 +1,3 @@
-
 import Image from 'next/image';
 import { Media } from '@/lib/service';
 import { useState } from 'react';
@@ -7,9 +6,13 @@ interface MediaGalleryProps {
   media: Media[];
 }
 
+// MediaGallery component to display images and videos in a grid layout
+// Supports lazy loading and loading states for better user experience
 export function MediaGallery({ media }: MediaGalleryProps) {
+  // Track which images have loaded to show loading states
   const [loadedIndexes, setLoadedIndexes] = useState<Set<number>>(new Set());
 
+  // Mark an image as loaded when it finishes loading
   const handleImageLoad = (index: number) => {
     setLoadedIndexes(prev => new Set(prev).add(index));
   };
@@ -22,6 +25,7 @@ export function MediaGallery({ media }: MediaGalleryProps) {
           <div key={`${item.url}-${index}`} className="relative aspect-video rounded-lg overflow-hidden bg-gray-200 dark:bg-gray-700">
             {item.type === 'Image' ? (
               <>
+                {/* Show loading placeholder until image loads */}
                 {!loadedIndexes.has(index) && (
                   <div className="absolute inset-0 bg-gray-300 dark:bg-gray-600 animate-pulse"></div>
                 )}
@@ -37,6 +41,7 @@ export function MediaGallery({ media }: MediaGalleryProps) {
                 />
               </>
             ) : item.type === 'Video' ? (
+              // Video element with controls for user interaction
               <video controls className="w-full h-full" preload="metadata">
                 <source src={item.url} type="video/mp4" />
                 Your browser does not support the video tag.
