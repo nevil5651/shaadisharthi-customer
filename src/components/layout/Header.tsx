@@ -222,7 +222,7 @@ function Header() {
   // Establishes persistent connection to backend WebSocket endpoint
   useEffect(() => {
     const socketUrl =
-      process.env.NEXT_PUBLIC_WEBSOCKET_URL ||
+      process.env.NEXT_PUBLIC_API_URL ||
       'ws://localhost:6190/ShaadiSharthi/CustomerSocket';
     const socket = new WebSocket(socketUrl);
     socketRef.current = socket;
