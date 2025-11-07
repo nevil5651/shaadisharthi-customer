@@ -56,15 +56,15 @@ function BookingsContent() {
             };
             
             // Log request parameters for debugging
-            console.log('[API Request] Fetching bookings with params:', params);
+            //console.log('[API Request] Fetching bookings with params:', params);
             
             return api.get('/Customer/cstmr-bookings', { params })
                 .then(res => {
                     // Log successful response for debugging
-                    console.log('[API Response] Bookings data:', {
-                        status: res.status,
-                        data: res.data
-                    });
+                    // console.log('[API Response] Bookings data:', {
+                    //     status: res.status,
+                    //     data: res.data
+                    // });
                     
                     // Normalize statuses in API response for frontend consistency
                     const normalizedData = {

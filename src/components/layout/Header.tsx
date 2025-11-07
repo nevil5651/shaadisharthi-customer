@@ -1,18 +1,82 @@
-'use client'
+'use client';
+
 import { useAuth } from '@/context/useAuth';
-import { useState, useCallback, memo } from 'react';
+import { useState, useCallback, memo, useEffect, useRef } from 'react';
 import {
   FaUser,
-  FaRing
+  FaRing,
+  FaBell,
+  FaTimes
 } from 'react-icons/fa';
-import Link from 'next/link'; // Added import
+import Link from 'next/link';
 
-const NotificationDropdown = memo(({ notifOpen }: { notifOpen: boolean }) => {
+const NotificationDropdown = memo(({ 
+  notifOpen, 
+  messages, 
+  onClear 
+}: { 
+  notifOpen: boolean; 
+  messages: string[]; 
+  onClear: () => void;
+}) => {
   if (!notifOpen) return null;
-  
+
   return (
-    <div className="absolute right-0 mt-2 w-80 bg-white rounded-md shadow-lg py-1 z-50">
-      {/* Notification content */}
+    <div className="absolute right-0 mt-2 w-80 bg-white dark:bg-gray-800 rounded-md shadow-lg py-1 z-50 border border-gray-200 dark:border-gray-700">
+      <div className="px-4 py-2 border-b border-gray-100 dark:border-gray-700">
+        <div className="flex items-center justify-between">
+          <h6 className="font-semibold text-gray-800 dark:text-white">Notifications</h6>
+          {messages.length > 0 && (
+            <button
+              onClick={onClear}
+              className="text-xs text-pink-500 hover:text-pink-600 font-medium flex items-center gap-1"
+            >
+              <FaTimes className="text-xs" /> Clear
+            </button>
+          )}
+        </div>
+      </div>
+
+      <div className="max-h-96 overflow-y-auto" id="notificationContainer">
+        {messages.length === 0 ? (
+          <div className="px-4 py-3 text-center text-gray-500 dark:text-gray-400">
+            No new notifications
+          </div>
+        ) : (
+          messages.map((msg, idx) => (
+            <div
+              key={idx}
+              className="px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-700 border-b border-gray-100 dark:border-gray-700 last:border-0"
+            >
+              <div className="flex items-start">
+                <div className="flex-shrink-0 mr-3">
+                  <FaBell className="text-pink-500" />
+                </div>
+                <div className="flex-1">
+                  <p className="text-sm text-gray-900 dark:text-gray-100">
+                    {msg}
+                  </p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                    Just now
+                  </p>
+                </div>
+              </div>
+            </div>
+          ))
+        )}
+      </div>
+
+      {messages.length > 10 && (
+        <div className="px-4 py-2 border-t border-gray-100 dark:border-gray-700 text-center">
+          <Link 
+            href="/notifications" 
+            className="text-sm text-pink-500 hover:underline"
+            onClick={(e) => e.stopPropagation()}
+          >
+            View all notifications
+          </Link>
+        </div>
+      )}
     </div>
   );
 });
@@ -46,7 +110,7 @@ const UserDropdown = memo(({
       <Link href="/bookings" onClick={onClose} className="block px-4 py-2 text-gray-700 dark:text-white dark:hover:bg-gray-600 hover:bg-gray-100">
         My Bookings
       </Link>
-      <div className="border-t border-gray-200 my-1"></div>
+      <div className="border-t border-gray-200 dark:border-gray-600 my-1"></div>
       <button
         onClick={() => {
           logout();
@@ -64,14 +128,77 @@ UserDropdown.displayName = 'UserDropdown';
 
 function Header() {
   const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const [notifOpen, setNotifOpen] = useState(false);
+  const [messages, setMessages] = useState<string[]>([]);
+  const [unreadCount, setUnreadCount] = useState(0);
+  const socketRef = useRef<WebSocket | null>(null);
   const { logout, isLoggingOut } = useAuth();
 
-  // Memoize click handlers to prevent unnecessary re-renders
-  const toggleUserMenu = useCallback(() => setUserMenuOpen(prev => !prev), []);
-  const closeUserMenu = useCallback(() => setUserMenuOpen(false), []);
+  // Toggle handlers
+  const toggleUserMenu = useCallback(() => {
+    setUserMenuOpen(prev => !prev);
+    setNotifOpen(false);
+  }, []);
+
+  const toggleNotif = useCallback(() => {
+    setNotifOpen(prev => !prev);
+    setUserMenuOpen(false);
+  }, []);
+
+  const closeMenus = useCallback(() => {
+    setUserMenuOpen(false);
+    setNotifOpen(false);
+  }, []);
+
+  const clearNotifications = useCallback(() => {
+    setMessages([]);
+    setUnreadCount(0);
+  }, []);
+
+  // Close dropdowns when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      const target = e.target as HTMLElement;
+      if (!target.closest('.notification-container') && !target.closest('.user-container')) {
+        closeMenus();
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [closeMenus]);
+
+  // WebSocket Connection
+  useEffect(() => {
+    const socket = new WebSocket("ws://localhost:6190/ShaadiSharthi/CustomerSocket");
+    socketRef.current = socket;
+
+    socket.onopen = () => {
+      console.log("WebSocket connected");
+    };
+
+    socket.onmessage = (event) => {
+      const msg = event.data;
+      setMessages(prev => [...prev, msg]);
+      setUnreadCount(prev => prev + 1);
+    };
+
+    socket.onerror = (error) => {
+      console.error("WebSocket error:", error);
+    };
+
+    socket.onclose = () => {
+      console.log("WebSocket closed");
+    };
+
+    return () => {
+      if (socket.readyState === WebSocket.OPEN || socket.readyState === WebSocket.CONNECTING) {
+        socket.close();
+      }
+    };
+  }, []);
 
   return (
-    <header className="dashboard-header sticky top-0 z-50 bg-white shadow-sm dark:bg-gray-900 dark:text-white dark:shadow-gray-800">
+    <header className="dashboard-header sticky top-0 z-50 bg-white shadow-sm dark:bg-gray-900 dark:text-white">
       <div className="container mx-auto px-4 py-3">
         <div className="flex items-center justify-between">
           {/* Logo */}
@@ -99,30 +226,30 @@ function Header() {
 
           {/* Icons */}
           <div className="flex items-center space-x-6">
-            {/* <div className="relative">
+            {/* Notification Bell */}
+            <div className="relative notification-container">
               <button 
                 className="text-gray-600 dark:text-gray-300 hover:text-pink-500 relative"
                 onClick={toggleNotif}
                 aria-label="Notifications"
               >
                 <FaBell className="text-xl" />
-                <span className="absolute -top-2 -right-2 bg-pink-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
-                  3
-                </span>
+                {unreadCount > 0 && (
+                  <span className="absolute -top-2 -right-2 bg-pink-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                    {unreadCount > 99 ? '99+' : unreadCount}
+                  </span>
+                )}
               </button>
-              
-              <NotificationDropdown notifOpen={notifOpen} />
-            </div> */}
 
-            {/* <div className=" top-4 right-4">
-              <ThemeToggle />
-            </div> */}
+              <NotificationDropdown 
+                notifOpen={notifOpen} 
+                messages={messages} 
+                onClear={clearNotifications}
+              />
+            </div>
 
-            {/* <Link href="/cart" className="text-gray-600 dark:text-gray-300 hover:text-pink-500" aria-label="Shopping Cart">
-              <FaShoppingBag className="text-xl" />
-            </Link> */}
-
-            <div className="relative">
+            {/* User Menu */}
+            <div className="relative user-container">
               <button 
                 className="user-avatar cursor-pointer flex items-center space-x-2"
                 onClick={toggleUserMenu}
@@ -138,7 +265,7 @@ function Header() {
                 userMenuOpen={userMenuOpen} 
                 logout={logout} 
                 isLoggingOut={isLoggingOut}
-                onClose={closeUserMenu}
+                onClose={closeMenus}
               />
             </div>
           </div>
