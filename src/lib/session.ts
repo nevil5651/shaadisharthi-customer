@@ -76,14 +76,14 @@ export async function createSession(token: string): Promise<boolean> {
     const expiresAt = new Date(payload.exp * 1000);
     const cookieStore = await cookies();
 
-    // Set the session cookie with security options
     cookieStore.set('session', token, {
-      httpOnly: true,     // Prevents JavaScript from accessing the cookie (XSS protection)
-      secure: process.env.NODE_ENV === 'production', // Only send over HTTPS in production
-      expires: expiresAt, // Cookie expires when token expires
-      sameSite: 'lax',    // Provides CSRF protection
-      path: '/',          // Cookie available across entire site
-    });
+  httpOnly: true,
+  secure: process.env.NODE_ENV === 'production',  // stays fine
+  expires: expiresAt,
+  sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+  path: '/',
+});
+
 
     // Cache the new session for better performance
     sessionCache.set(token, {
