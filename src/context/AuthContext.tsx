@@ -85,7 +85,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     if (isLoggingOut) return
 
     setIsLoggingOut(true)
-    const toastId = toast.loading('Logging out...')
+    // const toastId = toast.loading('Logging out...')
 
     try {
       // Call our logout API to clear the session cookie on backend
