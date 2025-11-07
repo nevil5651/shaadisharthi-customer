@@ -25,25 +25,35 @@ const NotificationDropdown = memo(({
   messages: string[]; 
   onClear: () => void;
 }) => {
-  // Don't render if dropdown is closed
   if (!notifOpen) return null;
 
   return (
-    <div className="absolute right-0 mt-2 w-80 bg-white dark:bg-gray-800 rounded-md shadow-lg py-1 z-50 border border-gray-200 dark:border-gray-700">
-      {/* Header: Title + Clear Button */}
-      <div className="px-4 py-2 border-b border-gray-100 dark:border-gray-700">
-        <div className="flex items-center justify-between">
-          <h6 className="font-semibold text-gray-800 dark:text-white">Notifications</h6>
-          {messages.length > 0 && (
-            <button
-              onClick={onClear}
-              className="text-xs text-pink-500 hover:text-pink-600 font-medium flex items-center gap-1 transition-colors"
-              aria-label="Clear all notifications"
-            >
-              <FaTimes className="text-xs" /> Clear
-            </button>
-          )}
-        </div>
+    <div
+      className={`
+        /* Default (Laptop/Tablet) */
+        absolute right-0 mt-2 w-80 bg-white dark:bg-gray-800 
+        rounded-md shadow-lg py-1 z-50 border border-gray-200 dark:border-gray-700
+
+        /* Mobile override */
+        sm:absolute sm:right-0 sm:w-80
+        md:w-80
+        max-sm:fixed max-sm:left-0 max-sm:right-0 max-sm:top-16 max-sm:w-[calc(100%-1.75rem)] 
+        max-sm:mx-auto max-sm:px-1.5 
+        max-sm:rounded-md max-sm:border max-sm:border-gray-300
+        max-sm:shadow-none max-sm:bg-white dark:max-sm:bg-gray-800
+      `}
+    >
+      {/* Header */}
+      <div className="px-4 py-2 border-b border-gray-100 dark:border-gray-700 flex items-center justify-between">
+        <h6 className="font-semibold text-gray-800 dark:text-white">Notifications</h6>
+        {messages.length > 0 && (
+          <button
+            onClick={onClear}
+            className="text-xs text-pink-500 hover:text-pink-600 font-medium flex items-center gap-1 transition-colors"
+          >
+            <FaTimes className="text-xs" /> Clear
+          </button>
+        )}
       </div>
 
       {/* Scrollable Notification List */}
@@ -82,7 +92,7 @@ const NotificationDropdown = memo(({
       {messages.length > 10 && (
         <div className="px-4 py-2 border-t border-gray-100 dark:border-gray-700 text-center">
           <Link 
-            href="/notifications" 
+            href="/notifications"
             className="text-sm text-pink-500 hover:underline font-medium"
             onClick={(e) => e.stopPropagation()} // Prevent header click-outside from closing
           >
@@ -93,6 +103,7 @@ const NotificationDropdown = memo(({
     </div>
   );
 });
+
 
 NotificationDropdown.displayName = 'NotificationDropdown';
 
