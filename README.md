@@ -5,9 +5,13 @@ Customers can explore vendors, filter services, book them, and manage their book
 
 > ⚠️ Note: This repo only contains the **Customer Frontend** (Next.js + TypeScript + Tailwind CSS).  
 > The platform also has:  
-> - **Admin frontend** (separate repo)  
-> - **Service Provider frontend** (separate repo)  
-> - **Java Backend** (separate repo, built with Servlets)  
+> - **Admin frontend** (github.com/nevil5651/shaadisharthi-admin)  
+> - **Service Provider frontend** (github.com/nevil5651/shaadisharthi-provider)   
+> - **Java Backend** (github.com/nevil5651/shaadisharthi-backend, built with Servlets)  
+
+---
+## Live demo & repos
+- **Live Demo URL**: `https://shaadisharthi.theworkpc.com`
 
 ---
 
@@ -125,7 +129,10 @@ npm install
 ### 3.Create .env file at Root of Project
 ```bash
 touch .env
-NEXT_PUBLIC_API_URL=http://localhost:8080/api
+NEXT_PUBLIC_API_URL=http://localhost:8080/shaadisharthi
+NEXT_PUBLIC_WEBSOCKET_API_URL=ws://localhost:8080/CustomerSocket
+NEXT_INTERNAL_API_URL=http://localhost:8080
+NODE_ENV=development
 ```
 
 
@@ -134,6 +141,22 @@ NEXT_PUBLIC_API_URL=http://localhost:8080/api
 npm run dev
 ```
 
+---
+
+## 👨‍💻 Contact
+
+-   **Author**: Nevil H. — Full Stack Developer (Java + Modern JS Frameworks)
+-   **Email**: nevilhapaliya565188@example.com
+-   **GitHub**: github.com/nevil5651
+
+---
+
+## 📜 License
+
+-   This repository is provided for portfolio and educational purposes.
+
+---
+Built with ❤️ for the wedding industry
 
 
 
